@@ -1,9 +1,14 @@
 # binary-brains
 
 ## Team Members
-- Md-EmranHossen (Team Leader)
-- md-rifatul
-- FI-Pranto
+
+| Name            | Role         | GitHub Username  |
+|-----------------|--------------|------------------|
+| Md Emran Hossen | Team Leader  | [Md-EmranHossen](https://github.com/Md-EmranHossen) |
+| Md Rifatul      | Member       | [md-rifatul](https://github.com/md-rifatul)         |
+| FI Pranto       | Member       | [FI-Pranto](https://github.com/FI-Pranto)           |
+| Mashrief        | Mentor       | [mashrief](https://github.com/mashrief)             |
+
 
 ## Mentor
 - mashrief
