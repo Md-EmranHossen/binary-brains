@@ -1,6 +1,4 @@
-# binary-brains
-
-## Team Members
+# Team: binary-brains
 
 | Name            | Role         | GitHub Username  |
 |-----------------|--------------|------------------|
@@ -8,10 +6,12 @@
 | Md Rifatul      | Member       | [md-rifatul](https://github.com/md-rifatul)         |
 | FI Pranto       | Member       | [FI-Pranto](https://github.com/FI-Pranto)           |
 
-
 ## Mentor
-- mashrief
+### Mashrief Bin Zulfiquer
 
+# 🧑‍💻Learning & Project Planning 
+### Stack Learning
+➡️ **[Learning Phase Tracking Sheet](https://docs.google.com/spreadsheets/d/1O1THgzEOz3rn8fNiuz1fPZaR_eUYecXm_UKkXdEvVFY/edit?usp=sharing)** – We tracked our daily activities using this sheet.
 ## Project Description
 Add your project description here.
 
