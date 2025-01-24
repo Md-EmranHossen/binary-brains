@@ -5,9 +5,8 @@
 | Md Emran Hossen | Team Leader  | [Md-EmranHossen](https://github.com/Md-EmranHossen) |
 | Md Rifatul      | Member       | [md-rifatul](https://github.com/md-rifatul)         |
 | FI Pranto       | Member       | [FI-Pranto](https://github.com/FI-Pranto)           |
+| Mashrief Bin Zulfiquer       | Mentor       | [mashrief](https://github.com/mashrief)           |
 
-## Mentor
-### Mashrief Bin Zulfiquer
 
 # 🧑‍💻Learning & Project Planning 
 ### Stack Learning
