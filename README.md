@@ -4,7 +4,7 @@ For comprehensive documentation, guides, and resources related to the Binary Bra
 
 <div align="center">
   <a href="https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki">
-    <img src="https://img.shields.io/badge/BinaryBrain-Wiki-87ceeb?logo=github&logoColor=white&style=for-the-badge" alt="GitHub Learnathon Wiki">
+   <img src="https://img.shields.io/badge/BinaryBrain-Wiki-007ACC?logo=github&logoColor=white&style=for-the-badge&background=000000" alt="GitHub Learnathon Wiki">
   </a>
 </div>
 
