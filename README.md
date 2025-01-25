@@ -1,3 +1,13 @@
+# Visit Our Wiki
+
+For comprehensive documentation, guides, and resources related to the Binary Brains project, please explore our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki). It provides in-depth insights to help you understand and contribute effectively.
+
+<div align="center">
+  <a href="https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki">
+    <img src="https://img.shields.io/badge/BinaryBrain-Wiki-87ceeb?logo=github&logoColor=white&style=for-the-badge" alt="GitHub Learnathon Wiki">
+  </a>
+</div>
+
 # Team: binary-brains
 
 | Name                   | Role        | GitHub Username                                     |
