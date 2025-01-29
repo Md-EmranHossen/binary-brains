@@ -37,7 +37,7 @@ Explore our [binary-brains Wiki](https://github.com/Learnathon-By-Geeky-Solution
 [sonarqube-shield]: https://img.shields.io/static/v1?label=Quality%20Gate&message=Passed&color=28A745&style=for-the-badge
 [sonarqube-url]: https://sonarcloud.io/dashboard?id=Learnathon-By-Geeky-Solutions_binary-brains
 
-## Team Information: binary-brains
+## 🤝Team Information: binary-brains
 
 | Name                   | Role        | GitHub Username                                     |
 | ---------------------- | ----------- | --------------------------------------------------- |
@@ -46,17 +46,17 @@ Explore our [binary-brains Wiki](https://github.com/Learnathon-By-Geeky-Solution
 | FI Pranto              | Member      | [FI-Pranto](https://github.com/FI-Pranto)           |
 | Mashrief Bin Zulfiquer | Mentor      | [mashrief](https://github.com/mashrief)             |
 
-## 🧑‍💻Learning & Project Planning
+## 📅Learning & Project Planning
 
 ### Stack Learning
 
 ➡️ **[Learning Phase Tracking Sheet](https://docs.google.com/spreadsheets/d/1O1THgzEOz3rn8fNiuz1fPZaR_eUYecXm_UKkXdEvVFY/edit?usp=sharing)** – We tracked our daily activities using this sheet.
 
-## Project Description
+## 📄Project Description
 
 The E-Commerce Platform is a comprehensive solution built using ASP.NET Core and SQL Server to enable efficient online shopping experiences. This platform includes features such as user management, product listing, shopping cart functionality, payment processing, and an admin panel for effective management.
 
-## Resources
+## 📦Resources
 
 - [Project Documentation](docs/)
 - [Development Setup](docs/setup.md)
