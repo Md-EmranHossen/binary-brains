@@ -1,5 +1,5 @@
 ## 📚 Get Started with the Wiki!
-Explore our [binary-brains Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki) for for comprehensive documentation and resources.
+Explore our [binary-brains Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki) for comprehensive documentation and resources.
 <div align="center">
   <a href="https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki">
    <img src="https://img.shields.io/badge/BinaryBrains-Wiki-007ACC?logo=github&logoColor=white&style=for-the-badge&background=000000" alt="GitHub Learnathon Wiki">
