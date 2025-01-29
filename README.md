@@ -1,4 +1,12 @@
-<a id="readme-top"></a>
+## 📚 Get Started with the Wiki!
+Explore our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki) for for comprehensive documentation and resources.
+<div align="center">
+  <a href="https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki">
+   <img src="https://img.shields.io/badge/BinaryBrains-Wiki-007ACC?logo=github&logoColor=white&style=for-the-badge&background=000000" alt="GitHub Learnathon Wiki">
+  </a>
+</div>
+
+## 🚀Project Status and Quality Metrics
 <div align="center">
   
 [![Contributors][contributors-shield]][contributors-url]
@@ -15,9 +23,7 @@
 
 </div>
 
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-
+<!-- ALL Links -->
 [contributors-shield]: https://img.shields.io/github/contributors/Learnathon-By-Geeky-Solutions/binary-brains.svg?style=for-the-badge&color=4C8BF5
 [contributors-url]: https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/Learnathon-By-Geeky-Solutions/binary-brains.svg?style=for-the-badge&color=4C8BF5
@@ -28,22 +34,10 @@
 [issues-url]: https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/issues
 [license-shield]: https://img.shields.io/github/license/Learnathon-By-Geeky-Solutions/binary-brains.svg?style=for-the-badge&color=28A745
 [license-url]: https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/master/LICENSE
-[FigJam]: https://img.shields.io/badge/FigJam-F24E1E?style=for-the-badge&logo=figma&logoColor=white
-[FigJam-url]: https://www.figma.com/figjam/
 [sonarqube-shield]: https://img.shields.io/static/v1?label=Quality%20Gate&message=Passed&color=28A745&style=for-the-badge
 [sonarqube-url]: https://sonarcloud.io/dashboard?id=Learnathon-By-Geeky-Solutions_binary-brains
 
-# Visit Our Wiki
-
-For comprehensive documentation, guides, and resources related to the Binary Brains project, please explore our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki). It provides in-depth insights to help you understand and contribute effectively.
-
-<div align="center">
-  <a href="https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki">
-   <img src="https://img.shields.io/badge/BinaryBrain-Wiki-007ACC?logo=github&logoColor=white&style=for-the-badge&background=000000" alt="GitHub Learnathon Wiki">
-  </a>
-</div>
-
-# Team: binary-brains
+## Team Information: binary-brains
 
 | Name                   | Role        | GitHub Username                                     |
 | ---------------------- | ----------- | --------------------------------------------------- |
