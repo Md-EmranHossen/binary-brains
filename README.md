@@ -46,7 +46,7 @@ Explore our [binary-brains Wiki](https://github.com/Learnathon-By-Geeky-Solution
 | FI Pranto              | Member      | [FI-Pranto](https://github.com/FI-Pranto)           |
 | Mashrief Bin Zulfiquer | Mentor      | [mashrief](https://github.com/mashrief)             |
 
-# 🧑‍💻Learning & Project Planning
+## 🧑‍💻Learning & Project Planning
 
 ### Stack Learning
 
