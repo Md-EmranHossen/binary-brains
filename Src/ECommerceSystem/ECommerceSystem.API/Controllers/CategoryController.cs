@@ -28,6 +28,7 @@ namespace ECommerceSystem.API.Controllers
             {
                 _db.Categories.Add(obj);
                 _db.SaveChanges();
+                TempData["success"] = "Category created succeddfully";
                 return RedirectToAction("Index");
             }
             return View();
@@ -52,6 +53,7 @@ namespace ECommerceSystem.API.Controllers
             {
                 _db.Categories.Update(obj);
                 _db.SaveChanges();
+                TempData["success"] = "Category updated succeddfully";
                 return RedirectToAction("Index");
             }
             return View();
@@ -76,6 +78,7 @@ namespace ECommerceSystem.API.Controllers
             }
             _db.Categories.Remove(obj);
             _db.SaveChanges();
+            TempData["success"] = "Category deleted succeddfully";
             return RedirectToAction("Index");
         }
     }
