@@ -9,9 +9,11 @@ namespace ECommerceSystem.API.Models
         public int Id { get; set; }
         [Required(ErrorMessage ="Category Must Be Required.")]
         [DisplayName("Category Name")]
+        [MaxLength(30)]
         public string Name { get; set; }
         [Required(ErrorMessage ="Display Order Must Be Required.")]
         [DisplayName("Display Order")]
+        [Range(1,100)]
         public int DsiplayOrder { get; set; }
         public bool IsActive { get; set; }
         [Required(ErrorMessage ="Created Name Must Be Required")]
