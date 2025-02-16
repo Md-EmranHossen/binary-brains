@@ -9,14 +9,17 @@
 		<div class="mb-3 row p-1">
 			<label asp-for="Name"></label>
 			<input asp-for="Name"class="form-control" />
+			<span asp-validation-for="Name" class="text-danger"></span>
 		</div>
 		<div class="mb-3 row p-1">
 			<label asp-for="DsiplayOrder"></label>
 			<input asp-for="DsiplayOrder"class="form-control" />
+			<span asp-validation-for="DsiplayOrder" class="text-danger"></span>
 		</div>
 		<div class="mb-3 row p-1">
 			<label asp-for="CreatedBy"></label>
 			<input asp-for="CreatedBy"class="form-control" />
+			<span asp-validation-for="CreatedBy" class="text-danger"></span>
 		</div>
 		<div class="row">
 			<div class="col-6 col-md-3">
