@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ECommerceSystem.API.Migrations
+namespace ECommerceSystem.DataAccess.Migrations
 {
     /// <inheritdoc />
     public partial class ByFIPro : Migration

@@ -1,6 +1,5 @@
-﻿using ECommerceSystem.API.Data;
-using ECommerceSystem.API.Models;
-using ECommerceSystem.API.Services;
+﻿using ECommerceSystem.API.Services;
+using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceSystem.API.Controllers
