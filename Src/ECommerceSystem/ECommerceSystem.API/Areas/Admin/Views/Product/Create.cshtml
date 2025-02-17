@@ -10,7 +10,7 @@
         </div>
     </div>
     <div class="card-body p-4">
-        <form method="post" class="row">
+        <form method="post" class="row" enctype="multipart/form-data">
             <div class="border p-3">
                 <div class="form-floating py-2 col-12">
                     <input asp-for="Name" class="form-control border-0 shadow" />
@@ -18,10 +18,10 @@
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
                 <div class="form-floating py-2 col-12">
-                    <input asp-for="ImageUrl" class="form-control border-0 shadow" />
+                    <input type="file" asp-for="ImageUrl" name="file" class="form-control border-0 shadow" />
                     <label asp-for="ImageUrl" class="ms-2"></label>
-                    <span asp-validation-for="ImageUrl" class="text-danger"></span>
                 </div>
+
                 <div class="form-floating py-2 col-12">
                     <input asp-for="Price" class="form-control border-0 shadow" type="number" step="0.01" />
                     <label asp-for="Price" class="ms-2"></label>
