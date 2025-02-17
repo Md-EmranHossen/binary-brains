@@ -4,8 +4,9 @@ using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ECommerceSystem.API.Controllers
+namespace ECommerceSystem.API.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -37,11 +38,11 @@ namespace ECommerceSystem.API.Controllers
         }
         public IActionResult Edit(int? id)
         {
-            if(id == null || id == 0)
+            if (id == null || id == 0)
             {
                 return NotFound();
             }
-            Category categoryFromDb = _unitOfWork.Category.Get(u=>u.Id==id);
+            Category categoryFromDb = _unitOfWork.Category.Get(u => u.Id == id);
             if (categoryFromDb == null)
             {
                 return NotFound();
