@@ -17,8 +17,8 @@ namespace ECommerceSystem.Models
         public string ImageUrl { get; set; }
         [Required]
         public decimal Price { get; set; }
-        [Required]
-        public int UnitOfMeasurementId { get; set; }
+       // [Required]
+       // public int UnitOfMeasurementId { get; set; }
         [Required]
         public int CategoryId { get; set; }
 
