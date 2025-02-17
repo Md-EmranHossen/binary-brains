@@ -3,6 +3,7 @@ using ECommerceSystem.DataAccess.Repository;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ECommerceSystem.API.Areas.Admin.Controllers
 {
@@ -18,6 +19,11 @@ namespace ECommerceSystem.API.Areas.Admin.Controllers
         public IActionResult Index()
         {
             IEnumerable<Product> productList = _unitOfWork.Product.GetAll();
+            IEnumerable<SelectListItem> CategoryList = _unitOfWork.Category.GetAll().Select(u =>new SelectListItem
+            {
+                Text= u.Name,
+                Value=u.Id.ToString()
+            });
             return View(productList);
         }
         public IActionResult Create()
