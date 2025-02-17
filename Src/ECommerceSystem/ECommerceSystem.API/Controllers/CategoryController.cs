@@ -51,6 +51,7 @@ namespace ECommerceSystem.API.Controllers
         {
             if (ModelState.IsValid)
             {
+                obj.UpdatedDate = DateTime.Now;
                 _categoryService.UpdateCategory(obj);
                 TempData["success"] = "Category updated successfully";
                 return RedirectToAction("Index");
