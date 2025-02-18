@@ -1,7 +1,7 @@
 ﻿@using ECommerceSystem.Models
 @model Product
 
-<div class="card shadow border-0 mt-4">
+<div class="card shadow border-0 my-4">
     <div class="card-header bg-secondary bg-gradient ml-0 py-3">
         <div class="row">
             <div class="col-12 text-center">
@@ -23,7 +23,13 @@
                             <label asp-for="Title" class="ms-2"></label>
                             <span asp-validation-for="Title" class="text-danger"></span>
                         </div>
-                   
+
+                        <div class="form-floating py-2 col-12">
+                            <textarea asp-for="Description" class="form-control border-0 shadow" style="height: 100px;"></textarea>
+                            <label asp-for="Description" class="ms-2"></label>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
                         <div class="form-floating py-2 col-12">
                             <input asp-for="Price" class="form-control border-0 shadow" type="number" step="0.01" />
                             <label asp-for="Price" class="ms-2"></label>
@@ -57,7 +63,7 @@
                         </div>
                         <div class="row pt-2">
                             <div class="col-6 col-md-3">
-                                <button type="submit" class="btn btn-primary form-control">Edit</button>
+                                <button type="submit" class="btn btn-primary form-control">Update</button>
                             </div>
                             <div class="col-6 col-md-3">
                                 <a asp-controller="Product" asp-action="Index" class="btn btn-outline border form-control">
