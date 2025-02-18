@@ -93,7 +93,7 @@ namespace ECommerceSystem.API.Areas.Admin.Controllers
 
                 if (file != null)
                 {
-                    var oldPath = Path.Combine(wwwRootPath, obj.ImageUrl.TrimStart('\\'));
+                    var oldPath = Path.Combine(wwwRootPath, obj.ImageUrl.TrimStart('\\'));//ImageUrl in database has a \ in front so we need to trim it 1st to get the acutal path
                     if (System.IO.File.Exists(oldPath))
                     {
                         System.IO.File.Delete(oldPath);
