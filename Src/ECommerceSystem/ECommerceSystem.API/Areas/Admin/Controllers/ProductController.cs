@@ -85,10 +85,30 @@ namespace ECommerceSystem.API.Areas.Admin.Controllers
             return View(productFromDb);
         }
         [HttpPost]
-        public IActionResult Edit(Product obj)
+        public IActionResult Edit(Product obj, IFormFile? file)
         {
             if (ModelState.IsValid)
             {
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+
+                if (file != null)
+                {
+                    var oldPath = Path.Combine(wwwRootPath, obj.ImageUrl.TrimStart('\\'));
+                    if (System.IO.File.Exists(oldPath))
+                    {
+                        System.IO.File.Delete(oldPath);
+                    }
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    string productPath = Path.Combine(wwwRootPath, @"images\product");
+
+                    using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+                    {
+                        file.CopyTo(fileStream);
+                    }
+
+                    obj.ImageUrl = @"\images\product\" + fileName;
+
+                }
                 obj.UpdatedDate = DateTime.Now;
                 _unitOfWork.Product.Update(obj);
                 _unitOfWork.Save();

@@ -13,6 +13,7 @@
         <form method="post" class="row" enctype="multipart/form-data">
             <input asp-for="Id" hidden />
             <input asp-for="CreatedBy" hidden />
+            <input asp-for="ImageUrl" hidden />
             <div class="row">
                 <!-- Form Fields -->
                 <div class="col-10">
@@ -22,11 +23,7 @@
                             <label asp-for="Name" class="ms-2"></label>
                             <span asp-validation-for="Name" class="text-danger"></span>
                         </div>
-                        <div class="form-floating py-2 col-12">
-                            <input asp-for="ImageUrl" class="form-control border-0 shadow" />
-                            <label asp-for="ImageUrl" class="ms-2"></label>
-                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
-                        </div>
+                   
                         <div class="form-floating py-2 col-12">
                             <input asp-for="Price" class="form-control border-0 shadow" type="number" step="0.01" />
                             <label asp-for="Price" class="ms-2"></label>
@@ -53,6 +50,10 @@
                             <input asp-for="UpdatedBy" class="form-control border-0 shadow" />
                             <label asp-for="UpdatedBy" class="ms-2"></label>
                             <span asp-validation-for="UpdatedBy" class="text-danger"></span>
+                        </div>
+                        <div class="form-floating py-2 col-12">
+                            <input type="file" name="file" class="form-control border-0 shadow" />
+                            <label asp-for="ImageUrl" class="ms-2"></label>
                         </div>
                         <div class="row pt-2">
                             <div class="col-6 col-md-3">
