@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ECommerceSystem.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class AddByFIPro : Migration
+    public partial class ToCreateCategoryAndProduct : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

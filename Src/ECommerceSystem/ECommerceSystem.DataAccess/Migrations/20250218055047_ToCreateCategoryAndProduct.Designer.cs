@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ECommerceSystem.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250217174601_AddByFIPro")]
-    partial class AddByFIPro
+    [Migration("20250218055047_ToCreateCategoryAndProduct")]
+    partial class ToCreateCategoryAndProduct
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
