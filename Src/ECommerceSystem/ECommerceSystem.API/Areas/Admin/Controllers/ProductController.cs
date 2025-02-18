@@ -20,7 +20,7 @@ namespace ECommerceSystem.API.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            IEnumerable<Product> productList = _unitOfWork.Product.GetAll();
+            IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties : "Category");
           
             return View(productList);
         }
