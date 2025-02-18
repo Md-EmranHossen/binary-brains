@@ -23,6 +23,13 @@ namespace ECommerceSystem.API.Areas.Customer.Controllers
             return View(ProductList);
         }
 
+
+        public IActionResult Details(int ProductId)
+        {
+            Product product = _unitOfWork.Product.Get(u=>u.Id== ProductId, includeProperties: "Category");
+            return View(product);
+        }
+
         public IActionResult Privacy()
         {
             return View();
