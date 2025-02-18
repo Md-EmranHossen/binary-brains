@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,15 +10,17 @@ namespace ECommerceSystem.API.Areas.Customer.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
+        private readonly IUnitOfWork _unitOfWork;
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
+            _unitOfWork = _unitOfWork;
         }
 
         public IActionResult Index()
         {
-            return View();
+            IEnumerable<Product> ProductList = _unitOfWork.Product.GetAll(includeProperties:"Category");
+            return View(ProductList);
         }
 
         public IActionResult Privacy()
