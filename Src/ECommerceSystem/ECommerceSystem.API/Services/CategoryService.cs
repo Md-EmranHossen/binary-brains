@@ -1,5 +1,7 @@
-﻿using ECommerceSystem.API.Data;
-using ECommerceSystem.API.Models;
+﻿
+
+using ECommerceSystem.DataAccess;
+using ECommerceSystem.Models;
 
 namespace ECommerceSystem.API.Services
 {

@@ -1,4 +1,4 @@
-﻿using ECommerceSystem.API.Models;
+﻿using ECommerceSystem.Models;
 
 namespace ECommerceSystem.API.Services
 {

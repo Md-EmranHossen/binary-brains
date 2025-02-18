@@ -1,7 +1,7 @@
-﻿using ECommerceSystem.API.Models;
+﻿using ECommerceSystem.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace ECommerceSystem.API.Data
+namespace ECommerceSystem.DataAccess
 {
     public class ApplicationDbContext:DbContext
     {
@@ -10,5 +10,6 @@ namespace ECommerceSystem.API.Data
 
         }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Product> Products { get; set; }
     }
 }
