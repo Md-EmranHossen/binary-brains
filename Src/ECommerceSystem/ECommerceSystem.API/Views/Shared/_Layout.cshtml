@@ -1,12 +1,13 @@
-﻿<!DOCTYPE html>
+﻿@using ECommerceSystem.Utility
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ECommerceSystem.API</title>
+    <title>@ViewData["Title"] - ECommerceWebApp</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
   
-    <link rel="stylesheet" href="~/ECommerceSystem.API.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ECommerceWebApp.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
 
@@ -17,7 +18,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="Customer" asp-controller="Home" asp-action="Index">ECommerceSystem.API</a>
+                <a class="navbar-brand" asp-area="Customer" asp-controller="Home" asp-action="Index">ECommerceWebApp</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -31,6 +32,7 @@
                             <a class="nav-link " asp-area="Customer" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>                        
                         
+                        @if(User.IsInRole(SD.Role_Admin)){
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Options
@@ -45,6 +47,7 @@
                                 <li><hr class="dropdown-divider"></li>
                             </ul>
                         </li>
+                        }
                     </ul>
 
                     <partial name="_LoginPartial" />
@@ -62,7 +65,7 @@
 
     <footer class="border-top footer bg-primary text-muted">
         <div class="container">
-            &copy; 2025 - ECommerceSystem.API - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 EcommerceWebApp <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

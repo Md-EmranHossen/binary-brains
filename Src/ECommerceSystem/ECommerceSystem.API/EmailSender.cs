@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
 
-namespace ECommerceSystem.API
+namespace ECommerceWebApp
 {
     public class EmailSender : IEmailSender
     {

@@ -1,11 +1,11 @@
 
-using ECommerceSystem.API.Services;
+using ECommerceWebApp.Services;
 using ECommerceSystem.DataAccess;
 using ECommerceSystem.DataAccess.Repository;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using ECommerceSystem.API;
+using ECommerceWebApp;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);

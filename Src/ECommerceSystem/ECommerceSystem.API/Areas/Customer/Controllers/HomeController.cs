@@ -3,7 +3,7 @@ using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ECommerceSystem.API.Areas.Customer.Controllers
+namespace ECommerceWebApp.Areas.Customer.Controllers
 {
 
     [Area("Customer")]
