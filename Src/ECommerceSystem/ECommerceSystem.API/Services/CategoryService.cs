@@ -3,7 +3,7 @@
 using ECommerceSystem.DataAccess;
 using ECommerceSystem.Models;
 
-namespace ECommerceSystem.API.Services
+namespace ECommerceWebApp.Services
 {
         public class CategoryService : ICategoryService
         {

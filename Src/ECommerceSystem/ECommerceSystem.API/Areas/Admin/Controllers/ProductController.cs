@@ -1,11 +1,11 @@
-﻿using ECommerceSystem.API.Services;
+﻿using ECommerceWebApp.Services;
 using ECommerceSystem.DataAccess.Repository;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace ECommerceSystem.API.Areas.Admin.Controllers
+namespace ECommerceWebApp.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class ProductController : Controller
