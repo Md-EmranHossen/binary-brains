@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using ECommerceWebApp;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using ECommerceSystem.Service.Services.IServices;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,7 +1,8 @@
 ﻿using ECommerceSystem.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace ECommerceWebApp.Services
+namespace ECommerceSystem.Service.Services.IServices
 {
     public interface IProductService
     {
@@ -14,7 +15,7 @@ namespace ECommerceWebApp.Services
 
         IEnumerable<SelectListItem> CategoryList();
 
-        void EditPathOfProduct(Product obj, IFormFile? file);
-        void CreatePathOfProduct(Product obj, IFormFile? file);
+        void EditPathOfProduct(Product obj, IFormFile? file,string wwwRootPath);
+        void CreatePathOfProduct(Product obj, IFormFile? file, string wwwRootPath);
     }
 }

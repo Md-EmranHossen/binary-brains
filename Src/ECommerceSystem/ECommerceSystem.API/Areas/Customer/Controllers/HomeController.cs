@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
-using ECommerceWebApp.Services;
+using ECommerceSystem.Service.Services.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceWebApp.Areas.Customer.Controllers

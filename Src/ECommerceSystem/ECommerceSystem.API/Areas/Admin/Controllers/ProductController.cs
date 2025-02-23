@@ -4,6 +4,7 @@ using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using ECommerceSystem.Service.Services.IServices;
 
 namespace ECommerceWebApp.Areas.Admin.Controllers
 {
@@ -12,12 +13,14 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IProductService productService;
+        private readonly IWebHostEnvironment webHostEnvironment;
 
-        public ProductController(IUnitOfWork unitOfWork,IProductService productService)
+        public ProductController(IUnitOfWork unitOfWork,IProductService productService, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
         
             this.productService = productService;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         public IActionResult Index()
@@ -39,7 +42,8 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                productService.CreatePathOfProduct(obj, file);
+                string wwwRootPath = webHostEnvironment.WebRootPath;
+                productService.CreatePathOfProduct(obj, file, wwwRootPath);
 
                 productService.AddProduct(obj);
                 _unitOfWork.Commit();
@@ -69,7 +73,8 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                productService.EditPathOfProduct(obj, file);
+                string wwwRootPath = webHostEnvironment.WebRootPath;
+                productService.EditPathOfProduct(obj, file,wwwRootPath);
                 obj.UpdatedDate = DateTime.Now;
                 productService.UpdateProduct(obj);
                 _unitOfWork.Commit();

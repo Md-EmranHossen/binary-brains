@@ -1,10 +1,9 @@
-﻿using ECommerceWebApp.Services;
-using ECommerceSystem.DataAccess.Repository;
-using ECommerceSystem.DataAccess.Repository.IRepository;
+﻿using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using ECommerceSystem.Utility;
 using Microsoft.AspNetCore.Authorization;
+using ECommerceSystem.Service.Services.IServices;
 
 namespace ECommerceWebApp.Areas.Admin.Controllers
 {

@@ -1,12 +1,10 @@
-﻿
-
-using ECommerceSystem.DataAccess;
-using ECommerceSystem.DataAccess.Repository.IRepository;
+﻿using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
+using ECommerceSystem.Service.Services.IServices;
 
 namespace ECommerceWebApp.Services
 {
-        public class CategoryService : ICategoryService
+    public class CategoryService : ICategoryService
         {
         private readonly ICategoryRepository categoryRepositroy;
 

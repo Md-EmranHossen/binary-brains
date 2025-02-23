@@ -1,26 +1,24 @@
-﻿
-
-using ECommerceSystem.DataAccess;
-using ECommerceSystem.DataAccess.Repository;
-using ECommerceSystem.DataAccess.Repository.IRepository;
+﻿using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
-using Microsoft.AspNetCore.Hosting;
+using ECommerceSystem.Service.Services.IServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
+
 
 namespace ECommerceWebApp.Services
 {
-        public class ProductService : IProductService
+    public class ProductService : IProductService
         {
         private readonly IProductRepository productRepositroy;
         private readonly ICategoryRepository categoryRepository;
-        private readonly IWebHostEnvironment webHostEnvironment;
+  
 
-        public ProductService(IProductRepository productRepositroy,ICategoryRepository categoryRepository, IWebHostEnvironment webHostEnvironment)
+        public ProductService(IProductRepository productRepositroy,ICategoryRepository categoryRepository)
             {
  
             this.productRepositroy = productRepositroy;
             this.categoryRepository = categoryRepository;
-            this.webHostEnvironment = webHostEnvironment;
+   
         }
 
             public IEnumerable<Product> GetAllProducts()
@@ -64,8 +62,8 @@ namespace ECommerceWebApp.Services
             });
         }
 
-        public void EditPathOfProduct(Product obj, IFormFile? file) {
-            string wwwRootPath = webHostEnvironment.WebRootPath;
+        public void EditPathOfProduct(Product obj,IFormFile? file,string wwwRootPath) {
+            
 
             if (file != null)
             {
@@ -90,9 +88,9 @@ namespace ECommerceWebApp.Services
 
         }
 
-        public void CreatePathOfProduct(Product obj, IFormFile? file)
+        public void CreatePathOfProduct(Product obj, IFormFile? file, string wwwRootPath)
         {
-            string wwwRootPath = webHostEnvironment.WebRootPath;
+          
 
             if (file != null)
             {
