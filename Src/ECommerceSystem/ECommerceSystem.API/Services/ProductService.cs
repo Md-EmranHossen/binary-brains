@@ -4,41 +4,44 @@ using ECommerceSystem.DataAccess;
 using ECommerceSystem.DataAccess.Repository;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ECommerceWebApp.Services
 {
         public class ProductService : IProductService
         {
-        private readonly IProductRepository ProductRepositroy;
+        private readonly IProductRepository productRepositroy;
         private readonly ICategoryRepository categoryRepository;
+        private readonly IWebHostEnvironment webHostEnvironment;
 
-        public ProductService(IProductRepository ProductRepositroy,ICategoryRepository categoryRepository)
+        public ProductService(IProductRepository productRepositroy,ICategoryRepository categoryRepository, IWebHostEnvironment webHostEnvironment)
             {
  
-            this.ProductRepositroy = ProductRepositroy;
+            this.productRepositroy = productRepositroy;
             this.categoryRepository = categoryRepository;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
             public IEnumerable<Product> GetAllProducts()
         {
-                return ProductRepositroy.GetAll(includeProperties: "Category");
+                return productRepositroy.GetAll(includeProperties: "Category");
             }
 
             public Product GetProductById(int? id)
             {
-                return ProductRepositroy.Get(u => u.Id == id);
+                return productRepositroy.Get(u => u.Id == id);
             }
 
             public void AddProduct(Product Product)
             {
-                ProductRepositroy.Add(Product);
+                productRepositroy.Add(Product);
             
             }
 
             public void UpdateProduct(Product Product)
             {
-                ProductRepositroy.Update(Product);
+                productRepositroy.Update(Product);
          
             }
 
@@ -47,7 +50,7 @@ namespace ECommerceWebApp.Services
                 var Product = GetProductById(id);
                 if (Product != null)
                 {
-                    ProductRepositroy.Remove(Product);
+                    productRepositroy.Remove(Product);
     
                 }
             }
@@ -59,6 +62,32 @@ namespace ECommerceWebApp.Services
                 Text = u.Name,
                 Value = u.Id.ToString()
             });
+        }
+
+        public void EditPathOfProduct(Product obj, IFormFile? file) {
+            string wwwRootPath = webHostEnvironment.WebRootPath;
+
+            if (file != null)
+            {
+                var oldPath = Path.Combine(wwwRootPath, obj.ImageUrl.TrimStart('\\'));//ImageUrl in database has a \ in front so we need to trim it 1st to get the acutal path
+                if (System.IO.File.Exists(oldPath))
+                {
+                    System.IO.File.Delete(oldPath);
+                }
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                string productPath = Path.Combine(wwwRootPath, @"images\product");
+
+                using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+                {
+                    file.CopyTo(fileStream);
+                }
+
+                obj.ImageUrl = @"\images\product\" + fileName;
+
+            }
+
+
+
         }
     }
     }

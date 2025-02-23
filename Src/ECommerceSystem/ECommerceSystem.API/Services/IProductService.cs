@@ -12,5 +12,8 @@ namespace ECommerceWebApp.Services
         void DeleteProduct(int? id);
 
         IEnumerable<SelectListItem> CategoryList();
+
+        void EditPathOfProduct(Product obj, IFormFile? file);
+        void CreatePathOfProduct(Product obj, IFormFile? file);
     }
 }
