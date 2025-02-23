@@ -108,5 +108,10 @@ namespace ECommerceWebApp.Services
 
             }
         }
+
+        public Product GetProductByIdwithCategory(int id)
+        {
+            return productRepositroy.Get(u => u.Id == id, includeProperties: "Category");
+        }
     }
     }

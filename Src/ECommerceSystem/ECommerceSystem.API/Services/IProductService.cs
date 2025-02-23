@@ -7,6 +7,7 @@ namespace ECommerceWebApp.Services
     {
         IEnumerable<Product> GetAllProducts();
         Product GetProductById(int? id);
+        Product GetProductByIdwithCategory(int id);
         void AddProduct(Product Product);
         void UpdateProduct(Product Product);
         void DeleteProduct(int? id);
