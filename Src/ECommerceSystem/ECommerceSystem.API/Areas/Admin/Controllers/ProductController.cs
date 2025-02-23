@@ -11,13 +11,12 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IProductService productService;
 
-        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment,IProductService productService)
+        public ProductController(IUnitOfWork unitOfWork,IProductService productService)
         {
             _unitOfWork = unitOfWork;
-            _webHostEnvironment = webHostEnvironment;
+        
             this.productService = productService;
         }
 
@@ -40,21 +39,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                string wwwRootPath = _webHostEnvironment.WebRootPath;
-
-                if (file != null)
-                {
-                    string fileName =Guid.NewGuid().ToString()+Path.GetExtension(file.FileName);
-                    string productPath = Path.Combine(wwwRootPath, @"images\product");
-
-                    using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
-                    {
-                        file.CopyTo(fileStream);
-                    }
-
-                    obj.ImageUrl = @"\images\product\" + fileName;
-
-                }
+                productService.CreatePathOfProduct(obj, file);
 
                 productService.AddProduct(obj);
                 _unitOfWork.Commit();

@@ -89,5 +89,24 @@ namespace ECommerceWebApp.Services
 
 
         }
+
+        public void CreatePathOfProduct(Product obj, IFormFile? file)
+        {
+            string wwwRootPath = webHostEnvironment.WebRootPath;
+
+            if (file != null)
+            {
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                string productPath = Path.Combine(wwwRootPath, @"images\product");
+
+                using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
+                {
+                    file.CopyTo(fileStream);
+                }
+
+                obj.ImageUrl = @"\images\product\" + fileName;
+
+            }
+        }
     }
     }
