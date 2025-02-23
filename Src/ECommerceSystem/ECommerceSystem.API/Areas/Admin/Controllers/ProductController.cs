@@ -12,26 +12,25 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+        private readonly IProductService productService;
+
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment,IProductService productService)
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
+            this.productService = productService;
         }
 
         public IActionResult Index()
         {
-            IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties : "Category");
+            IEnumerable<Product> productList = productService.GetAllProducts();
           
             return View(productList);
         }
         public IActionResult Create()
         {
 
-            IEnumerable<SelectListItem> CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
-            {
-                Text = u.Name,
-                Value = u.Id.ToString()
-            });
+            IEnumerable<SelectListItem> CategoryList = productService.CategoryList();
 
             ViewBag.CategoryList = CategoryList;
             return View();
@@ -58,7 +57,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 }
 
                 _unitOfWork.Product.Add(obj);
-                _unitOfWork.Save();
+                _unitOfWork.Commit();
                 TempData["success"] = "Product created successfully";
                 return RedirectToAction("Index");
             }
@@ -70,7 +69,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            Product productFromDb = _unitOfWork.Product.Get(u => u.Id == id);
+            Product productFromDb = productService.GetProductById(id);
             if (productFromDb == null)
             {
                 return NotFound();
@@ -111,7 +110,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 }
                 obj.UpdatedDate = DateTime.Now;
                 _unitOfWork.Product.Update(obj);
-                _unitOfWork.Save();
+                _unitOfWork.Commit();
                 TempData["success"] = "Product updated successfully";
                 return RedirectToAction("Index");
             }
@@ -144,7 +143,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 return NotFound();
             }
             _unitOfWork.Product.Remove(obj);
-            _unitOfWork.Save();
+            _unitOfWork.Commit();
             TempData["success"] = "Product deleted successfully";
             return RedirectToAction("Index");
         }
