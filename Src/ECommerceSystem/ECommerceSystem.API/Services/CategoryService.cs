@@ -1,48 +1,50 @@
 ﻿
 
 using ECommerceSystem.DataAccess;
+using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 
 namespace ECommerceWebApp.Services
 {
         public class CategoryService : ICategoryService
         {
-            private readonly ApplicationDbContext _db;
+        private readonly ICategoryRepository categoryRepositroy;
 
-            public CategoryService(ApplicationDbContext db)
+        public CategoryService(ICategoryRepository categoryRepositroy)
             {
-                _db = db;
-            }
+ 
+            this.categoryRepositroy = categoryRepositroy;
+        }
 
             public IEnumerable<Category> GetAllCategories()
             {
-                return _db.Categories.ToList();
+                return categoryRepositroy.GetAll();
             }
 
-            public Category GetCategoryById(int id)
+            public Category GetCategoryById(int? id)
             {
-                return _db.Categories.Find(id);
+                return categoryRepositroy.Get(u => u.Id == id);
             }
 
             public void AddCategory(Category category)
             {
-                _db.Categories.Add(category);
-                _db.SaveChanges();
+                categoryRepositroy.Add(category);
+            
             }
 
             public void UpdateCategory(Category category)
             {
-                _db.Categories.Update(category);
-                _db.SaveChanges();
+                categoryRepositroy.Update(category);
+         
             }
 
-            public void DeleteCategory(int id)
+            public void DeleteCategory(int? id)
             {
-                var category = _db.Categories.Find(id);
+                var category = GetCategoryById(id);
                 if (category != null)
                 {
-                    _db.Categories.Remove(category);
-                    _db.SaveChanges();
+                    categoryRepositroy.Remove(category);
+    
                 }
             }
         }
