@@ -32,14 +32,18 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 
 builder.Services.AddRazorPages();
+
+//UOW
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 //repo
 builder.Services.AddScoped<ICategoryRepository, CategoryRepositroy>();
+builder.Services.AddScoped<IProductRepository, ProductRepositroy>();
 
 
 //service
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 
 builder.Services.AddScoped<IEmailSender,EmailSender>();
