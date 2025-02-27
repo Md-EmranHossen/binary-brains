@@ -21,7 +21,7 @@ namespace ECommerceSystem.DataAccess.Repository
 
         public void Update(Company obj)
         {
-            _db.Categories.Update(obj);
+            _db.Companies.Update(obj);
         }
     }
 }
