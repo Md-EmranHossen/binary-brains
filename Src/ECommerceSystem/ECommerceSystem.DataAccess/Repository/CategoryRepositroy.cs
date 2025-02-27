@@ -12,7 +12,7 @@ namespace ECommerceSystem.DataAccess.Repository
   public  class CategoryRepositroy : Repository<Category>, ICategoryRepository
     {
         private ApplicationDbContext _db;
-        public CategoryRepositroy(ApplicationDbContext db) : base(db)
+        public CategoryRepositroy(ApplicationDbContext db) : base(db) 
         {
             _db = db;
         }

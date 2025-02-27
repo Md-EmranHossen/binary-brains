@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
+using ECommerceSystem.Service.Services.IServices;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceWebApp.Areas.Customer.Controllers
@@ -11,22 +12,25 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IUnitOfWork _unitOfWork;
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork)
+        private readonly IProductService productService;
+
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork,IProductService productService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
+            this.productService = productService;
         }
 
         public IActionResult Index()
         {
-            IEnumerable<Product> ProductList = _unitOfWork.Product.GetAll(includeProperties:"Category");
+            IEnumerable<Product> ProductList = productService.GetAllProducts();
             return View(ProductList);
         }
 
 
         public IActionResult Details(int ProductId)
         {
-            Product product = _unitOfWork.Product.Get(u=>u.Id== ProductId, includeProperties: "Category");
+            Product product = productService.GetProductByIdwithCategory(ProductId);
             return View(product);
         }
 

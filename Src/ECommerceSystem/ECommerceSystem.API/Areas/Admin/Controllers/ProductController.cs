@@ -4,6 +4,7 @@ using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using ECommerceSystem.Service.Services.IServices;
 
 namespace ECommerceWebApp.Areas.Admin.Controllers
 {
@@ -11,27 +12,27 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IWebHostEnvironment _webHostEnvironment;
-        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
+        private readonly IProductService productService;
+        private readonly IWebHostEnvironment webHostEnvironment;
+
+        public ProductController(IUnitOfWork unitOfWork,IProductService productService, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
-            _webHostEnvironment = webHostEnvironment;
+        
+            this.productService = productService;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
         public IActionResult Index()
         {
-            IEnumerable<Product> productList = _unitOfWork.Product.GetAll(includeProperties : "Category");
+            IEnumerable<Product> productList = productService.GetAllProducts();
           
             return View(productList);
         }
         public IActionResult Create()
         {
 
-            IEnumerable<SelectListItem> CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
-            {
-                Text = u.Name,
-                Value = u.Id.ToString()
-            });
+            IEnumerable<SelectListItem> CategoryList = productService.CategoryList();
 
             ViewBag.CategoryList = CategoryList;
             return View();
@@ -41,24 +42,11 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                string wwwRootPath = webHostEnvironment.WebRootPath;
+                productService.CreatePathOfProduct(obj, file, wwwRootPath);
 
-                if (file != null)
-                {
-                    string fileName =Guid.NewGuid().ToString()+Path.GetExtension(file.FileName);
-                    string productPath = Path.Combine(wwwRootPath, @"images\product");
-
-                    using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
-                    {
-                        file.CopyTo(fileStream);
-                    }
-
-                    obj.ImageUrl = @"\images\product\" + fileName;
-
-                }
-
-                _unitOfWork.Product.Add(obj);
-                _unitOfWork.Save();
+                productService.AddProduct(obj);
+                _unitOfWork.Commit();
                 TempData["success"] = "Product created successfully";
                 return RedirectToAction("Index");
             }
@@ -70,16 +58,12 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            Product productFromDb = _unitOfWork.Product.Get(u => u.Id == id);
+            Product productFromDb = productService.GetProductById(id);
             if (productFromDb == null)
             {
                 return NotFound();
             }
-            IEnumerable<SelectListItem> CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
-            {
-                Text = u.Name,
-                Value = u.Id.ToString()
-            });
+            IEnumerable<SelectListItem> CategoryList = productService.CategoryList();
 
             ViewBag.CategoryList = CategoryList;
             return View(productFromDb);
@@ -89,29 +73,11 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                string wwwRootPath = _webHostEnvironment.WebRootPath;
-
-                if (file != null)
-                {
-                    var oldPath = Path.Combine(wwwRootPath, obj.ImageUrl.TrimStart('\\'));//ImageUrl in database has a \ in front so we need to trim it 1st to get the acutal path
-                    if (System.IO.File.Exists(oldPath))
-                    {
-                        System.IO.File.Delete(oldPath);
-                    }
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                    string productPath = Path.Combine(wwwRootPath, @"images\product");
-
-                    using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
-                    {
-                        file.CopyTo(fileStream);
-                    }
-
-                    obj.ImageUrl = @"\images\product\" + fileName;
-
-                }
+                string wwwRootPath = webHostEnvironment.WebRootPath;
+                productService.EditPathOfProduct(obj, file,wwwRootPath);
                 obj.UpdatedDate = DateTime.Now;
-                _unitOfWork.Product.Update(obj);
-                _unitOfWork.Save();
+                productService.UpdateProduct(obj);
+                _unitOfWork.Commit();
                 TempData["success"] = "Product updated successfully";
                 return RedirectToAction("Index");
             }
@@ -119,17 +85,13 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         }
         public IActionResult Delete(int? id)
         {
-            Product productFromDb = _unitOfWork.Product.Get(u => u.Id == id);
+            Product productFromDb =productService.GetProductById(id);
             if (productFromDb == null)
             {
                 return NotFound();
             }
 
-            IEnumerable<SelectListItem> CategoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem
-            {
-                Text = u.Name,
-                Value = u.Id.ToString()
-            });
+            IEnumerable<SelectListItem> CategoryList = productService.CategoryList();
             ViewBag.CategoryList = CategoryList;
             return View(productFromDb);
 
@@ -138,13 +100,12 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [HttpPost, ActionName("Delete")]
         public IActionResult DeletePost(int? id)
         {
-            Product? obj = _unitOfWork.Product.Get(u => u.Id == id);
             if (id == null)
             {
                 return NotFound();
             }
-            _unitOfWork.Product.Remove(obj);
-            _unitOfWork.Save();
+             productService.DeleteProduct(id);
+            _unitOfWork.Commit();
             TempData["success"] = "Product deleted successfully";
             return RedirectToAction("Index");
         }

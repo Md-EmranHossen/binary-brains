@@ -9,34 +9,34 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = SD.Role_Admin)]
-    public class CategoryController : Controller
+    public class CompanyController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ICategoryService categoryService;
+        private readonly ICompanyService CompanyService;
 
-        public CategoryController(IUnitOfWork unitOfWork,ICategoryService categoryService)
+        public CompanyController(IUnitOfWork unitOfWork,ICompanyService CompanyService)
         {
             _unitOfWork = unitOfWork;
-            this.categoryService = categoryService;
+            this.CompanyService = CompanyService;
         }
 
         public IActionResult Index()
         {
-            IEnumerable<Category> categoryList = categoryService.GetAllCategories();
-            return View(categoryList);
+            IEnumerable<Company> CompanyList = CompanyService.GetAllCompanies();
+            return View(CompanyList);
         }
         public IActionResult Create()
         {
             return View();
         }
         [HttpPost]
-        public IActionResult Create(Category obj)
+        public IActionResult Create(Company obj)
         {
             if (ModelState.IsValid)
             {
-                categoryService.AddCategory(obj);
+                CompanyService.AddCompany(obj);
                 _unitOfWork.Commit();
-                TempData["success"] = "Category created successfully";
+                TempData["success"] = "Company created successfully";
                 return RedirectToAction("Index");
             }
             return View();
@@ -47,34 +47,34 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            Category categoryFromDb = categoryService.GetCategoryById(id);
-            if (categoryFromDb == null)
+            Company CompanyFromDb = CompanyService.GetCompanyById(id);
+            if (CompanyFromDb == null)
             {
                 return NotFound();
             }
-            return View(categoryFromDb);
+            return View(CompanyFromDb);
         }
         [HttpPost]
-        public IActionResult Edit(Category obj)
+        public IActionResult Edit(Company obj)
         {
             if (ModelState.IsValid)
             {
-                obj.UpdatedDate = DateTime.Now;
-                categoryService.UpdateCategory(obj);
+            
+                CompanyService.UpdateCompany(obj);
                 _unitOfWork.Commit();
-                TempData["success"] = "Category updated successfully";
+                TempData["success"] = "Company updated successfully";
                 return RedirectToAction("Index");
             }
             return View();
         }
         public IActionResult Delete(int? id)
         {
-            var categoryFromDb = categoryService.GetCategoryById(id);
-            if (categoryFromDb == null)
+            var CompanyFromDb = CompanyService.GetCompanyById(id);
+            if (CompanyFromDb == null)
             {
                 return NotFound();
             }
-            return View(categoryFromDb);
+            return View(CompanyFromDb);
         }
 
         [HttpPost, ActionName("Delete")]
@@ -85,9 +85,9 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            categoryService.DeleteCategory(id);
+            CompanyService.DeleteCompany(id);
             _unitOfWork.Commit();
-            TempData["success"] = "Category deleted successfully";
+            TempData["success"] = "Company deleted successfully";
             return RedirectToAction("Index");
         }
     }

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using ECommerceWebApp;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using ECommerceSystem.Service.Services.IServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +33,22 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 
 builder.Services.AddRazorPages();
+
+//UOW
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+//repo
+builder.Services.AddScoped<ICategoryRepository, CategoryRepositroy>();
+builder.Services.AddScoped<IProductRepository, ProductRepositroy>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+
+
+//service
+builder.Services.AddScoped<ICategoryService,CategoryService>();
+builder.Services.AddScoped<IProductService,ProductService>();
+builder.Services.AddScoped<ICompanyService,CompanyService>();
+
+
 builder.Services.AddScoped<IEmailSender,EmailSender>();
 
 var app = builder.Build();
