@@ -8,7 +8,7 @@ using static ECommerceSystem.DataAccess.Repository.IRepository.IRepository;
 
 namespace ECommerceSystem.DataAccess.Repository.IRepository
 {
-    public interface ICompanyRepositroy : IRepository<Company>
+    public interface ICompanyRepository : IRepository<Company>
     {
         void Update(Company obj);
     }
