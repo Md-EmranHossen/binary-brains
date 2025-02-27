@@ -40,11 +40,13 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 //repo
 builder.Services.AddScoped<ICategoryRepository, CategoryRepositroy>();
 builder.Services.AddScoped<IProductRepository, ProductRepositroy>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 
 
 //service
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICategoryService,CategoryService>();
+builder.Services.AddScoped<IProductService,ProductService>();
+builder.Services.AddScoped<ICompanyService,CompanyService>();
 
 
 builder.Services.AddScoped<IEmailSender,EmailSender>();
