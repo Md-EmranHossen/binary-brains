@@ -4,6 +4,7 @@ using ECommerceSystem.Service.Services.IServices;
 
 namespace ECommerceWebApp.Services
 {
+
     public class ShoppingCartService : IShoppingCartService
         {
         private readonly IShoppingCartRepository ShoppingCartRepositroy;
@@ -45,5 +46,10 @@ namespace ECommerceWebApp.Services
     
                 }
             }
+
+        public ShoppingCart GetShoppingCartById(bool v)
+        {
+            throw new NotImplementedException();
         }
+    }
     }

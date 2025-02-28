@@ -17,7 +17,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         private readonly IProductService productService;
         private readonly IShoppingCartService shoppingCartService;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork,IProductService productService,IShoppingCartService shoppingCartService)
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IProductService productService, IShoppingCartService shoppingCartService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
@@ -40,7 +40,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 Count = 1,
                 ProductId = ProductId
             };
-           
+
             return View(cart);
         }
 
@@ -52,10 +52,23 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
             shoppingCart.ApplicationUserId = userId;
-            shoppingCartService.AddShoppingCart(shoppingCart);
-            _unitOfWork.Commit();
 
-            
+            ShoppingCart cartFromDb = shoppingCartService
+            .GetAllShoppingCarts()
+            .FirstOrDefault(c => c.ApplicationUserId == shoppingCart.ApplicationUserId && c.ProductId == shoppingCart.ProductId);
+
+
+            if (cartFromDb != null)
+            {
+                cartFromDb.Count += shoppingCart.Count;
+                shoppingCartService.UpdateShoppingCart(cartFromDb); // Update the cart in the database
+            }
+            else
+            {
+                shoppingCartService.AddShoppingCart(shoppingCart);
+            }
+
+            _unitOfWork.Commit();
             return RedirectToAction("Index");
         }
 

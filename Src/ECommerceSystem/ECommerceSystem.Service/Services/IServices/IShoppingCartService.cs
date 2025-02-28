@@ -9,5 +9,6 @@ namespace ECommerceSystem.Service.Services.IServices
         void AddShoppingCart(ShoppingCart ShoppingCart);
         void UpdateShoppingCart(ShoppingCart ShoppingCart);
         void DeleteShoppingCart(int? id);
+        ShoppingCart GetShoppingCartById(bool v);
     }
 }
