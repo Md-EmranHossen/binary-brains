@@ -1,7 +1,9 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceWebApp.Areas.Customer.Controllers
@@ -13,12 +15,14 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IProductService productService;
+        private readonly IShoppingCartService shoppingCartService;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork,IProductService productService)
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork,IProductService productService,IShoppingCartService shoppingCartService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             this.productService = productService;
+            this.shoppingCartService = shoppingCartService;
         }
 
         public IActionResult Index()
@@ -30,8 +34,29 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
         public IActionResult Details(int ProductId)
         {
-            Product product = productService.GetProductByIdwithCategory(ProductId);
-            return View(product);
+            ShoppingCart cart = new()
+            {
+                Product = productService.GetProductByIdwithCategory(ProductId),
+                Count = 1,
+                ProductId = ProductId
+            };
+           
+            return View(cart);
+        }
+
+
+        [HttpPost]
+        [Authorize]
+        public IActionResult Details(ShoppingCart shoppingCart)
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+            shoppingCart.ApplicationUserId = userId;
+            shoppingCartService.AddShoppingCart(shoppingCart);
+            _unitOfWork.Commit();
+
+            
+            return RedirectToAction("Index");
         }
 
         public IActionResult Privacy()
