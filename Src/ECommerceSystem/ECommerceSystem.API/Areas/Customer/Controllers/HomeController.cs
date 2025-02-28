@@ -57,16 +57,16 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             .GetAllShoppingCarts()
             .FirstOrDefault(c => c.ApplicationUserId == shoppingCart.ApplicationUserId && c.ProductId == shoppingCart.ProductId);
 
-
             if (cartFromDb != null)
             {
                 cartFromDb.Count += shoppingCart.Count;
-                shoppingCartService.UpdateShoppingCart(cartFromDb); // Update the cart in the database
+                shoppingCartService.UpdateShoppingCart(cartFromDb); 
             }
             else
             {
                 shoppingCartService.AddShoppingCart(shoppingCart);
             }
+            
 
             _unitOfWork.Commit();
             return RedirectToAction("Index");
