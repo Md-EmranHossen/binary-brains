@@ -1,5 +1,6 @@
 ## 📚 Get Started with the Wiki!
-Explore our [binary-brains Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki) for comprehensive documentation and resources.
+Check out our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki) for docs, stay updated with [DevLog](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/tree/main/DevLog), and manage the project on [Trello](https://trello.com/b/67a6303580ff372f899865ae/e-commerce-system-binary-brains).
+
 <div align="center">
   <a href="https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki">
    <img src="https://img.shields.io/badge/BinaryBrains-Wiki-007ACC?logo=github&logoColor=white&style=for-the-badge&background=000000" alt="GitHub Learnathon Wiki">
