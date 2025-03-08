@@ -1,0 +1,41 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  sonar:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x' # তোমার প্রোজেক্টের জন্য প্রাসঙ্গিক ভার্সন সেট করো
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --no-restore
+
+      - name: Run tests and generate coverage report
+        run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage"
+
+      - name: Install SonarScanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Start SonarScanner
+        run: dotnet sonarscanner begin /k:"Learnathon-By-Geeky-Solutions_binary-brains" /o:"learnathon-by-geeky-solutions" /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}" /d:sonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
+
+      - name: End SonarScanner
+        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}"
