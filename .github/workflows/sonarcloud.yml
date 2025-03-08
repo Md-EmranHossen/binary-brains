@@ -24,22 +24,28 @@ jobs:
         with:
           dotnet-version: '8.x'
 
-      # Step 3: Restore dependencies
+      # Step 3: Install SonarScanner for MSBuild
+      - name: Install SonarScanner for MSBuild
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      # Step 4: Restore dependencies
       - name: Restore dependencies
         run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln
 
-      # Step 4: Build the project
+      # Step 5: Build the project
       - name: Build project
         run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --configuration Release
 
-      # Step 5: Run SonarScanner Begin (add the correct path to solution)
+      # Step 6: Run SonarScanner Begin (add the correct path to solution)
       - name: Run SonarScanner Begin
         run: dotnet sonarscanner begin /k:"binary-brains" /o:"learnathon-by-geeky-solutions" /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.projectBaseDir="Src/ECommerceSystem"
 
-      # Step 6: Run tests and generate coverage report (optional)
+      # Step 7: Run tests and generate coverage report (optional)
       - name: Run tests and generate coverage report
         run: dotnet test Src/ECommerceSystem/ECommerceSystem.sln --configuration Release
 
-      # Step 7: Run SonarScanner End
+      # Step 8: Run SonarScanner End
       - name: Run SonarScanner End
         run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}"
