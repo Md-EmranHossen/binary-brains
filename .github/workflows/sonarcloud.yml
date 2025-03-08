@@ -17,28 +17,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: List repository files (for debugging)
-        run: ls -R
-
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.x'
 
       - name: Restore dependencies
-        run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln  # Correct path
+        run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln
 
       - name: Build project
-        run: dotnet build --no-restore Src/ECommerceSystem/ECommerceSystem.sln  # Correct path
+        run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --configuration Release
+
+      - name: Run SonarScanner Begin
+        run: dotnet sonarscanner begin /k:"Learnathon-By-Geeky-Solutions_binary-brains" /o:"learnathon-by-geeky-solutions" /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
 
       - name: Run tests and generate coverage report
-        run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" Src/ECommerceSystem/ECommerceSystem.sln  # Correct path
+        run: dotnet test Src/ECommerceSystem/ECommerceSystem.sln --configuration Release --logger "trx;LogFileName=test-results.trx"
 
-      - name: Install SonarScanner
-        run: dotnet tool install --global dotnet-sonarscanner
-
-      - name: Start SonarScanner
-        run: dotnet sonarscanner begin /k:"Learnathon-By-Geeky-Solutions_binary-brains" /o:"learnathon-by-geeky-solutions" /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}" /d:sonar.cs.opencover.reportsPaths=**/coverage.opencover.xml
-
-      - name: End SonarScanner
+      - name: Run SonarScanner End
         run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}"
+
