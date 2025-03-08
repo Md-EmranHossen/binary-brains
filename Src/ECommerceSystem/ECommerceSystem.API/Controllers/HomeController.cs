@@ -1,10 +1,11 @@
-using System.Diagnostics;
-using ECommerceSystem.API.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace ECommerceSystem.API.Controllers
 {
-    public class HomeController : Controller
+    [ApiController]
+    [Route("[controller]")]
+    public class HomeController : ControllerBase
     {
         private readonly ILogger<HomeController> _logger;
 
@@ -13,20 +14,11 @@ namespace ECommerceSystem.API.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        [HttpGet]
+        public IActionResult Get()
         {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            _logger.LogInformation("HomeController Get method called.");
+            return Ok(new { Message = "Welcome to E-Commerce System API" });
         }
     }
 }
