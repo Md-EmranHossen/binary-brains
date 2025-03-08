@@ -14,11 +14,9 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # 1. Checkout the repository.
       - name: Checkout Repository
         uses: actions/checkout@v3
-
-      # 2. (Optional) List the repository structure for debugging and to verify the folder paths.
+        
       - name: List Repository Structure
         shell: powershell
         run: |
@@ -27,44 +25,35 @@ jobs:
           Write-Host "Contents of the Src folder:"
           dir Src
           Write-Host "Contents of the ECommerceSystem folder:"
-          dir "Src\ECommerceSystem"
+          dir "Src\\ECommerceSystem"
           Write-Host "Contents of the ECommerceSystem.API folder:"
-          dir "Src\ECommerceSystem\ECommerceSystem.API"
-
-      # 3. Set up .NET 8.
+          dir "Src\\ECommerceSystem\\ECommerceSystem.API"
+          
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.x'
-
-      # 4. Install SonarScanner for MSBuild globally.
+          
       - name: Install SonarScanner for MSBuild
         shell: powershell
         run: |
           dotnet tool install --global dotnet-sonarscanner
-          # Append the tool location to PATH.
-          Add-Content -Path $Env:GITHUB_PATH -Value "$env:USERPROFILE\.dotnet\tools"
+          Add-Content -Path $Env:GITHUB_PATH -Value "$env:USERPROFILE\\.dotnet\\tools"
 
-      # 5. Restore project dependencies.
       - name: Restore Dependencies
-        run: dotnet restore "Src\ECommerceSystem\ECommerceSystem.API\ECommerceSystem.API.csproj"
+        run: dotnet restore "Src\\ECommerceSystem\\ECommerceSystem.API\\ECommerceSystem.API.csproj"
 
-      # 6. Begin SonarScanner Analysis.
-      #     This step sets up SonarCloud with your project key, organization,
-      #     authentication token, the location of the coverage report, and the project base directory (relative to the repository root).
       - name: SonarScanner Begin
-        run: dotnet sonarscanner begin /k:"binary-brains" /o:"learnathon-by-geeky-solutions" /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="coverage.opencover.xml" /d:sonar.projectBaseDir="Src\ECommerceSystem\ECommerceSystem.API"
+        run: dotnet sonarscanner begin /k:"binary-brains" /o:"learnathon-by-geeky-solutions" /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
 
-      # 7. Build the project.
       - name: Build Project
-        run: dotnet build "Src\ECommerceSystem\ECommerceSystem.API\ECommerceSystem.API.csproj" --configuration Release
+        run: dotnet build "Src\\ECommerceSystem\\ECommerceSystem.API\\ECommerceSystem.API.csproj" --configuration Release
 
-      # 8. Run Tests with Coverage.
-      #     This command runs the tests with Coverlet enabled. The coverage report is output to 'coverage.opencover.xml' in OpenCover format,
-      #     which SonarCloud will pick up during analysis.
+      - name: Verify Coverlet Installation
+        run: dotnet tool list -g
+
       - name: Run Tests with Coverage
-        run: dotnet test "Src\ECommerceSystem\ECommerceSystem.API\ECommerceSystem.API.csproj" --configuration Release /p:CollectCoverage=true /p:CoverletOutput="coverage.opencover.xml" /p:CoverletOutputFormat=opencover
+        run: dotnet test "Src\\ECommerceSystem\\ECommerceSystem.API\\ECommerceSystem.API.csproj" --configuration Release /p:CollectCoverage=true /p:CoverletOutput="coverage.opencover.xml" /p:CoverletOutputFormat=opencover
 
-      # 9. End SonarScanner Analysis.
       - name: SonarScanner End
         run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}"
