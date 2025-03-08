@@ -23,13 +23,13 @@ jobs:
           dotnet-version: '8.x' # .NET 8
 
       - name: Restore dependencies
-        run: dotnet restore ECommerceSystem.sln # Point to your solution file
+        run: dotnet restore binary-brains/Src/ECommerceSystem/ECommerceSystem.sln # Correct path to solution file
 
       - name: Build project
-        run: dotnet build --no-restore
+        run: dotnet build --no-restore binary-brains/Src/ECommerceSystem/ECommerceSystem.sln
 
       - name: Run tests and generate coverage report
-        run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage"
+        run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" binary-brains/Src/ECommerceSystem/ECommerceSystem.sln
 
       - name: Install SonarScanner
         run: dotnet tool install --global dotnet-sonarscanner
