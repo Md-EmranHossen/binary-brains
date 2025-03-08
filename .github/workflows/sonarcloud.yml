@@ -17,19 +17,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: List repository files (for debugging)
+        run: ls -R
+
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.x' # .NET 8
+          dotnet-version: '8.x'
 
       - name: Restore dependencies
-        run: dotnet restore binary-brains/Src/ECommerceSystem/ECommerceSystem.sln # Correct path to solution file
+        run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln  # Correct path
 
       - name: Build project
-        run: dotnet build --no-restore binary-brains/Src/ECommerceSystem/ECommerceSystem.sln
+        run: dotnet build --no-restore Src/ECommerceSystem/ECommerceSystem.sln  # Correct path
 
       - name: Run tests and generate coverage report
-        run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" binary-brains/Src/ECommerceSystem/ECommerceSystem.sln
+        run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" Src/ECommerceSystem/ECommerceSystem.sln  # Correct path
 
       - name: Install SonarScanner
         run: dotnet tool install --global dotnet-sonarscanner
