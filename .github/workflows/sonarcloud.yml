@@ -14,11 +14,11 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # 1. Checkout the repository.
+      # 1. Check out the repository.
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. List repository structure (for debugging and verifying paths).
+      # 2. List repository structure for verification.
       - name: List Repository Structure
         run: |
           echo "Repository root:"
@@ -28,37 +28,36 @@ jobs:
           echo "Contents of Src\ECommerceSystem:"
           dir Src\ECommerceSystem
 
-      # 3. Setup .NET 8.
+      # 3. Set up .NET 8.
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.x'
 
-      # 4. Install the SonarScanner for MSBuild tool globally.
+      # 4. Install the SonarScanner for MSBuild globally.
       - name: Install SonarScanner for MSBuild
         run: |
           dotnet tool install --global dotnet-sonarscanner
-          REM Append the tool location to PATH.
           echo "%USERPROFILE%\.dotnet\tools" >> $Env:GITHUB_PATH
 
-      # 5. Restore dependencies using your solution file.
+      # 5. Restore project dependencies.
       - name: Restore Dependencies
         run: dotnet restore Src\ECommerceSystem\ECommerceSystem.sln
 
-      # 6. Start the SonarScanner analysis before the build.
-      #     Note: The parameter "/d:sonar.cs.opencover.reportsPaths" tells SonarCloud where to expect the coverage report.
+      # 6. Begin SonarScanner analysis.
+      #     Specifies the coverage report location using Coverlet (OpenCover format).
       - name: Run SonarScanner Begin
         run: dotnet sonarscanner begin /k:"binary-brains" /o:"learnathon-by-geeky-solutions" /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.projectBaseDir="Src\ECommerceSystem" /d:sonar.cs.opencover.reportsPaths="coverage.opencover.xml"
 
-      # 7. Build the project (the scanner intercepts the build process).
+      # 7. Build the project.
       - name: Build Project
         run: dotnet build Src\ECommerceSystem\ECommerceSystem.sln --configuration Release
 
       # 8. Run tests with coverage enabled.
-      #     This uses Coverlet to produce an OpenCover formatted report (coverage.opencover.xml).
+      #     Coverlet will output an OpenCover formatted report to 'coverage.opencover.xml'.
       - name: Run Tests with Coverage
         run: dotnet test Src\ECommerceSystem\ECommerceSystem.sln --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="coverage.opencover.xml"
 
-      # 9. End the SonarScanner analysis so that coverage (and build data) is sent to SonarCloud.
+      # 9. End the SonarScanner analysis.
       - name: Run SonarScanner End
         run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}"
