@@ -10,55 +10,55 @@ on:
 
 jobs:
   sonar:
-    name: SonarCloud Scan
-    runs-on: ubuntu-latest
+    name: SonarCloud Scan with Test Coverage
+    runs-on: windows-latest
 
     steps:
-      # 1. Check out the repository so everything is available.
+      # 1. Checkout the repository.
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. List directory structure for debugging
+      # 2. List repository structure (for debugging and verifying paths).
       - name: List Repository Structure
         run: |
           echo "Repository root:"
-          ls -la .
-          echo "Listing contents of the Src directory:"
-          ls -la ./Src
-          echo "Listing contents of Src/ECommerceSystem directory:"
-          ls -la ./Src/ECommerceSystem
+          dir
+          echo "Contents of the Src directory:"
+          dir Src
+          echo "Contents of Src\ECommerceSystem:"
+          dir Src\ECommerceSystem
 
-      # 3. Set up .NET 8 environment
+      # 3. Setup .NET 8.
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.x'
 
-      # 4. Install SonarScanner for MSBuild globally
+      # 4. Install the SonarScanner for MSBuild tool globally.
       - name: Install SonarScanner for MSBuild
         run: |
           dotnet tool install --global dotnet-sonarscanner
-          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+          REM Append the tool location to PATH.
+          echo "%USERPROFILE%\.dotnet\tools" >> $Env:GITHUB_PATH
 
-      # 5. Restore dependencies using your solution file
+      # 5. Restore dependencies using your solution file.
       - name: Restore Dependencies
-        run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln
+        run: dotnet restore Src\ECommerceSystem\ECommerceSystem.sln
 
-      # 6. Start the SonarScanner analysis – this must run before building!
+      # 6. Start the SonarScanner analysis before the build.
+      #     Note: The parameter "/d:sonar.cs.opencover.reportsPaths" tells SonarCloud where to expect the coverage report.
       - name: Run SonarScanner Begin
-        run: dotnet sonarscanner begin /k:"binary-brains" /o:"learnathon-by-geeky-solutions" \
-            /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}" \
-            /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.projectBaseDir="Src/ECommerceSystem"
+        run: dotnet sonarscanner begin /k:"binary-brains" /o:"learnathon-by-geeky-solutions" /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.projectBaseDir="Src\ECommerceSystem" /d:sonar.cs.opencover.reportsPaths="coverage.opencover.xml"
 
-      # 7. Build the project – the scanner will capture build details
+      # 7. Build the project (the scanner intercepts the build process).
       - name: Build Project
-        run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --configuration Release
+        run: dotnet build Src\ECommerceSystem\ECommerceSystem.sln --configuration Release
 
-      # 8. (Optional) Run tests – also useful for generating code coverage
-      - name: Run Tests
-        run: dotnet test Src/ECommerceSystem/ECommerceSystem.sln --configuration Release
+      # 8. Run tests with coverage enabled.
+      #     This uses Coverlet to produce an OpenCover formatted report (coverage.opencover.xml).
+      - name: Run Tests with Coverage
+        run: dotnet test Src\ECommerceSystem\ECommerceSystem.sln --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="coverage.opencover.xml"
 
-      # 9. Complete the SonarScanner analysis
+      # 9. End the SonarScanner analysis so that coverage (and build data) is sent to SonarCloud.
       - name: Run SonarScanner End
         run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}"
