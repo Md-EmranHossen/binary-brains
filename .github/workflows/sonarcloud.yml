@@ -1,64 +1,66 @@
-name: SonarCloud Analysis
+name: sonarqube-analyze
+
+permissions:
+  contents: read
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  sonar:
-    name: SonarCloud Scan with Test Coverage
-    runs-on: windows-latest
+  sonarqube:
+    name: Run SonarQube Coverage Analysis (.NET)
+    runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout the repository; fetch-depth: 0 is required for SonarCloud analysis.
       - name: Checkout Repository
-        uses: actions/checkout@v3
-        
-      - name: List Repository Structure
-        shell: powershell
-        run: |
-          Write-Host "Repository Root:"
-          dir
-          Write-Host "Contents of the Src folder:"
-          dir Src
-          Write-Host "Contents of the ECommerceSystem folder:"
-          dir "Src\\ECommerceSystem"
-          Write-Host "Contents of the ECommerceSystem.API folder:"
-          dir "Src\\ECommerceSystem\\ECommerceSystem.API"
-          
-      - name: Setup .NET 8
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # 2. Set up .NET (using .NET 8 in this example; adjust if needed)
+      - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.x'
-          
-      - name: Install SonarScanner for MSBuild
-        shell: powershell
+
+      # 3. Install dotnet-sonarscanner global tool and add it to PATH.
+      - name: Install dotnet-sonarscanner
         run: |
           dotnet tool install --global dotnet-sonarscanner
-          Add-Content -Path $Env:GITHUB_PATH -Value "$env:USERPROFILE\\.dotnet\\tools"
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
+      # 4. Restore project dependencies.
       - name: Restore Dependencies
-        run: dotnet restore "Src\\ECommerceSystem\\ECommerceSystem.API\\ECommerceSystem.API.csproj"
+        run: dotnet restore "Src/ECommerceSystem/ECommerceSystem.API/ECommerceSystem.API.csproj"
 
+      # 5. Begin SonarCloud analysis.
+      # Use hyphen notation for parameters on Linux.
       - name: SonarScanner Begin
-        run: dotnet sonarscanner begin /k:"binary-brains" /o:"learnathon-by-geeky-solutions" /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-
-      - name: Build Project
-        run: dotnet build "Src\\ECommerceSystem\\ECommerceSystem.API\\ECommerceSystem.API.csproj" --configuration Release
-
-      - name: Install Coverlet
         run: |
-          dotnet tool install --global coverlet.console
-          dotnet tool list -g  # Verifying installation
+          dotnet sonarscanner begin \
+            -k:"binary-brains" \
+            -o:"learnathon-by-geeky-solutions" \
+            -d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}" \
+            -d:sonar.host.url="https://sonarcloud.io" \
+            -d:sonar.cs.opencover.reportsPaths="coverage.opencover.xml" \
+            -d:sonar.projectBaseDir="Src/ECommerceSystem/ECommerceSystem.API"
 
-      - name: Verify Coverlet Installation
-        run: dotnet tool list -g
+      # 6. Build the project.
+      - name: Build Project
+        run: dotnet build "Src/ECommerceSystem/ECommerceSystem.API/ECommerceSystem.API.csproj" --configuration Release
 
+      # 7. Run tests with coverage using Coverlet.
+      # This produces an OpenCover-formatted coverage report called 'coverage.opencover.xml'
       - name: Run Tests with Coverage
-        run: dotnet test "Src\\ECommerceSystem\\ECommerceSystem.API\\ECommerceSystem.API.csproj" --configuration Release /p:CollectCoverage=true /p:CoverletOutput="coverage.opencover.xml" /p:CoverletOutputFormat="opencover"
+        run: |
+          dotnet test "Src/ECommerceSystem/ECommerceSystem.API/ECommerceSystem.API.csproj" --configuration Release \
+            /p:CollectCoverage=true \
+            /p:CoverletOutput="coverage.opencover.xml" \
+            /p:CoverletOutputFormat=opencover
 
+      # 8. End SonarCloud analysis.
       - name: SonarScanner End
-        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}"
+        run: dotnet sonarscanner end -d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}"
