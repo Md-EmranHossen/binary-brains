@@ -49,11 +49,14 @@ jobs:
       - name: Build Project
         run: dotnet build "Src\\ECommerceSystem\\ECommerceSystem.API\\ECommerceSystem.API.csproj" --configuration Release
 
+      - name: Install Coverlet
+        run: dotnet tool install --global coverlet.console
+
       - name: Verify Coverlet Installation
         run: dotnet tool list -g
 
       - name: Run Tests with Coverage
-        run: dotnet test "Src\\ECommerceSystem\\ECommerceSystem.API\\ECommerceSystem.API.csproj" --configuration Release /p:CollectCoverage=true /p:CoverletOutput="coverage.opencover.xml" /p:CoverletOutputFormat=opencover
+        run: dotnet test "Src\\ECommerceSystem\\ECommerceSystem.API\\ECommerceSystem.API.csproj" --configuration Release /p:CollectCoverage=true /p:CoverletOutput="coverage.opencover.xml" /p:CoverletOutputFormat="opencover"
 
       - name: SonarScanner End
         run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}"
