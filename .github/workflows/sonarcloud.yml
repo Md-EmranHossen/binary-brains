@@ -8,35 +8,38 @@ on:
     branches:
       - main
 
-
 jobs:
   sonar:
     name: SonarCloud Scan
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Step 2: Set up .NET 8
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.x'
 
-      - name: Install SonarScanner for .NET
-        run: dotnet tool install --global dotnet-sonarscanner
-
+      # Step 3: Restore dependencies
       - name: Restore dependencies
         run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln
 
+      # Step 4: Build the project
       - name: Build project
         run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --configuration Release
 
+      # Step 5: Run SonarScanner Begin (add the correct path to solution)
       - name: Run SonarScanner Begin
-        run: dotnet sonarscanner begin /k:"Learnathon-By-Geeky-Solutions_binary-brains" /o:"learnathon-by-geeky-solutions" /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+        run: dotnet sonarscanner begin /k:"binary-brains" /o:"learnathon-by-geeky-solutions" /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.projectBaseDir="Src/ECommerceSystem"
 
+      # Step 6: Run tests and generate coverage report (optional)
       - name: Run tests and generate coverage report
-        run: dotnet test Src/ECommerceSystem/ECommerceSystem.sln --configuration Release --logger "trx;LogFileName=test-results.trx"
+        run: dotnet test Src/ECommerceSystem/ECommerceSystem.sln --configuration Release
 
+      # Step 7: Run SonarScanner End
       - name: Run SonarScanner End
         run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}"
