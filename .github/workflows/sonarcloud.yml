@@ -14,41 +14,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
+      # Check out the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up .NET 8 (adjust the version as needed)
+      # Set up the .NET environment (using .NET 8)
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.x'
 
-      # Step 3: Install SonarScanner for MSBuild tool
+      # Install SonarScanner for MSBuild globally
       - name: Install SonarScanner for MSBuild
         run: |
           dotnet tool install --global dotnet-sonarscanner
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
-      # Step 4: Restore dependencies using your solution file
-      - name: Restore Dependencies
+      # Restore your project dependencies
+      - name: Restore dependencies
         run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln
 
-      # Step 5: Run SonarScanner Begin (must be before the build step)
+      # IMPORTANT: Run SonarScanner Begin BEFORE the build step
       - name: Run SonarScanner Begin
-        run: dotnet sonarscanner begin /k:"binary-brains" /o:"learnathon-by-geeky-solutions" \
-            /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}" \
-            /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.projectBaseDir="Src/ECommerceSystem"
+        run: dotnet sonarscanner begin /k:"binary-brains" /o:"learnathon-by-geeky-solutions" /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.projectBaseDir="Src/ECommerceSystem"
 
-      # Step 6: Build the project
-      - name: Build Project
+      # Build your project so the scanner can capture build information
+      - name: Build project
         run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --configuration Release
 
-      # Step 7: (Optional) Run tests and generate code coverage
-      - name: Run Tests (and generate coverage report if configured)
+      # (Optional) Run tests and generate code coverage reports if needed
+      - name: Run tests
         run: dotnet test Src/ECommerceSystem/ECommerceSystem.sln --configuration Release
 
-      # Step 8: Run SonarScanner End to complete the analysis
+      # Run SonarScanner End to complete the analysis
       - name: Run SonarScanner End
         run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}"
