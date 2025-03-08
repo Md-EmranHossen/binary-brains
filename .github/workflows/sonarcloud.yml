@@ -50,7 +50,9 @@ jobs:
         run: dotnet build "Src\\ECommerceSystem\\ECommerceSystem.API\\ECommerceSystem.API.csproj" --configuration Release
 
       - name: Install Coverlet
-        run: dotnet tool install --global coverlet.console
+        run: |
+          dotnet tool install --global coverlet.console
+          dotnet tool list -g  # Verifying installation
 
       - name: Verify Coverlet Installation
         run: dotnet tool list -g
