@@ -1,4 +1,4 @@
-name: SonarCloud Analysis
+name: CI/CD with SonarCloud
 
 on:
   push:
@@ -9,62 +9,42 @@ on:
       - main
 
 jobs:
-  sonar:
-    name: SonarCloud Scan with Test Coverage
-    runs-on: windows-latest
+  build-and-analyze:
+    name: Build, Test & SonarCloud Analysis
+    runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repository.
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # 2. (Optional) List the repository structure for debugging and to verify the folder paths.
-      - name: List Repository Structure
-        shell: powershell
-        run: |
-          Write-Host "Repository Root:"
-          dir
-          Write-Host "Contents of the Src folder:"
-          dir Src
-          Write-Host "Contents of the ECommerceSystem folder:"
-          dir "Src\ECommerceSystem"
-          Write-Host "Contents of the ECommerceSystem.API folder:"
-          dir "Src\ECommerceSystem\ECommerceSystem.API"
-
-      # 3. Set up .NET 8.
-      - name: Setup .NET 8
+      - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.x'
+          dotnet-version: '7.0'  # Adjust based on your project version
 
-      # 4. Install SonarScanner for MSBuild globally.
-      - name: Install SonarScanner for MSBuild
-        shell: powershell
+      - name: Install Dependencies
+        run: dotnet restore
+
+      - name: Build Solution
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Run Tests & Collect Coverage
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
+
+      - name: Prepare SonarCloud Analysis
         run: |
-          dotnet tool install --global dotnet-sonarscanner
-          # Append the tool location to PATH.
-          Add-Content -Path $Env:GITHUB_PATH -Value "$env:USERPROFILE\.dotnet\tools"
+          dotnet sonarscanner begin /k:"Learnathon-By-Geeky-Solutions_binary-brains" \
+          /o:"learnathon-by-geeky-solutions" \
+          /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}" \
+          /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
 
-      # 5. Restore project dependencies.
-      - name: Restore Dependencies
-        run: dotnet restore "Src\ECommerceSystem\ECommerceSystem.API\ECommerceSystem.API.csproj"
+      - name: Run SonarCloud Analysis
+        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}"
 
-      # 6. Begin SonarScanner Analysis.
-      #     This step sets up SonarCloud with your project key, organization,
-      #     authentication token, the location of the coverage report, and the project base directory (relative to the repository root).
-      - name: SonarScanner Begin
-        run: dotnet sonarscanner begin /k:"binary-brains" /o:"learnathon-by-geeky-solutions" /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="coverage.opencover.xml" /d:sonar.projectBaseDir="Src\ECommerceSystem\ECommerceSystem.API"
-
-      # 7. Build the project.
-      - name: Build Project
-        run: dotnet build "Src\ECommerceSystem\ECommerceSystem.API\ECommerceSystem.API.csproj" --configuration Release
-
-      # 8. Run Tests with Coverage.
-      #     This command runs the tests with Coverlet enabled. The coverage report is output to 'coverage.opencover.xml' in OpenCover format,
-      #     which SonarCloud will pick up during analysis.
-      - name: Run Tests with Coverage
-        run: dotnet test "Src\ECommerceSystem\ECommerceSystem.API\ECommerceSystem.API.csproj" --configuration Release /p:CollectCoverage=true /p:CoverletOutput="coverage.opencover.xml" /p:CoverletOutputFormat=opencover
-
-      # 9. End SonarScanner Analysis.
-      - name: SonarScanner End
-        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}"
+      - name: Publish Test Coverage Report
+        run: |
+          report_path=$(find . -name "coverage.cobertura.xml")
+          echo "Coverage report path: $report_path"
+          bash <(curl -s https://codecov.io/bash) -f "$report_path"
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
