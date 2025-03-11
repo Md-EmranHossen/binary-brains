@@ -1,66 +1,50 @@
-name: sonarqube-analyze
-
-permissions:
-  contents: read
+name: CI/CD with SonarCloud
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
-  sonarqube:
-    name: Run SonarQube Coverage Analysis (.NET)
+  build-and-analyze:
+    name: Build, Test & SonarCloud Analysis
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repository; fetch-depth: 0 is required for SonarCloud analysis.
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      # 2. Set up .NET (using .NET 8 in this example; adjust if needed)
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.x'
+          dotnet-version: '7.0'  # Adjust based on your project version
 
-      # 3. Install dotnet-sonarscanner global tool and add it to PATH.
-      - name: Install dotnet-sonarscanner
+      - name: Install Dependencies
+        run: dotnet restore
+
+      - name: Build Solution
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Run Tests & Collect Coverage
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
+
+      - name: Prepare SonarCloud Analysis
         run: |
-          dotnet tool install --global dotnet-sonarscanner
-          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+          dotnet sonarscanner begin /k:"Learnathon-By-Geeky-Solutions_binary-brains" \
+          /o:"learnathon-by-geeky-solutions" \
+          /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}" \
+          /d:sonar.cs.vscoveragexml.reportsPaths=coverage.xml
 
-      # 4. Restore project dependencies.
-      - name: Restore Dependencies
-        run: dotnet restore "Src/ECommerceSystem/ECommerceSystem.API/ECommerceSystem.API.csproj"
+      - name: Run SonarCloud Analysis
+        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}"
 
-      # 5. Begin SonarCloud analysis.
-      # Use hyphen notation for parameters on Linux.
-      - name: SonarScanner Begin
+      - name: Publish Test Coverage Report
         run: |
-          dotnet sonarscanner begin \
-            -k:"binary-brains" \
-            -o:"learnathon-by-geeky-solutions" \
-            -d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}" \
-            -d:sonar.host.url="https://sonarcloud.io" \
-            -d:sonar.cs.opencover.reportsPaths="coverage.opencover.xml" \
-            -d:sonar.projectBaseDir="Src/ECommerceSystem/ECommerceSystem.API"
-
-      # 6. Build the project.
-      - name: Build Project
-        run: dotnet build "Src/ECommerceSystem/ECommerceSystem.API/ECommerceSystem.API.csproj" --configuration Release
-
-      # 7. Run tests with coverage using Coverlet.
-      # This produces an OpenCover-formatted coverage report called 'coverage.opencover.xml'
-      - name: Run Tests with Coverage
-        run: |
-          dotnet test "Src/ECommerceSystem/ECommerceSystem.API/ECommerceSystem.API.csproj" --configuration Release \
-            /p:CollectCoverage=true \
-            /p:CoverletOutput="coverage.opencover.xml" \
-            /p:CoverletOutputFormat=opencover
-
-      # 8. End SonarCloud analysis.
-      - name: SonarScanner End
-        run: dotnet sonarscanner end -d:sonar.login="${{ secrets.SONARCLOUD_TOKEN }}"
+          report_path=$(find . -name "coverage.cobertura.xml")
+          echo "Coverage report path: $report_path"
+          bash <(curl -s https://codecov.io/bash) -f "$report_path"
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
