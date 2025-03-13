@@ -18,7 +18,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         private readonly IProductService productService;
         private readonly IShoppingCartService shoppingCartService;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IProductService productService,IShoppingCartService shoppingCartService)
+        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IProductService productService, IShoppingCartService shoppingCartService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
@@ -79,9 +79,9 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
             if (cartFromDb != null)
             {
-                // If product exists in cart, update quantity
-                cartFromDb.Count += shoppingCart.Count;
-                shoppingCartService.UpdateShoppingCart(cartFromDb);
+                //If product exists in cart, update quantity
+               cartFromDb.Count += shoppingCart.Count;
+               shoppingCartService.UpdateShoppingCart(cartFromDb);
             }
             else
             {
