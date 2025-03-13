@@ -8,6 +8,8 @@ namespace ECommerceSystem.Service.Services.IServices
         ShoppingCart GetShoppingCartById(int? id);
         void AddShoppingCart(ShoppingCart ShoppingCart);
         void UpdateShoppingCart(ShoppingCart ShoppingCart);
+        ShoppingCart GetShoppingCartByUserAndProduct(string userId, int productId);
+
         void DeleteShoppingCart(int? id);
     }
 }

@@ -74,13 +74,26 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
             shoppingCart.ApplicationUserId = userId;
 
+            // Check if the item already exists in the shopping cart
+            ShoppingCart cartFromDb = shoppingCartService.GetShoppingCartByUserAndProduct(userId, shoppingCart.ProductId);
 
+            if (cartFromDb != null)
+            {
+                // If product exists in cart, update quantity
+                cartFromDb.Count += shoppingCart.Count;
+                shoppingCartService.UpdateShoppingCart(cartFromDb);
+            }
+            else
+            {
+                // Otherwise, add a new shopping cart entry
+                shoppingCartService.AddShoppingCart(shoppingCart);
+            }
 
-            shoppingCartService.AddShoppingCart(shoppingCart);
-            _unitOfWork.Commit();
+            _unitOfWork.Commit(); // Save changes
 
             return RedirectToAction("Index");
         }
+
 
 
 

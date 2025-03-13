@@ -38,14 +38,17 @@ namespace ECommerceSystem.Service.Services
         public ShoppingCart GetShoppingCartById(int? id)
         {
             return _shoppingCartRepository.Get(u => u.Id == id);
-
         }
 
-       
+        public ShoppingCart GetShoppingCartByUserAndProduct(string userId, int productId)
+        {
+            return _shoppingCartRepository.Get(u => u.ApplicationUserId == userId && u.ProductId == productId);
+        }
+
 
         public void UpdateShoppingCart(ShoppingCart ShoppingCart)
         {
-            throw new NotImplementedException();
+            _shoppingCartRepository.Update(ShoppingCart);
         }
     }
 }
