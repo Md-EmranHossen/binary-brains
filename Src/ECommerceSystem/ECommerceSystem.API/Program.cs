@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using ECommerceWebApp;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using ECommerceSystem.Service.Services.IServices;
+using ECommerceSystem.Service.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,7 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectio
 
 
 
-builder.Services.AddIdentity<IdentityUser,IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -41,15 +42,17 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepositroy>();
 builder.Services.AddScoped<IProductRepository, ProductRepositroy>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
+builder.Services.AddScoped<IApplicationUserRepository, ApplicationUserRepositroy>();
 
 
 //service
-builder.Services.AddScoped<ICategoryService,CategoryService>();
-builder.Services.AddScoped<IProductService,ProductService>();
-builder.Services.AddScoped<ICompanyService,CompanyService>();
-
-
-builder.Services.AddScoped<IEmailSender,EmailSender>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
+builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 

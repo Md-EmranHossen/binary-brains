@@ -8,8 +8,8 @@ using static ECommerceSystem.DataAccess.Repository.IRepository.IRepository;
 
 namespace ECommerceSystem.DataAccess.Repository.IRepository
 {
-    public interface IShoppingCartRepository : IRepository<ShoppingCart>
+    public interface IApplicationUserRepository : IRepository<ApplicationUser>
     {
-        void Update(ShoppingCart obj);
+       
     }
 }
