@@ -38,6 +38,15 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         }
 
 
+
+        public IActionResult Summary()
+        {
+            return View();
+        }
+
+
+
+
         public IActionResult Plus(int cartId)
         {
             var cartFromDb = _shoppingCartService.GetShoppingCartById(cartId);
