@@ -9,6 +9,8 @@ namespace ECommerceSystem.Service.Services.IServices
         void AddShoppingCart(ShoppingCart ShoppingCart);
         void UpdateShoppingCart(ShoppingCart ShoppingCart);
         ShoppingCart GetShoppingCartByUserAndProduct(string userId, int productId);
+        IEnumerable<ShoppingCart> GetShoppingCartsByUserId(string userId);
+
 
         void DeleteShoppingCart(int? id);
     }

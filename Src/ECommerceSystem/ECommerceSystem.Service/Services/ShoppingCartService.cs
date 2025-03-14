@@ -14,10 +14,12 @@ namespace ECommerceSystem.Service.Services
     public class ShoppingCartService : IShoppingCartService
     {
         private readonly IShoppingCartRepository _shoppingCartRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository)
+        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository, IUnitOfWork unitOfWork)
         {
             _shoppingCartRepository = shoppingCartRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public void AddShoppingCart(ShoppingCart ShoppingCart)
@@ -25,9 +27,20 @@ namespace ECommerceSystem.Service.Services
             _shoppingCartRepository.Add(ShoppingCart);
         }
 
+
+
+     
+
+
+
         public void DeleteShoppingCart(int? id)
         {
-            throw new NotImplementedException();
+            var shoppingcart = GetShoppingCartById(id);
+            if(shoppingcart != null)
+            {
+                _shoppingCartRepository.Remove(shoppingcart);
+            }
+           
         }
 
         public IEnumerable<ShoppingCart> GetAllShoppingCarts()
@@ -46,9 +59,27 @@ namespace ECommerceSystem.Service.Services
         }
 
 
-        public void UpdateShoppingCart(ShoppingCart ShoppingCart)
+        public void UpdateShoppingCart(ShoppingCart shoppingCart)
         {
-            _shoppingCartRepository.Update(ShoppingCart);
+            var existingCart = _shoppingCartRepository.Get(u => u.Id == shoppingCart.Id);
+            if (existingCart != null)
+            {
+                existingCart.Count = shoppingCart.Count;
+                _shoppingCartRepository.Update(existingCart);
+                _unitOfWork.Commit();
+                
+            }
         }
+
+
+       public IEnumerable<ShoppingCart> GetShoppingCartsByUserId(string userId)
+        {
+            return _shoppingCartRepository.GetAll(
+                u => u.ApplicationUserId == userId,
+                includeProperties: "Product" // Ensure Product is loaded
+            ) ?? new List<ShoppingCart>();
+        }
+
+
     }
 }

@@ -54,6 +54,7 @@ builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
