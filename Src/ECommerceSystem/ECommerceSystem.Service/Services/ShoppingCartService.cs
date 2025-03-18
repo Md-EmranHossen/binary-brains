@@ -27,12 +27,6 @@ namespace ECommerceSystem.Service.Services
             _shoppingCartRepository.Add(ShoppingCart);
         }
 
-
-
-     
-
-
-
         public void DeleteShoppingCart(int? id)
         {
             var shoppingcart = GetShoppingCartById(id);
@@ -40,7 +34,6 @@ namespace ECommerceSystem.Service.Services
             {
                 _shoppingCartRepository.Remove(shoppingcart);
             }
-           
         }
 
         public IEnumerable<ShoppingCart> GetAllShoppingCarts()
@@ -58,7 +51,6 @@ namespace ECommerceSystem.Service.Services
             return _shoppingCartRepository.Get(u => u.ApplicationUserId == userId && u.ProductId == productId);
         }
 
-
         public void UpdateShoppingCart(ShoppingCart shoppingCart)
         {
             var existingCart = _shoppingCartRepository.Get(u => u.Id == shoppingCart.Id);
@@ -67,10 +59,8 @@ namespace ECommerceSystem.Service.Services
                 existingCart.Count = shoppingCart.Count;
                 _shoppingCartRepository.Update(existingCart);
                 _unitOfWork.Commit();
-                
             }
         }
-
 
        public IEnumerable<ShoppingCart> GetShoppingCartsByUserId(string userId)
         {
@@ -79,7 +69,5 @@ namespace ECommerceSystem.Service.Services
                 includeProperties: "Product" // Ensure Product is loaded
             ) ?? new List<ShoppingCart>();
         }
-
-
     }
 }

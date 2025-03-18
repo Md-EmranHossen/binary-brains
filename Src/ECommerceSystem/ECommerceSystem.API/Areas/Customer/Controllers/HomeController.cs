@@ -32,11 +32,9 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             return View(ProductList);
         }
 
-
         public IActionResult Details(int ProductId)
         {
             var product = productService.GetProductByIdwithCategory(ProductId);
-
             if (product == null)
             {
                 return NotFound("Product not found");
@@ -48,12 +46,8 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 Count = 1,
                 ProductId = ProductId
             };
-
             return View(cart);
         }
-
-
-
 
         [HttpPost]
         [Authorize]
@@ -63,7 +57,6 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             {
                 return BadRequest("Invalid ShoppingCart Data");
             }
-
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -71,7 +64,6 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             {
                 return Unauthorized();
             }
-
             shoppingCart.ApplicationUserId = userId;
 
             // Check if the item already exists in the shopping cart
@@ -88,15 +80,9 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 // Otherwise, add a new shopping cart entry
                 shoppingCartService.AddShoppingCart(shoppingCart);
             }
-
             _unitOfWork.Commit(); // Save changes
-
             return RedirectToAction("Index");
         }
-
-
-
-
 
         public IActionResult Privacy()
         {

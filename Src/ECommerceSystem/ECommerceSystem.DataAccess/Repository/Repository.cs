@@ -46,10 +46,7 @@ namespace ECommerceSystem.DataAccess.Repository
             return query.FirstOrDefault();
         }
 
-        public T Get(Expression<Func<T, bool>> filter, string? includeProperties = null)
-        {
-            throw new NotImplementedException();
-        }
+
 
         public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter, string? includeProperties = null)
         {

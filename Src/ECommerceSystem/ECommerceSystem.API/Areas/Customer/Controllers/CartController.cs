@@ -14,7 +14,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
     {
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IUnitOfWork _unitOfWork;
-        public CartController(IShoppingCartService shoppingCartService,IUnitOfWork unitOfWork)
+        public CartController(IShoppingCartService shoppingCartService, IUnitOfWork unitOfWork)
         {
             _shoppingCartService = shoppingCartService;
             _unitOfWork = unitOfWork;
@@ -24,7 +24,6 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         {
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
             var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId) ?? new List<ShoppingCart>(); // Ensure not null
 
             var shoppingCartVM = new ShoppingCartVM
@@ -37,15 +36,10 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             return View(shoppingCartVM);
         }
 
-
-
         public IActionResult Summary()
         {
             return View();
         }
-
-
-
 
         public IActionResult Plus(int cartId)
         {
@@ -54,14 +48,12 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             {
                 return RedirectToAction("Index");
             }
-
             cartFromDb.Count += 1;
             _shoppingCartService.UpdateShoppingCart(cartFromDb);
             _unitOfWork.Commit();
 
             return RedirectToAction("Index");
         }
-
         public IActionResult Minus(int cartId)
         {
             var cartFromDb = _shoppingCartService.GetShoppingCartById(cartId);
@@ -91,14 +83,10 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             {
                 return RedirectToAction("Index");
             }
-
             _shoppingCartService.DeleteShoppingCart(cartId);
             _unitOfWork.Commit();
-
             return RedirectToAction("Index");
         }
-
-
     }
 }
 
