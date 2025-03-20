@@ -44,6 +44,8 @@ builder.Services.AddScoped<IProductRepository, ProductRepositroy>();
 builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
 builder.Services.AddScoped<IApplicationUserRepository, ApplicationUserRepositroy>();
+builder.Services.AddScoped<IOrderHeaderRepository, OrderHeaderRepositroy>();
+builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepositroy>();
 
 
 //service
@@ -53,6 +55,9 @@ builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
+builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
+builder.Services.AddScoped<IOrderHeaderService, OrderHeaderService>();
+
 
 
 var app = builder.Build();

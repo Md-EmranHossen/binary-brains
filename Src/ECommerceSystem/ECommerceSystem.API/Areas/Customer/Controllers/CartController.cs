@@ -1,5 +1,6 @@
 ﻿using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
+using ECommerceSystem.Service.Services;
 using ECommerceSystem.Service.Services.IServices;
 using ECommerceWebApp.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -14,13 +15,33 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
     {
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IUnitOfWork _unitOfWork;
-        public CartController(IShoppingCartService shoppingCartService, IUnitOfWork unitOfWork)
+        private readonly IOrderHeaderService _orderHeaderService;
+        public CartController(IShoppingCartService shoppingCartService, IUnitOfWork unitOfWork, IOrderHeaderService orderHeaderService)
         {
             _shoppingCartService = shoppingCartService;
             _unitOfWork = unitOfWork;
+            _orderHeaderService = orderHeaderService;
         }
 
         public IActionResult Index()
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId) ?? new List<ShoppingCart>(); // Ensure not null
+
+
+            var shoppingCartVM = new ShoppingCartVM
+            {
+                ShoppingCartList = shoppingCartList,
+                OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
+                                             .Sum(cart => cart.Product.Price * cart.Count)
+
+            };
+
+            return View(shoppingCartVM);
+        }
+
+        public IActionResult Summary()
         {
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -32,12 +53,15 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
                                              .Sum(cart => cart.Product.Price * cart.Count)
             };
+            shoppingCartVM.OrderHeader = _orderHeaderService.GetAllOrderHeaders()
+                     .FirstOrDefault(o => o.ApplicationUser.Id == userId) ?? new OrderHeader();
 
-            return View(shoppingCartVM);
-        }
-
-        public IActionResult Summary()
-        {
+            shoppingCartVM.OrderHeader.Name = shoppingCartVM.OrderHeader.ApplicationUser?.Name;
+            shoppingCartVM.OrderHeader.PhoneNumber = shoppingCartVM.OrderHeader.ApplicationUser?.PhoneNumber;
+            shoppingCartVM.OrderHeader.StreetAddress = shoppingCartVM.OrderHeader.ApplicationUser?.StreetAddress;
+            shoppingCartVM.OrderHeader.City = shoppingCartVM.OrderHeader.ApplicationUser?.City;
+            shoppingCartVM.OrderHeader.State = shoppingCartVM.OrderHeader.ApplicationUser?.State;
+            shoppingCartVM.OrderHeader.PostalCode = shoppingCartVM.OrderHeader.ApplicationUser?.PostalCode;
             return View();
         }
 
