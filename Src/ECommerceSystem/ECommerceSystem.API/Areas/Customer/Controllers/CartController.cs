@@ -33,8 +33,12 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             var shoppingCartVM = new ShoppingCartVM
             {
                 ShoppingCartList = shoppingCartList,
-                OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
+                OrderHeader = new OrderHeader
+                {
+                    OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
                                              .Sum(cart => cart.Product.Price * cart.Count)
+                }
+
 
             };
 
@@ -47,22 +51,28 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId) ?? new List<ShoppingCart>(); // Ensure not null
 
+
             var shoppingCartVM = new ShoppingCartVM
             {
                 ShoppingCartList = shoppingCartList,
-                OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
+                OrderHeader = new OrderHeader
+                {
+                    OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
                                              .Sum(cart => cart.Product.Price * cart.Count)
-            };
-            shoppingCartVM.OrderHeader = _orderHeaderService.GetAllOrderHeaders()
-                     .FirstOrDefault(o => o.ApplicationUser.Id == userId) ?? new OrderHeader();
+                }
 
-            shoppingCartVM.OrderHeader.Name = shoppingCartVM.OrderHeader.ApplicationUser?.Name;
-            shoppingCartVM.OrderHeader.PhoneNumber = shoppingCartVM.OrderHeader.ApplicationUser?.PhoneNumber;
-            shoppingCartVM.OrderHeader.StreetAddress = shoppingCartVM.OrderHeader.ApplicationUser?.StreetAddress;
-            shoppingCartVM.OrderHeader.City = shoppingCartVM.OrderHeader.ApplicationUser?.City;
-            shoppingCartVM.OrderHeader.State = shoppingCartVM.OrderHeader.ApplicationUser?.State;
-            shoppingCartVM.OrderHeader.PostalCode = shoppingCartVM.OrderHeader.ApplicationUser?.PostalCode;
-            return View();
+
+            };
+            //shoppingCartVM.OrderHeader = _orderHeaderService.GetOrderHeaderById(userId);
+
+            shoppingCartVM.OrderHeader.Name = shoppingCartVM.OrderHeader.ApplicationUser.Name;
+            shoppingCartVM.OrderHeader.PhoneNumber = shoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
+            shoppingCartVM.OrderHeader.StreetAddress = shoppingCartVM.OrderHeader.ApplicationUser.StreetAddress;
+            shoppingCartVM.OrderHeader.City = shoppingCartVM.OrderHeader.ApplicationUser.City;
+            shoppingCartVM.OrderHeader.State = shoppingCartVM.OrderHeader.ApplicationUser.State;
+            shoppingCartVM.OrderHeader.PostalCode = shoppingCartVM.OrderHeader.ApplicationUser.PostalCode;
+
+            return View(shoppingCartVM);
         }
 
         public IActionResult Plus(int cartId)
