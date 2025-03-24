@@ -21,15 +21,15 @@ jobs:
         run: dotnet tool install --global dotnet-sonarscanner
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln
 
       - name: Build Solution
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build --no-restore --configuration Release --project Src/ECommerceSystem/ECommerceSystem.sln
 
       - name: Run SonarCloud Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           dotnet sonarscanner begin /k:"Learnathon-By-Geeky-Solutions_binary-brains" /d:sonar.host.url="https://learnathon.geeky.solutions" /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-          dotnet build --configuration Release
+          dotnet build --configuration Release --project Src/ECommerceSystem/ECommerceSystem.sln
           dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
