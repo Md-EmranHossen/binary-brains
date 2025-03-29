@@ -16,5 +16,6 @@ namespace ECommerceSystem.DataAccess.Repository
         {
             _db = db;
         }
+        
     }
 }

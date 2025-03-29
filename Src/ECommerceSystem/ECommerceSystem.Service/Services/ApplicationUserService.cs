@@ -11,5 +11,10 @@ namespace ECommerceWebApp.Services
         {
             this.ApplicationUserRepositroy = ApplicationUserRepositroy;
         }
+
+        ApplicationUser IApplicationUserService.GetUserById(string id)
+        {
+            return ApplicationUserRepositroy.Get(u => u.Id == id);
+        }
     }
 }

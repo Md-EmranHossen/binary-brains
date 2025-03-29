@@ -15,12 +15,14 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
     {
         private readonly IShoppingCartService _shoppingCartService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IApplicationUserService _applicationUserService;
         private readonly IOrderHeaderService _orderHeaderService;
-        public CartController(IShoppingCartService shoppingCartService, IUnitOfWork unitOfWork, IOrderHeaderService orderHeaderService)
+        public CartController(IShoppingCartService shoppingCartService, IUnitOfWork unitOfWork, IOrderHeaderService orderHeaderService, IApplicationUserService applicationUserService)
         {
             _shoppingCartService = shoppingCartService;
             _unitOfWork = unitOfWork;
             _orderHeaderService = orderHeaderService;
+            _applicationUserService = applicationUserService;
         }
 
         public IActionResult Index()
@@ -63,7 +65,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
 
             };
-            //shoppingCartVM.OrderHeader = _orderHeaderService.GetOrderHeaderById(userId);
+            shoppingCartVM.OrderHeader.ApplicationUser =_applicationUserService.GetUserById(userId);
 
             shoppingCartVM.OrderHeader.Name = shoppingCartVM.OrderHeader.ApplicationUser.Name;
             shoppingCartVM.OrderHeader.PhoneNumber = shoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
