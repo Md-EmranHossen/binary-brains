@@ -2,6 +2,7 @@
 using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services;
 using ECommerceSystem.Service.Services.IServices;
+using ECommerceSystem.Utility;
 using ECommerceWebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -73,6 +74,54 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             shoppingCartVM.OrderHeader.City = shoppingCartVM.OrderHeader.ApplicationUser.City;
             shoppingCartVM.OrderHeader.State = shoppingCartVM.OrderHeader.ApplicationUser.State;
             shoppingCartVM.OrderHeader.PostalCode = shoppingCartVM.OrderHeader.ApplicationUser.PostalCode;
+
+            return View(shoppingCartVM);
+        }
+        [HttpPost]
+        [ActionName("Summary")]
+        public IActionResult SummaryPost(ShoppingCartVM shoppingCartVM)
+        {
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId) ?? new List<ShoppingCart>(); // Ensure not null
+
+
+             shoppingCartVM = new ShoppingCartVM
+            {
+                ShoppingCartList = shoppingCartList,
+                OrderHeader = new OrderHeader
+                {
+                    OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
+                                             .Sum(cart => cart.Product.Price * cart.Count)
+                }
+
+
+            };
+            if (shoppingCartVM.OrderHeader.ApplicationUser.CompanyId.GetValueOrDefault() == 0)
+            {
+                //it is a regular customer account and we need to capture payment
+                shoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
+                shoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
+            }
+            else
+            {
+                //it is a company user
+                shoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPayment;
+                shoppingCartVM.OrderHeader.OrderStatus=SD.StatusApproved;
+            }
+
+            _orderHeaderService.AddOrderHeader(shoppingCartVM.OrderHeader);
+
+            foreach(var card in shoppingCartVM.ShoppingCartList)
+            {
+                OrderDetail orderDetail = new()
+                {
+                    ProductId = card.ProductId,
+                    OrderHeaderId = shoppingCartVM.OrderHeader.Id,
+                    Price = card.Price,
+                    Count = card.Count
+                };
+            }
 
             return View(shoppingCartVM);
         }
