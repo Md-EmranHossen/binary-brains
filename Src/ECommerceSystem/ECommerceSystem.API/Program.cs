@@ -9,6 +9,7 @@ using ECommerceWebApp;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using ECommerceSystem.Service.Services.IServices;
 using ECommerceSystem.Service.Services;
+using ECommerceSystem.Utility;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
-
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
