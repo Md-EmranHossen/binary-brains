@@ -87,7 +87,8 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId) ?? new List<ShoppingCart>(); // Ensure not null
 
-
+           
+            ApplicationUser applicationUser = _applicationUserService.GetUserById(userId);
              shoppingCartVM = new ShoppingCartVM
             {
                 ShoppingCartList = shoppingCartList,
@@ -99,7 +100,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
 
             };
-            if (shoppingCartVM.OrderHeader.ApplicationUser.CompanyId.GetValueOrDefault() == 0)
+            if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
                 //it is a regular customer
                 shoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
@@ -126,13 +127,13 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 _orderDetailService.AddOrderDetail(orderDetail);
                 
             }
-            if (shoppingCartVM.OrderHeader.ApplicationUser.CompanyId.GetValueOrDefault() == 0)
+            if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
                 //it is a regular customer account and we need to capture payment
                 //stripe logic
             }
 
-            return RedirectToAction(nameof(OrderConfirmation),new {id=shoppingCartVM.OrderHeader.Id});
+            return RedirectToAction(nameof(OrderConfirmation),new {id=shoppingCartVM.OrderHeader});
         }
 
         public IActionResult OrderConfirmation(int id)
