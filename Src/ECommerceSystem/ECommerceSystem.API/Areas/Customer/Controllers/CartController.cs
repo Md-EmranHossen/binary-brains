@@ -18,12 +18,14 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IApplicationUserService _applicationUserService;
         private readonly IOrderHeaderService _orderHeaderService;
-        public CartController(IShoppingCartService shoppingCartService, IUnitOfWork unitOfWork, IOrderHeaderService orderHeaderService, IApplicationUserService applicationUserService)
+        private readonly IOrderDetailService _orderDetailService;
+        public CartController(IShoppingCartService shoppingCartService, IUnitOfWork unitOfWork, IOrderHeaderService orderHeaderService, IApplicationUserService applicationUserService,IOrderDetailService orderDetailService)
         {
             _shoppingCartService = shoppingCartService;
             _unitOfWork = unitOfWork;
             _orderHeaderService = orderHeaderService;
             _applicationUserService = applicationUserService;
+            _orderDetailService = orderDetailService;
         }
 
         public IActionResult Index()
@@ -99,7 +101,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             };
             if (shoppingCartVM.OrderHeader.ApplicationUser.CompanyId.GetValueOrDefault() == 0)
             {
-                //it is a regular customer account and we need to capture payment
+                //it is a regular customer
                 shoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
                 shoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
             }
@@ -121,9 +123,21 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                     Price = card.Price,
                     Count = card.Count
                 };
+                _orderDetailService.AddOrderDetail(orderDetail);
+                
+            }
+            if (shoppingCartVM.OrderHeader.ApplicationUser.CompanyId.GetValueOrDefault() == 0)
+            {
+                //it is a regular customer account and we need to capture payment
+                //stripe logic
             }
 
-            return View(shoppingCartVM);
+            return RedirectToAction(nameof(OrderConfirmation),new {id=shoppingCartVM.OrderHeader.Id});
+        }
+
+        public IActionResult OrderConfirmation(int id)
+        {
+            return View(id);
         }
 
         public IActionResult Plus(int cartId)
