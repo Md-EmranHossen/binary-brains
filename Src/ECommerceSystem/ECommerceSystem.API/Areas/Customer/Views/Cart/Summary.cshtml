@@ -1,4 +1,5 @@
 ﻿@model ShoppingCartVM
+@using System.Globalization
 <form method="post">
     <br />
     <div class="container">
@@ -85,16 +86,19 @@
                                 <span class="text-info">Order Summary:</span>
                             </h4>
                             <ul class="list-group mb-3">
-                                @foreach(var deatails in Model.ShoppingCartList){
+                                @foreach (var details in Model.ShoppingCartList)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <div>
+                                            <h6 class="my-0">@details.Product.Title</h6>
+                                            <small class="text-muted">Quantity: @details.Count</small><br />
+                                            <small class="text-muted">Unit Price: @details.Price.ToString("c", new CultureInfo("bn-BD"))</small>
 
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <div>
-                                        <h6 class="my-0">@deatails.Product.Title</h6>
-                                        <small class="text-muted">Quantity: Count</small>
-                                    </div>
-                                        <span class="text-muted">@((deatails.Price*deatails.Count).ToString("c"))</span>
-                                </li>
+                                        </div>
+                                        <span class="text-muted">@details.Price.ToString("c", new CultureInfo("bn-BD"))</span>
+                                    </li>
                                 }
+
 
                                 <li class="list-group-item d-flex justify-content-between bg-light">
                                     <small class="text-info">Total (USD)</small>
