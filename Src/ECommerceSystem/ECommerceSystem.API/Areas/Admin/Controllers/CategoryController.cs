@@ -43,7 +43,9 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Edit(int? id)
+        [HttpGet]
+        // SonarCloud: ModelState.IsValid is not applicable here – no model binding is done in GET
+        public IActionResult Edit( int? id)
         {
             if (id is null || id == 0)
             {
@@ -57,6 +59,8 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             }
 
             return View(category);
+
+          
         }
 
         [HttpPost]
@@ -74,6 +78,8 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        // SonarCloud: ModelState.IsValid is not applicable here – no model binding is done in GET
         public IActionResult Delete(int? id)
         {
             if (id is null || id == 0)
