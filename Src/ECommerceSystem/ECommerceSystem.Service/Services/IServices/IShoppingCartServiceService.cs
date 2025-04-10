@@ -1,10 +1,11 @@
 ﻿using ECommerceSystem.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceSystem.Service.Services.IServices
 {
     public interface IShoppingCartService
     {
-        IEnumerable<ShoppingCart> GetAllShoppingCarts();
+
         ShoppingCart GetShoppingCartById(int? id);
         void AddShoppingCart(ShoppingCart ShoppingCart);
         void UpdateShoppingCart(ShoppingCart ShoppingCart);
@@ -13,5 +14,12 @@ namespace ECommerceSystem.Service.Services.IServices
         void RemoveRange(List<ShoppingCart> shoppingCarts);
 
         void DeleteShoppingCart(int? id);
+
+        ShoppingCart CreateCartWithProduct(Product product);
+
+        bool AddOrUpdateShoppingCart(ShoppingCart shoppingCart, string userId);
+
+
+
     }
 }

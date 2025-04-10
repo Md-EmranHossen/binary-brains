@@ -2,10 +2,12 @@
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services.IServices;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,20 +27,23 @@ namespace ECommerceSystem.Service.Services
         public void AddShoppingCart(ShoppingCart ShoppingCart)
         {
             _shoppingCartRepository.Add(ShoppingCart);
+            _unitOfWork.Commit();
         }
 
         public void DeleteShoppingCart(int? id)
         {
-            var shoppingcart = GetShoppingCartById(id);
-            if(shoppingcart != null)
+            if (id != null)
             {
-                _shoppingCartRepository.Remove(shoppingcart);
-            }
-        }
+                var shoppingcart = GetShoppingCartById(id);
+                if (shoppingcart != null)
+                {
+                    _shoppingCartRepository.Remove(shoppingcart);
+                    _unitOfWork.Commit();
+                }
 
-        public IEnumerable<ShoppingCart> GetAllShoppingCarts()
-        {
-            throw new NotImplementedException();
+            }
+
+
         }
 
         public ShoppingCart GetShoppingCartById(int? id)
@@ -73,6 +78,46 @@ namespace ECommerceSystem.Service.Services
         public void RemoveRange(List<ShoppingCart> shoppingCarts)
         {
             _shoppingCartRepository.RemoveRange(shoppingCarts);
+            _unitOfWork.Commit();
         }
+
+        public ShoppingCart CreateCartWithProduct(Product product)
+        {
+            return new ShoppingCart
+            {
+                Product = product,
+                ProductId = product.Id,
+                Count = 1
+            };
+        }
+
+        public bool AddOrUpdateShoppingCart(ShoppingCart shoppingCart, string userId)
+        {
+            if (string.IsNullOrEmpty(userId) || shoppingCart == null || shoppingCart.ProductId == 0)
+            {
+                return false; 
+            }
+
+            shoppingCart.ApplicationUserId = userId;
+
+            var cartFromDb = GetShoppingCartByUserAndProduct(userId, shoppingCart.ProductId);
+
+            if (cartFromDb != null)
+            {
+                cartFromDb.Count += shoppingCart.Count;
+                UpdateShoppingCart(cartFromDb);
+            }
+            else
+            {
+                AddShoppingCart(shoppingCart);
+            }
+
+            _unitOfWork.Commit();
+            return true;
+        }
+
+
+
+
     }
 }
