@@ -12,21 +12,30 @@ namespace ECommerceSystem.Service.Services
     public class OrderDetailService : IOrderDetailService
     {
         private readonly IOrderDetailRepository orderDetailRepository;
-        public OrderDetailService(IOrderDetailRepository orderDetailRepository)
+        private readonly IUnitOfWork _unitOfWork;
+
+        public OrderDetailService(IOrderDetailRepository orderDetailRepository,IUnitOfWork unitOfWork)
         {
             this.orderDetailRepository = orderDetailRepository;
+            _unitOfWork = unitOfWork;
         }
         public void AddOrderDetail(OrderDetail orderDetail)
         {
             orderDetailRepository.Add(orderDetail);
+            _unitOfWork.Commit();
+
         }
 
         public void DeleteOrderDetail(int? id)
         {
-            var order = GetOrderDetailById(id);
-            if (order != null)
+            if (id != null)
             {
-                orderDetailRepository.Remove(order);
+                var order = GetOrderDetailById(id);
+                if (order != null)
+                {
+                    orderDetailRepository.Remove(order);
+                    _unitOfWork.Commit();
+                }
             }
         }
 
@@ -43,6 +52,7 @@ namespace ECommerceSystem.Service.Services
         public void UpdateOrderDetail(OrderDetail orderDetail)
         {
             orderDetailRepository.Update(orderDetail);
+            _unitOfWork.Commit();
         }
     }
 }

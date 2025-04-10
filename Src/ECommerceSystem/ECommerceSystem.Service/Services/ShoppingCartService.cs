@@ -30,11 +30,15 @@ namespace ECommerceSystem.Service.Services
 
         public void DeleteShoppingCart(int? id)
         {
-            var shoppingcart = GetShoppingCartById(id);
-            if(shoppingcart != null)
+            if (id != null)
             {
-                _shoppingCartRepository.Remove(shoppingcart);
-                _unitOfWork.Commit();
+                var shoppingcart = GetShoppingCartById(id);
+                if (shoppingcart != null)
+                {
+                    _shoppingCartRepository.Remove(shoppingcart);
+                    _unitOfWork.Commit();
+                }
+
             }
 
 
