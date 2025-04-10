@@ -9,13 +9,19 @@ using System.Threading.Tasks;
 
 namespace ECommerceSystem.DataAccess.Repository
 {
-  public  class ApplicationUserRepositroy : Repository<ApplicationUser>, IApplicationUserRepository
+    public class OrderDetailRepositroy : Repository<OrderDetail>, IOrderDetailRepository
     {
         private ApplicationDbContext _db;
-        public ApplicationUserRepositroy(ApplicationDbContext db) : base(db) 
+        public OrderDetailRepositroy(ApplicationDbContext db) : base(db)
         {
             _db = db;
         }
-        
+
+
+
+        public void Update(OrderDetail obj)
+        {
+            _db.OrderDetails.Update(obj);
+        }
     }
 }

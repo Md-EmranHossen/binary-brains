@@ -69,5 +69,10 @@ namespace ECommerceSystem.Service.Services
                 includeProperties: "Product" // Ensure Product is loaded
             ) ?? new List<ShoppingCart>();
         }
+
+        public void RemoveRange(List<ShoppingCart> shoppingCarts)
+        {
+            _shoppingCartRepository.RemoveRange(shoppingCarts);
+        }
     }
 }

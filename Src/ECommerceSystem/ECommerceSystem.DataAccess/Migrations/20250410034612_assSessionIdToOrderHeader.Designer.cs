@@ -4,6 +4,7 @@ using ECommerceSystem.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ECommerceSystem.DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250410034612_assSessionIdToOrderHeader")]
+    partial class assSessionIdToOrderHeader
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -158,7 +161,7 @@ namespace ECommerceSystem.DataAccess.Migrations
                     b.Property<DateOnly>("PaymentDueDate")
                         .HasColumnType("date");
 
-                    b.Property<string>("PaymentIntentId")
+                    b.Property<string>("PaymentIntenId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PaymentStatus")
