@@ -72,8 +72,8 @@ namespace ECommerceWebApp.Services
                 {
                     System.IO.File.Delete(oldPath);
                 }
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                string productPath = Path.Combine(wwwRootPath, @"images\product");
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var productPath = Path.Combine(wwwRootPath, @"images\product");
 
                 using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
                 {
@@ -94,8 +94,8 @@ namespace ECommerceWebApp.Services
 
             if (file != null)
             {
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                string productPath = Path.Combine(wwwRootPath, @"images\product");
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var productPath = Path.Combine(wwwRootPath, @"images\product");
 
                 using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
                 {

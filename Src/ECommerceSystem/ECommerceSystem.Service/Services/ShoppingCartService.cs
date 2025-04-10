@@ -25,6 +25,7 @@ namespace ECommerceSystem.Service.Services
         public void AddShoppingCart(ShoppingCart ShoppingCart)
         {
             _shoppingCartRepository.Add(ShoppingCart);
+            _unitOfWork.Commit();
         }
 
         public void DeleteShoppingCart(int? id)
@@ -33,12 +34,10 @@ namespace ECommerceSystem.Service.Services
             if(shoppingcart != null)
             {
                 _shoppingCartRepository.Remove(shoppingcart);
+                _unitOfWork.Commit();
             }
-        }
 
-        public IEnumerable<ShoppingCart> GetAllShoppingCarts()
-        {
-            throw new NotImplementedException();
+
         }
 
         public ShoppingCart GetShoppingCartById(int? id)
@@ -73,6 +72,9 @@ namespace ECommerceSystem.Service.Services
         public void RemoveRange(List<ShoppingCart> shoppingCarts)
         {
             _shoppingCartRepository.RemoveRange(shoppingCarts);
+            _unitOfWork.Commit();
         }
+
+     
     }
 }

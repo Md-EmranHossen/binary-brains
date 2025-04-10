@@ -33,6 +33,7 @@ namespace ECommerceWebApp.Services
             public void UpdateCategory(Category category)
             {
                 categoryRepositroy.Update(category);
+               
          
             }
 
