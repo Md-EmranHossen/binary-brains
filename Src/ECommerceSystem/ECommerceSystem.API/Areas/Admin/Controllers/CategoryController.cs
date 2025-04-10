@@ -11,81 +11,97 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     [Authorize(Roles = SD.Role_Admin)]
     public class CategoryController : Controller
     {
-
-        private readonly ICategoryService categoryService;
+        private readonly ICategoryService _categoryService;
 
         public CategoryController(ICategoryService categoryService)
         {
-            this.categoryService = categoryService;
+            _categoryService = categoryService;
         }
 
         public IActionResult Index()
         {
-            var categoryList = categoryService.GetAllCategories();
-            return View(categoryList);
+            var categories = _categoryService.GetAllCategories();
+            return View(categories);
         }
+
         public IActionResult Create()
         {
             return View();
         }
+
         [HttpPost]
-        public IActionResult Create(Category obj)
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(Category category)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                categoryService.AddCategory(obj);
-                
-                TempData["success"] = "Category created successfully";
-                return RedirectToAction("Index");
+                return View(category);
             }
-            return View();
+
+            _categoryService.AddCategory(category);
+            TempData["success"] = "Category created successfully";
+            return RedirectToAction(nameof(Index));
         }
+
         public IActionResult Edit(int? id)
         {
-            if (id == null || id == 0)
+            if (id is null || id == 0)
             {
                 return NotFound();
             }
-            var categoryFromDb = categoryService.GetCategoryById(id);
-            if (categoryFromDb == null)
+
+            var category = _categoryService.GetCategoryById(id);
+            if (category == null)
             {
                 return NotFound();
             }
-            return View(categoryFromDb);
+
+            return View(category);
         }
+
         [HttpPost]
-        public IActionResult Edit(Category obj)
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(Category category)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                obj.UpdatedDate = DateTime.Now;
-                categoryService.UpdateCategory(obj);
-                TempData["success"] = "Category updated successfully";
-                return RedirectToAction("Index");
+                return View(category);
             }
-            return View();
+
+            category.UpdatedDate = DateTime.Now;
+            _categoryService.UpdateCategory(category);
+            TempData["success"] = "Category updated successfully";
+            return RedirectToAction(nameof(Index));
         }
+
         public IActionResult Delete(int? id)
         {
-            var categoryFromDb = categoryService.GetCategoryById(id);
-            if (categoryFromDb == null)
+            if (id is null || id == 0)
             {
                 return NotFound();
             }
-            return View(categoryFromDb);
+
+            var category = _categoryService.GetCategoryById(id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+
+            return View(category);
         }
 
         [HttpPost, ActionName("Delete")]
-        public IActionResult DeletePost(int? id)
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int? id)
         {
-            if (id == null)
+            if (id is null)
             {
                 return NotFound();
             }
 
-            categoryService.DeleteCategory(id);
+            _categoryService.DeleteCategory(id);
             TempData["success"] = "Category deleted successfully";
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
     }
 }

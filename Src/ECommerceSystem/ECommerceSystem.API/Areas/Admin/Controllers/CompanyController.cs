@@ -11,79 +11,96 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     [Authorize(Roles = SD.Role_Admin)]
     public class CompanyController : Controller
     {
-        private readonly ICompanyService CompanyService;
+        private readonly ICompanyService _companyService;
 
-        public CompanyController(ICompanyService CompanyService)
+        public CompanyController(ICompanyService companyService)
         {
-            this.CompanyService = CompanyService;
+            _companyService = companyService;
         }
 
         public IActionResult Index()
         {
-            var CompanyList = CompanyService.GetAllCompanies();
-            return View(CompanyList);
+            var companyList = _companyService.GetAllCompanies();
+            return View(companyList);
         }
+
         public IActionResult Create()
         {
             return View();
         }
+
         [HttpPost]
-        public IActionResult Create(Company obj)
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(Company company)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                CompanyService.AddCompany(obj);
-                TempData["success"] = "Company created successfully";
-                return RedirectToAction("Index");
+                return View(company);
             }
-            return View();
+
+            _companyService.AddCompany(company);
+            TempData["success"] = "Company created successfully";
+            return RedirectToAction(nameof(Index));
         }
+
         public IActionResult Edit(int? id)
         {
-            if (id == null || id == 0)
+            if (id is null || id == 0)
             {
                 return NotFound();
             }
-            var CompanyFromDb = CompanyService.GetCompanyById(id);
-            if (CompanyFromDb == null)
+
+            var companyFromDb = _companyService.GetCompanyById(id);
+            if (companyFromDb == null)
             {
                 return NotFound();
             }
-            return View(CompanyFromDb);
+
+            return View(companyFromDb);
         }
+
         [HttpPost]
-        public IActionResult Edit(Company obj)
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(Company company)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-            
-                CompanyService.UpdateCompany(obj);
-                TempData["success"] = "Company updated successfully";
-                return RedirectToAction("Index");
+                return View(company);
             }
-            return View();
+
+            _companyService.UpdateCompany(company);
+            TempData["success"] = "Company updated successfully";
+            return RedirectToAction(nameof(Index));
         }
+
         public IActionResult Delete(int? id)
         {
-            var CompanyFromDb = CompanyService.GetCompanyById(id);
-            if (CompanyFromDb == null)
+            if (id is null || id == 0)
             {
                 return NotFound();
             }
-            return View(CompanyFromDb);
+
+            var companyFromDb = _companyService.GetCompanyById(id);
+            if (companyFromDb == null)
+            {
+                return NotFound();
+            }
+
+            return View(companyFromDb);
         }
 
         [HttpPost, ActionName("Delete")]
-        public IActionResult DeletePost(int? id)
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int? id)
         {
-            if (id == null)
+            if (id is null)
             {
                 return NotFound();
             }
 
-            CompanyService.DeleteCompany(id);
+            _companyService.DeleteCompany(id);
             TempData["success"] = "Company deleted successfully";
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
     }
 }
