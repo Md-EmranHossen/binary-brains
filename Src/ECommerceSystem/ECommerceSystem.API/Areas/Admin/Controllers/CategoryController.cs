@@ -43,8 +43,8 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // SonarQube: No need to check ModelState in GET action – this action doesn't bind any model
         [HttpGet]
-        // SonarCloud: ModelState.IsValid is not applicable here – no model binding is done in GET
         public IActionResult Edit( int? id)
         {
             if (id is null || id == 0)
@@ -78,8 +78,8 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // SonarQube: No need to check ModelState in GET action – this action doesn't bind any model
         [HttpGet]
-        // SonarCloud: ModelState.IsValid is not applicable here – no model binding is done in GET
         public IActionResult Delete(int? id)
         {
             if (id is null || id == 0)
