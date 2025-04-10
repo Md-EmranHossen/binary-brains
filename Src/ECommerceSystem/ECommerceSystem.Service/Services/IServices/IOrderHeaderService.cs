@@ -11,7 +11,7 @@ namespace ECommerceSystem.Service.Services.IServices
     {
 
         IEnumerable<OrderHeader> GetAllOrderHeaders();
-        OrderHeader GetOrderHeaderById(int? id);
+        OrderHeader GetOrderHeaderById(int? id,string? includeProperty);
         void AddOrderHeader(OrderHeader orderHeader);
         void UpdateOrderHeader(OrderHeader orderHeader);
         void DeleteOrderHeader(int? id);

@@ -35,9 +35,16 @@ namespace ECommerceSystem.Service.Services
             return orderHeaderRepository.GetAll();
         }
 
-        public OrderHeader GetOrderHeaderById(int? id)
+        public OrderHeader GetOrderHeaderById(int? id,string? includeProperty=null )
         {
-            return orderHeaderRepository.Get(u => u.Id == id);
+            if(includeProperty != null)
+            {
+                return orderHeaderRepository.Get(u=>u.Id == id,includeProperty);
+            }
+            else
+            {
+                return orderHeaderRepository.Get(u => u.Id == id);
+            }
         }
 
         public void UpdateOrderHeader(OrderHeader orderHeader)

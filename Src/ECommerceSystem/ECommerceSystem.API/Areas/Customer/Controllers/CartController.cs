@@ -159,7 +159,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            UnitAmount = (long)(item.Price * 100), // cents
+                            UnitAmount = (long)(20 * 100), // cents
                             Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
@@ -187,7 +187,28 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
         public IActionResult OrderConfirmation(int id)
         {
-            return View(id);
+
+            OrderHeader orderHeader = _orderHeaderService.GetOrderHeaderById(id, "ApplicationUser");
+            if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
+            {
+                //this is an order by customer
+
+                var service = new SessionService();
+                Session session = service.Get(orderHeader.SessionId);
+
+                if (session.PaymentStatus.ToLower() == "paid")
+                {
+                    _orderHeaderService.UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
+                    _orderHeaderService.UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
+                    _unitOfWork.Commit();
+
+                }
+            }
+            List<ShoppingCart> shoppingCarts = _shoppingCartService.GetShoppingCartsByUserId(orderHeader.ApplicationUserId).ToList();
+            _shoppingCartService.RemoveRange(shoppingCarts);
+            _unitOfWork.Commit();
+
+             return View(id);
         }
 
         public IActionResult Plus(int cartId)
