@@ -1,4 +1,5 @@
 ﻿using ECommerceSystem.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceSystem.Service.Services.IServices
 {
@@ -13,5 +14,7 @@ namespace ECommerceSystem.Service.Services.IServices
         void RemoveRange(List<ShoppingCart> shoppingCarts);
 
         void DeleteShoppingCart(int? id);
+
+       
     }
 }

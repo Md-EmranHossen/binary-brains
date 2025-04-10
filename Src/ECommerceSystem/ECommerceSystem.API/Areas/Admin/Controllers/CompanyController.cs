@@ -11,18 +11,16 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     [Authorize(Roles = SD.Role_Admin)]
     public class CompanyController : Controller
     {
-        private readonly IUnitOfWork _unitOfWork;
         private readonly ICompanyService CompanyService;
 
-        public CompanyController(IUnitOfWork unitOfWork,ICompanyService CompanyService)
+        public CompanyController(ICompanyService CompanyService)
         {
-            _unitOfWork = unitOfWork;
             this.CompanyService = CompanyService;
         }
 
         public IActionResult Index()
         {
-            IEnumerable<Company> CompanyList = CompanyService.GetAllCompanies();
+            var CompanyList = CompanyService.GetAllCompanies();
             return View(CompanyList);
         }
         public IActionResult Create()
@@ -35,7 +33,6 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             if (ModelState.IsValid)
             {
                 CompanyService.AddCompany(obj);
-                _unitOfWork.Commit();
                 TempData["success"] = "Company created successfully";
                 return RedirectToAction("Index");
             }
@@ -47,7 +44,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            Company CompanyFromDb = CompanyService.GetCompanyById(id);
+            var CompanyFromDb = CompanyService.GetCompanyById(id);
             if (CompanyFromDb == null)
             {
                 return NotFound();
@@ -61,7 +58,6 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             {
             
                 CompanyService.UpdateCompany(obj);
-                _unitOfWork.Commit();
                 TempData["success"] = "Company updated successfully";
                 return RedirectToAction("Index");
             }
@@ -86,7 +82,6 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             }
 
             CompanyService.DeleteCompany(id);
-            _unitOfWork.Commit();
             TempData["success"] = "Company deleted successfully";
             return RedirectToAction("Index");
         }
