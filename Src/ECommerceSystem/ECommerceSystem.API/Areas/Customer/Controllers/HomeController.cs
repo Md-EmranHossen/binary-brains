@@ -38,48 +38,34 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 return NotFound("Product not found");
             }
 
-            ShoppingCart cart = new()
-            {
-                Product = product,
-                Count = 1,
-                ProductId = ProductId
-            };
+            var cart = shoppingCartService.CreateCartWithProduct(product);
+
             return View(cart);
         }
+
+        
 
         [HttpPost]
         [Authorize]
         public IActionResult Details(ShoppingCart shoppingCart)
         {
-            if (shoppingCart == null || shoppingCart.ProductId == 0)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null || shoppingCart == null || shoppingCart.ProductId == 0)
             {
                 return BadRequest("Invalid ShoppingCart Data");
             }
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (string.IsNullOrEmpty(userId))
+            bool isSuccessful = shoppingCartService.AddOrUpdateShoppingCart(shoppingCart, userId);
+
+            if (!isSuccessful)
             {
                 return Unauthorized();
             }
-            shoppingCart.ApplicationUserId = userId;
 
-            // Check if the item already exists in the shopping cart
-            var cartFromDb = shoppingCartService.GetShoppingCartByUserAndProduct(userId, shoppingCart.ProductId);
-
-            if (cartFromDb != null)
-            {
-                //If product exists in cart, update quantity
-                cartFromDb.Count += shoppingCart.Count;
-                shoppingCartService.UpdateShoppingCart(cartFromDb);
-            }
-            else
-            {
-                // Otherwise, add a new shopping cart entry
-                shoppingCartService.AddShoppingCart(shoppingCart);
-            }
             return RedirectToAction("Index");
         }
+
 
         public IActionResult Privacy()
         {

@@ -81,6 +81,43 @@ namespace ECommerceSystem.Service.Services
             _unitOfWork.Commit();
         }
 
-      
+        public ShoppingCart CreateCartWithProduct(Product product)
+        {
+            return new ShoppingCart
+            {
+                Product = product,
+                ProductId = product.Id,
+                Count = 1
+            };
+        }
+
+        public bool AddOrUpdateShoppingCart(ShoppingCart shoppingCart, string userId)
+        {
+            if (string.IsNullOrEmpty(userId) || shoppingCart == null || shoppingCart.ProductId == 0)
+            {
+                return false; 
+            }
+
+            shoppingCart.ApplicationUserId = userId;
+
+            var cartFromDb = GetShoppingCartByUserAndProduct(userId, shoppingCart.ProductId);
+
+            if (cartFromDb != null)
+            {
+                cartFromDb.Count += shoppingCart.Count;
+                UpdateShoppingCart(cartFromDb);
+            }
+            else
+            {
+                AddShoppingCart(shoppingCart);
+            }
+
+            _unitOfWork.Commit();
+            return true;
+        }
+
+
+
+
     }
 }

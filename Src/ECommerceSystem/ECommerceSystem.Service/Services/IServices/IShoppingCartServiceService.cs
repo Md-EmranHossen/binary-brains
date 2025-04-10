@@ -15,6 +15,11 @@ namespace ECommerceSystem.Service.Services.IServices
 
         void DeleteShoppingCart(int? id);
 
-       
+        ShoppingCart CreateCartWithProduct(Product product);
+
+        bool AddOrUpdateShoppingCart(ShoppingCart shoppingCart, string userId);
+
+
+
     }
 }
