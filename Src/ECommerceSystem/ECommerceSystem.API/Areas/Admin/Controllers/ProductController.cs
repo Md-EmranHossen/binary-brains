@@ -11,99 +11,110 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     [Area("Admin")]
     public class ProductController : Controller
     {
-
-        private readonly IProductService productService;
-        private readonly IWebHostEnvironment webHostEnvironment;
+        private readonly IProductService _productService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
         public ProductController(IProductService productService, IWebHostEnvironment webHostEnvironment)
         {
-        
-            this.productService = productService;
-            this.webHostEnvironment = webHostEnvironment;
+            _productService = productService;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public IActionResult Index()
         {
-            var productList = productService.GetAllProducts();
-          
+            var productList = _productService.GetAllProducts();
             return View(productList);
         }
+
         public IActionResult Create()
         {
-
-            var CategoryList = productService.CategoryList();
-
-            ViewBag.CategoryList = CategoryList;
+            var categoryList = _productService.CategoryList();
+            ViewBag.CategoryList = categoryList;
             return View();
         }
+
         [HttpPost]
-        public IActionResult Create(Product obj,IFormFile? file)
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(Product obj, IFormFile? file)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var wwwRootPath = webHostEnvironment.WebRootPath;
-                productService.CreatePathOfProduct(obj, file, wwwRootPath);
-
-                productService.AddProduct(obj);
-                TempData["success"] = "Product created successfully";
-                return RedirectToAction("Index");
+                return View(obj);
             }
-            return View();
+
+            var wwwRootPath = _webHostEnvironment.WebRootPath;
+            _productService.CreatePathOfProduct(obj, file, wwwRootPath);
+
+            _productService.AddProduct(obj);
+            TempData["success"] = "Product created successfully";
+            return RedirectToAction(nameof(Index));
         }
+
         public IActionResult Edit(int? id)
         {
-            if (id == null || id == 0)
+            if (id is null || id == 0)
             {
                 return NotFound();
             }
-            var productFromDb = productService.GetProductById(id);
+
+            var productFromDb = _productService.GetProductById(id);
             if (productFromDb == null)
             {
                 return NotFound();
             }
-            var CategoryList = productService.CategoryList();
 
-            ViewBag.CategoryList = CategoryList;
+            var categoryList = _productService.CategoryList();
+            ViewBag.CategoryList = categoryList;
             return View(productFromDb);
         }
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Edit(Product obj, IFormFile? file)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var wwwRootPath = webHostEnvironment.WebRootPath;
-                productService.EditPathOfProduct(obj, file,wwwRootPath);
-                obj.UpdatedDate = DateTime.Now;
-                productService.UpdateProduct(obj);
-                TempData["success"] = "Product updated successfully";
-                return RedirectToAction("Index");
+                return View(obj);
             }
-            return View();
+
+            var wwwRootPath = _webHostEnvironment.WebRootPath;
+            _productService.EditPathOfProduct(obj, file, wwwRootPath);
+            obj.UpdatedDate = DateTime.Now;
+            _productService.UpdateProduct(obj);
+            TempData["success"] = "Product updated successfully";
+            return RedirectToAction(nameof(Index));
         }
+
         public IActionResult Delete(int? id)
         {
-            var productFromDb =productService.GetProductById(id);
+            if (id is null || id == 0)
+            {
+                return NotFound();
+            }
+
+            var productFromDb = _productService.GetProductById(id);
             if (productFromDb == null)
             {
                 return NotFound();
             }
 
-            var CategoryList = productService.CategoryList();
-            ViewBag.CategoryList = CategoryList;
+            var categoryList = _productService.CategoryList();
+            ViewBag.CategoryList = categoryList;
             return View(productFromDb);
-
         }
 
         [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
         public IActionResult DeletePost(int? id)
         {
-            if (id == null)
+            if (id is null)
             {
                 return NotFound();
             }
-             productService.DeleteProduct(id);
+
+            _productService.DeleteProduct(id);
             TempData["success"] = "Product deleted successfully";
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
     }
 }
