@@ -11,13 +11,12 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     [Area("Admin")]
     public class ProductController : Controller
     {
-        private readonly IUnitOfWork _unitOfWork;
+
         private readonly IProductService productService;
         private readonly IWebHostEnvironment webHostEnvironment;
 
-        public ProductController(IUnitOfWork unitOfWork,IProductService productService, IWebHostEnvironment webHostEnvironment)
+        public ProductController(IProductService productService, IWebHostEnvironment webHostEnvironment)
         {
-            _unitOfWork = unitOfWork;
         
             this.productService = productService;
             this.webHostEnvironment = webHostEnvironment;
@@ -25,14 +24,14 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            IEnumerable<Product> productList = productService.GetAllProducts();
+            var productList = productService.GetAllProducts();
           
             return View(productList);
         }
         public IActionResult Create()
         {
 
-            IEnumerable<SelectListItem> CategoryList = productService.CategoryList();
+            var CategoryList = productService.CategoryList();
 
             ViewBag.CategoryList = CategoryList;
             return View();
@@ -42,11 +41,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                string wwwRootPath = webHostEnvironment.WebRootPath;
+                var wwwRootPath = webHostEnvironment.WebRootPath;
                 productService.CreatePathOfProduct(obj, file, wwwRootPath);
 
                 productService.AddProduct(obj);
-                _unitOfWork.Commit();
                 TempData["success"] = "Product created successfully";
                 return RedirectToAction("Index");
             }
@@ -58,12 +56,12 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            Product productFromDb = productService.GetProductById(id);
+            var productFromDb = productService.GetProductById(id);
             if (productFromDb == null)
             {
                 return NotFound();
             }
-            IEnumerable<SelectListItem> CategoryList = productService.CategoryList();
+            var CategoryList = productService.CategoryList();
 
             ViewBag.CategoryList = CategoryList;
             return View(productFromDb);
@@ -73,11 +71,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                string wwwRootPath = webHostEnvironment.WebRootPath;
+                var wwwRootPath = webHostEnvironment.WebRootPath;
                 productService.EditPathOfProduct(obj, file,wwwRootPath);
                 obj.UpdatedDate = DateTime.Now;
                 productService.UpdateProduct(obj);
-                _unitOfWork.Commit();
                 TempData["success"] = "Product updated successfully";
                 return RedirectToAction("Index");
             }
@@ -85,13 +82,13 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         }
         public IActionResult Delete(int? id)
         {
-            Product productFromDb =productService.GetProductById(id);
+            var productFromDb =productService.GetProductById(id);
             if (productFromDb == null)
             {
                 return NotFound();
             }
 
-            IEnumerable<SelectListItem> CategoryList = productService.CategoryList();
+            var CategoryList = productService.CategoryList();
             ViewBag.CategoryList = CategoryList;
             return View(productFromDb);
 
@@ -105,7 +102,6 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 return NotFound();
             }
              productService.DeleteProduct(id);
-            _unitOfWork.Commit();
             TempData["success"] = "Product deleted successfully";
             return RedirectToAction("Index");
         }

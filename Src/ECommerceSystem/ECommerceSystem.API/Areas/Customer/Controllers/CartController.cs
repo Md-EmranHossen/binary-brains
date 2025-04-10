@@ -20,13 +20,14 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         private readonly IApplicationUserService _applicationUserService;
         private readonly IOrderHeaderService _orderHeaderService;
         private readonly IOrderDetailService _orderDetailService;
-        public CartController(IShoppingCartService shoppingCartService, IUnitOfWork unitOfWork, IOrderHeaderService orderHeaderService, IApplicationUserService applicationUserService,IOrderDetailService orderDetailService)
+        public CartController(IShoppingCartService shoppingCartService,IUnitOfWork unitOfWork,  IOrderHeaderService orderHeaderService, IApplicationUserService applicationUserService,IOrderDetailService orderDetailService)
         {
             _shoppingCartService = shoppingCartService;
             _unitOfWork = unitOfWork;
             _orderHeaderService = orderHeaderService;
             _applicationUserService = applicationUserService;
             _orderDetailService = orderDetailService;
+
         }
 
         public IActionResult Index()
@@ -88,7 +89,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId) ?? new List<ShoppingCart>();
 
-            ApplicationUser applicationUser = _applicationUserService.GetUserById(userId);
+            var applicationUser = _applicationUserService.GetUserById(userId);
 
             shoppingCartVM = new ShoppingCartVM
             {
@@ -172,7 +173,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 }
 
                 var service = new SessionService();
-                Session session = service.Create(options);
+                var session = service.Create(options);
 
                 _orderHeaderService.UpdateStripePaymentID(shoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
                 _unitOfWork.Commit();
@@ -188,13 +189,13 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         public IActionResult OrderConfirmation(int id)
         {
 
-            OrderHeader orderHeader = _orderHeaderService.GetOrderHeaderById(id, "ApplicationUser");
+            var orderHeader = _orderHeaderService.GetOrderHeaderById(id, "ApplicationUser");
             if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
             {
-                //this is an order by customer
+
 
                 var service = new SessionService();
-                Session session = service.Get(orderHeader.SessionId);
+                var session = service.Get(orderHeader.SessionId);
 
                 if (session.PaymentStatus.ToLower() == "paid")
                 {
@@ -204,7 +205,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
                 }
             }
-            List<ShoppingCart> shoppingCarts = _shoppingCartService.GetShoppingCartsByUserId(orderHeader.ApplicationUserId).ToList();
+            var shoppingCarts = _shoppingCartService.GetShoppingCartsByUserId(orderHeader.ApplicationUserId).ToList();
             _shoppingCartService.RemoveRange(shoppingCarts);
             _unitOfWork.Commit();
 

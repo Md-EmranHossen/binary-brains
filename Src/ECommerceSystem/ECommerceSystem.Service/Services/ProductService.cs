@@ -11,14 +11,14 @@ namespace ECommerceWebApp.Services
         {
         private readonly IProductRepository productRepositroy;
         private readonly ICategoryRepository categoryRepository;
-  
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ProductService(IProductRepository productRepositroy,ICategoryRepository categoryRepository)
+        public ProductService(IProductRepository productRepositroy,ICategoryRepository categoryRepository,IUnitOfWork unitOfWork)
             {
  
             this.productRepositroy = productRepositroy;
             this.categoryRepository = categoryRepository;
-   
+            _unitOfWork = unitOfWork;
         }
 
             public IEnumerable<Product> GetAllProducts()
@@ -34,23 +34,30 @@ namespace ECommerceWebApp.Services
             public void AddProduct(Product Product)
             {
                 productRepositroy.Add(Product);
+               _unitOfWork.Commit();
             
             }
 
             public void UpdateProduct(Product Product)
             {
                 productRepositroy.Update(Product);
+                _unitOfWork.Commit();
          
             }
 
             public void DeleteProduct(int? id)
             {
+            if (id != null)
+            {
                 var Product = GetProductById(id);
                 if (Product != null)
                 {
                     productRepositroy.Remove(Product);
-    
+                    _unitOfWork.Commit();
+
+
                 }
+            }
             }
 
         public IEnumerable<SelectListItem> CategoryList()
@@ -72,8 +79,8 @@ namespace ECommerceWebApp.Services
                 {
                     System.IO.File.Delete(oldPath);
                 }
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                string productPath = Path.Combine(wwwRootPath, @"images\product");
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var productPath = Path.Combine(wwwRootPath, @"images\product");
 
                 using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
                 {
@@ -94,8 +101,8 @@ namespace ECommerceWebApp.Services
 
             if (file != null)
             {
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                string productPath = Path.Combine(wwwRootPath, @"images\product");
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                var productPath = Path.Combine(wwwRootPath, @"images\product");
 
                 using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
                 {

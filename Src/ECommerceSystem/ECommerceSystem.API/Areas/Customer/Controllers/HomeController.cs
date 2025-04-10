@@ -14,21 +14,19 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IProductService productService;
         private readonly IShoppingCartService shoppingCartService;
 
-        public HomeController(ILogger<HomeController> logger, IUnitOfWork unitOfWork, IProductService productService, IShoppingCartService shoppingCartService)
+        public HomeController(ILogger<HomeController> logger, IProductService productService, IShoppingCartService shoppingCartService)
         {
             _logger = logger;
-            _unitOfWork = unitOfWork;
             this.productService = productService;
             this.shoppingCartService = shoppingCartService;
         }
 
         public IActionResult Index()
         {
-            IEnumerable<Product> ProductList = productService.GetAllProducts();
+            var ProductList = productService.GetAllProducts();
             return View(ProductList);
         }
 
@@ -40,49 +38,34 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 return NotFound("Product not found");
             }
 
-            ShoppingCart cart = new()
-            {
-                Product = product,
-                Count = 1,
-                ProductId = ProductId
-            };
+            var cart = shoppingCartService.CreateCartWithProduct(product);
+
             return View(cart);
         }
+
+        
 
         [HttpPost]
         [Authorize]
         public IActionResult Details(ShoppingCart shoppingCart)
         {
-            if (shoppingCart == null || shoppingCart.ProductId == 0)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null || shoppingCart == null || shoppingCart.ProductId == 0)
             {
                 return BadRequest("Invalid ShoppingCart Data");
             }
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if (string.IsNullOrEmpty(userId))
+            bool isSuccessful = shoppingCartService.AddOrUpdateShoppingCart(shoppingCart, userId);
+
+            if (!isSuccessful)
             {
                 return Unauthorized();
             }
-            shoppingCart.ApplicationUserId = userId;
 
-            // Check if the item already exists in the shopping cart
-            ShoppingCart cartFromDb = shoppingCartService.GetShoppingCartByUserAndProduct(userId, shoppingCart.ProductId);
-
-            if (cartFromDb != null)
-            {
-                //If product exists in cart, update quantity
-               cartFromDb.Count += shoppingCart.Count;
-               shoppingCartService.UpdateShoppingCart(cartFromDb);
-            }
-            else
-            {
-                // Otherwise, add a new shopping cart entry
-                shoppingCartService.AddShoppingCart(shoppingCart);
-            }
-            _unitOfWork.Commit(); // Save changes
             return RedirectToAction("Index");
         }
+
 
         public IActionResult Privacy()
         {
