@@ -6,6 +6,7 @@ using ECommerceSystem.Utility;
 using ECommerceWebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe.Checkout;
 using System.Security.Claims;
 
 namespace ECommerceWebApp.Areas.Customer.Controllers
@@ -129,8 +130,42 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             }
             if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
-                //it is a regular customer account and we need to capture payment
-                //stripe logic
+                var domain = "https://localhost:7000/";
+                var options = new Stripe.Checkout.SessionCreateOptions
+                {
+                    SuccessUrl = domain+$"/customer/cart/OrderConfirmation?id={shoppingCartVM.OrderHeader.Id}",
+                    CancelUrl = domain+"customer/cart/index",
+                    LineItems = new List<Stripe.Checkout.SessionLineItemOptions>()
+    {
+                        new Stripe.Checkout.SessionLineItemOptions
+                        {
+                            Price = "price_1MotwRLkdIwHu7ixYcPLm5uZ",
+                            Quantity = 2,
+                        },
+    },
+                    Mode = "payment",
+                };
+
+                foreach(var item in shoppingCartVM.ShoppingCartList)
+                {
+                    var sessionLineItem = new SessionLineItemOptions
+                    {
+                        PriceData = new SessionLineItemPriceDataOptions
+                        {
+                            UnitAmount = (long)(item.Price * 100),
+                            Currency = "usd",
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = item.Product.Title
+                            }
+                        },
+                        Quantity = item.Count
+                    };
+                    options.LineItems.Add(sessionLineItem);
+                }
+
+                var service = new Stripe.Checkout.SessionService();
+                service.Create(options);
             }
 
             return RedirectToAction(nameof(OrderConfirmation),new {id=shoppingCartVM.OrderHeader});

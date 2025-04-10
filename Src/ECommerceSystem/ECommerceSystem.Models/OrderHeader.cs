@@ -29,7 +29,7 @@ namespace ECommerceSystem.Models
 
 
         public string? SessionId { get; set; }
-        public string? PaymentIntenId { get; set; }
+        public string? PaymentIntentId { get; set; }
 
         [Required]
         public string PhoneNumber { get; set; }
