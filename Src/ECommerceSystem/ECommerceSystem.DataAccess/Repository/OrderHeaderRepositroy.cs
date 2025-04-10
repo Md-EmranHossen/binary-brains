@@ -11,7 +11,7 @@ namespace ECommerceSystem.DataAccess.Repository
 {
     public class OrderHeaderRepositroy : Repository<OrderHeader>, IOrderHeaderRepository
     {
-        private ApplicationDbContext _db;
+        private readonly ApplicationDbContext _db;
         public OrderHeaderRepositroy(ApplicationDbContext db) : base(db)
         {
             _db = db;
@@ -33,7 +33,7 @@ namespace ECommerceSystem.DataAccess.Repository
             }
         }
 
-        public void UpdateStripePaymentID(int id, string sessionId, string paymentIntentId)
+        public void UpdateStripePaymentID(int id, string sessionId, string paymentIntenId)
         {
             var orderFromDb = _db.OrderHeaders.FirstOrDefault(u => u.Id == id);
 
@@ -44,9 +44,9 @@ namespace ECommerceSystem.DataAccess.Repository
                     orderFromDb.SessionId = sessionId;
                 }
 
-                if (!string.IsNullOrEmpty(paymentIntentId))
+                if (!string.IsNullOrEmpty(paymentIntenId))
                 {
-                    orderFromDb.PaymentIntentId = paymentIntentId;
+                    orderFromDb.PaymentIntentId = paymentIntenId;
                     orderFromDb.PaymentDate = DateTime.Now;
                 }
             }

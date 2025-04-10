@@ -27,16 +27,16 @@ namespace ECommerceWebApp.Services
             return CompanyRepositroy.Get(u => u.Id == id);
         }
 
-        public void AddCompany(Company Company)
+        public void AddCompany(Company company)
         {
-            CompanyRepositroy.Add(Company);
+            CompanyRepositroy.Add(company);
             _unitOfWork.Commit();
 
         }
 
-        public void UpdateCompany(Company Company)
+        public void UpdateCompany(Company company)
         {
-            CompanyRepositroy.Update(Company);
+            CompanyRepositroy.Update(company);
             _unitOfWork.Commit();
 
         }

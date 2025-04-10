@@ -11,10 +11,10 @@ namespace ECommerceSystem.DataAccess.Repository
 {
   public  class ApplicationUserRepositroy : Repository<ApplicationUser>, IApplicationUserRepository
     {
-        private ApplicationDbContext _db;
+        
         public ApplicationUserRepositroy(ApplicationDbContext db) : base(db) 
         {
-            _db = db;
+          
         }
         
     }

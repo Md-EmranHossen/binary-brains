@@ -11,7 +11,7 @@ namespace ECommerceSystem.DataAccess.Repository
 {
   public  class CompanyRepository : Repository<Company>, ICompanyRepository
     {
-        private ApplicationDbContext _db;
+        private readonly ApplicationDbContext _db;
         public CompanyRepository(ApplicationDbContext db) : base(db) 
         {
             _db = db;
