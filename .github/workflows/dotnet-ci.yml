@@ -1,5 +1,4 @@
 name: .NET CI with SonarCloud Analysis
-
 on:
   pull_request:
     branches:
@@ -8,7 +7,6 @@ on:
   push:
     branches:
       - main
-
 jobs:
   build-and-analyze:
     name: Build and Analyze
@@ -19,12 +17,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Fetching full history for SonarCloud
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.0.x'
-
       - name: Set up JDK 17 for SonarCloud
         uses: actions/setup-java@v3
         with:
@@ -34,10 +30,8 @@ jobs:
       - name: Install SonarCloud scanner
         run: |
           dotnet tool install --global dotnet-sonarscanner
-
       - name: Restore dependencies
         run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln
-
       - name: Begin SonarCloud analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -50,7 +44,7 @@ jobs:
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
             /d:sonar.sources="Src" \
-            /d:sonar.exclusions="**/bin/**,**/obj/**,**/*.Designer.cs,**/Migrations/**" \
+            /d:sonar.exclusions="**/bin/**,**/obj/**,**/*.Designer.cs,**/Migrations/**,**/*.cs.html" \
             /d:sonar.tests="Src" \
             /d:sonar.test.inclusions="**/*Tests/**/*.cs,**/*.Tests.cs,**/*.Test.cs" \
             /d:sonar.sourceEncoding="UTF-8" \
@@ -60,15 +54,12 @@ jobs:
             /d:sonar.alm.github.api.url=https://api.github.com \
             /d:sonar.cfamily.build-wrapper-output.bypass=true \
             /d:sonar.analytics.ci=github-actions
-
       - name: Build
         run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --no-restore --configuration Release
-
       - name: Test with coverage
         run: |
           dotnet tool install --global dotnet-coverage
           dotnet test Src/ECommerceSystem/ECommerceSystem.sln --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-
       - name: End SonarCloud analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
