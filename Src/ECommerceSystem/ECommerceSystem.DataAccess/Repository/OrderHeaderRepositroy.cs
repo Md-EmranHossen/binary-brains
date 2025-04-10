@@ -33,15 +33,26 @@ namespace ECommerceSystem.DataAccess.Repository
             }
         }
 
-        public void UpdateStripePaymentID(int id, string sessionId, string paymentIntentId) {
+        public void UpdateStripePaymentID(int id, string sessionId, string paymentIntentId)
+        {
             var orderFromDb = _db.OrderHeaders.FirstOrDefault(u => u.Id == id);
-            if (!string.IsNullOrEmpty(sessionId)) {
-                orderFromDb.SessionId= sessionId;
+
+            if (orderFromDb != null)
+            {
+                if (!string.IsNullOrEmpty(sessionId))
+                {
+                    orderFromDb.SessionId = sessionId;
+                }
+
+                if (!string.IsNullOrEmpty(paymentIntentId))
+                {
+                    orderFromDb.PaymentIntentId = paymentIntentId;
+                    orderFromDb.PaymentDate = DateTime.Now;
+                }
             }
-            if (!string.IsNullOrEmpty(paymentIntentId)) {
-                orderFromDb.PaymentIntentId= paymentIntentId;
-                orderFromDb.PaymentDate = DateTime.Now;
-            }
+
+            
         }
+
     }
 }

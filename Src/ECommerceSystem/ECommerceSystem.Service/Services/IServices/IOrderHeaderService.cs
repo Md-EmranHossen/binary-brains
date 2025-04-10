@@ -15,5 +15,7 @@ namespace ECommerceSystem.Service.Services.IServices
         void AddOrderHeader(OrderHeader orderHeader);
         void UpdateOrderHeader(OrderHeader orderHeader);
         void DeleteOrderHeader(int? id);
+        void UpdateStatus(int id, string orderStatus, string? paymentStatus = null);
+        void UpdateStripePaymentID(int id, string sessionId, string paymentIntentId);
     }
 }

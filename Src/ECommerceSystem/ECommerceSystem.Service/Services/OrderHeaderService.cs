@@ -44,5 +44,15 @@ namespace ECommerceSystem.Service.Services
         {
             orderHeaderRepository.Update(orderHeader);
         }
+
+        public void UpdateStatus(int id, string orderStatus, string? paymentStatus = null)
+        {
+            orderHeaderRepository.UpdateStatus(id, orderStatus, paymentStatus);
+        }
+
+        public void UpdateStripePaymentID(int id, string sessionId, string paymentIntentId)
+        {
+            orderHeaderRepository.UpdateStripePaymentID(id, sessionId, paymentIntentId);
+        }
     }
 }

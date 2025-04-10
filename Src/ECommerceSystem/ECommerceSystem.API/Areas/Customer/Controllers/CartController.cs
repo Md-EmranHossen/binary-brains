@@ -86,73 +86,80 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         {
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId) ?? new List<ShoppingCart>(); // Ensure not null
+            var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId) ?? new List<ShoppingCart>();
 
-           
             ApplicationUser applicationUser = _applicationUserService.GetUserById(userId);
-             shoppingCartVM = new ShoppingCartVM
+
+            shoppingCartVM = new ShoppingCartVM
             {
                 ShoppingCartList = shoppingCartList,
                 OrderHeader = new OrderHeader
                 {
-                    OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
-                                             .Sum(cart => cart.Product.Price * cart.Count)
+                    ApplicationUserId = userId,
+                    OrderDate = DateTime.Now,
+                    OrderTotal = (double)shoppingCartList
+                                    .Where(cart => cart.Product != null)
+                                    .Sum(cart => cart.Product.Price * cart.Count),
+
+                    // ✅ Fill required fields from ApplicationUser
+                    Name = applicationUser.Name,
+                    PhoneNumber = applicationUser.PhoneNumber,
+                    StreetAddress = applicationUser.StreetAddress,
+                    City = applicationUser.City,
+                    State = applicationUser.State,
+                    PostalCode = applicationUser.PostalCode
                 }
-
-
             };
+
+            // Set payment & order status
             if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
-                //it is a regular customer
                 shoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
                 shoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
             }
             else
             {
-                //it is a company user
                 shoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPayment;
-                shoppingCartVM.OrderHeader.OrderStatus=SD.StatusApproved;
+                shoppingCartVM.OrderHeader.OrderStatus = SD.StatusApproved;
             }
 
+            // Save OrderHeader
             _orderHeaderService.AddOrderHeader(shoppingCartVM.OrderHeader);
+            _unitOfWork.Commit(); // commit early to generate OrderHeader.Id
 
-            foreach(var card in shoppingCartVM.ShoppingCartList)
+            // Save OrderDetails
+            foreach (var cart in shoppingCartVM.ShoppingCartList)
             {
                 OrderDetail orderDetail = new()
                 {
-                    ProductId = card.ProductId,
+                    ProductId = cart.ProductId,
                     OrderHeaderId = shoppingCartVM.OrderHeader.Id,
-                    Price = card.Price,
-                    Count = card.Count
+                    Price = cart.Price,
+                    Count = cart.Count
                 };
                 _orderDetailService.AddOrderDetail(orderDetail);
-                
             }
+            _unitOfWork.Commit();
+
+            // Stripe Checkout for individual users
             if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
                 var domain = "https://localhost:7000/";
                 var options = new Stripe.Checkout.SessionCreateOptions
                 {
-                    SuccessUrl = domain+$"/customer/cart/OrderConfirmation?id={shoppingCartVM.OrderHeader.Id}",
-                    CancelUrl = domain+"customer/cart/index",
-                    LineItems = new List<Stripe.Checkout.SessionLineItemOptions>()
-    {
-                        new Stripe.Checkout.SessionLineItemOptions
-                        {
-                            Price = "price_1MotwRLkdIwHu7ixYcPLm5uZ",
-                            Quantity = 2,
-                        },
-    },
+                    SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={shoppingCartVM.OrderHeader.Id}",
+                    CancelUrl = domain + "customer/cart/index",
+                    LineItems = new List<SessionLineItemOptions>(),
                     Mode = "payment",
                 };
 
-                foreach(var item in shoppingCartVM.ShoppingCartList)
+                foreach (var item in shoppingCartVM.ShoppingCartList)
                 {
                     var sessionLineItem = new SessionLineItemOptions
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            UnitAmount = (long)(item.Price * 100),
+                            UnitAmount = (long)(item.Price * 100), // cents
                             Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
@@ -164,12 +171,19 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                     options.LineItems.Add(sessionLineItem);
                 }
 
-                var service = new Stripe.Checkout.SessionService();
-                service.Create(options);
+                var service = new SessionService();
+                Session session = service.Create(options);
+
+                _orderHeaderService.UpdateStripePaymentID(shoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
+                _unitOfWork.Commit();
+
+                Response.Headers.Add("Location", session.Url);
+                return new StatusCodeResult(303);
             }
 
-            return RedirectToAction(nameof(OrderConfirmation),new {id=shoppingCartVM.OrderHeader});
+            return RedirectToAction(nameof(OrderConfirmation), new { id = shoppingCartVM.OrderHeader.Id });
         }
+
 
         public IActionResult OrderConfirmation(int id)
         {
