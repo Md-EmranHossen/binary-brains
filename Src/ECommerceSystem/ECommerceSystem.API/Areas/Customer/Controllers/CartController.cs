@@ -219,20 +219,20 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             var cartFromDb = _shoppingCartService.GetShoppingCartById(cartId);
             if (cartFromDb == null)
             {
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             cartFromDb.Count += 1;
             _shoppingCartService.UpdateShoppingCart(cartFromDb);
             _unitOfWork.Commit();
 
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
         public IActionResult Minus(int cartId)
         {
             var cartFromDb = _shoppingCartService.GetShoppingCartById(cartId);
             if (cartFromDb == null)
             {
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
 
             if (cartFromDb.Count <= 1)
@@ -246,7 +246,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             }
 
             _unitOfWork.Commit();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Remove(int cartId)
@@ -254,11 +254,11 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             var cartFromDb = _shoppingCartService.GetShoppingCartById(cartId);
             if (cartFromDb == null)
             {
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
             _shoppingCartService.DeleteShoppingCart(cartId);
             _unitOfWork.Commit();
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
     }
 }
