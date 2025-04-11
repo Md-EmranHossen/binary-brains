@@ -9,13 +9,13 @@ namespace ECommerceSystem.Service.Services.IServices
         IEnumerable<Product> GetAllProducts();
         Product? GetProductById(int? id);
         Product? GetProductByIdwithCategory(int id);
-        void AddProduct(Product Product);
-        void UpdateProduct(Product Product);
+        void AddProduct(Product product);
+        void UpdateProduct(Product product);
         void DeleteProduct(int? id);
 
         IEnumerable<SelectListItem> CategoryList();
 
-        void EditPathOfProduct(Product obj, IFormFile? file,string wwwRootPath);
-        void CreatePathOfProduct(Product obj, IFormFile? file, string wwwRootPath);
+        void EditPathOfProduct(Product product, IFormFile? file,string wwwRootPath);
+        void CreatePathOfProduct(Product product, IFormFile? file, string wwwRootPath);
     }
 }
