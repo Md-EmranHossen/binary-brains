@@ -22,7 +22,7 @@ namespace ECommerceSystem.Service.Services.IServices
 
         ShoppingCartVM GetShoppingCartVM(string? userId);
 
-        void RemoveShoppingCarts(OrderHeader orderHeader);
+        void RemoveShoppingCarts(OrderHeader? orderHeader);
 
         void Plus(int cartId);
 

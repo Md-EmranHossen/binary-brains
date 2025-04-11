@@ -138,11 +138,13 @@ namespace ECommerceSystem.Service.Services
             return shoppingCartVM;
         }
 
-        public void RemoveShoppingCarts(OrderHeader orderHeader)
+        public void RemoveShoppingCarts(OrderHeader? orderHeader)
         {
+            if (orderHeader != null) { 
             var shoppingCarts = GetShoppingCartsByUserId(orderHeader.ApplicationUserId).ToList();
             RemoveRange(shoppingCarts);
             _unitOfWork.Commit();
+            }
         }
         public void Plus(int cartId)
         {

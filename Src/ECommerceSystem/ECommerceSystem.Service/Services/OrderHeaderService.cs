@@ -76,17 +76,17 @@ namespace ECommerceSystem.Service.Services
             _unitOfWork.Commit();
         }
 
-        public OrderHeader OrderConfirmation(int id)
+        public OrderHeader? OrderConfirmation(int id)
         {
             var orderHeader = GetOrderHeaderById(id, "ApplicationUser");
-            if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
+            if (orderHeader != null && orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
             {
 
 
                 var service = new SessionService();
                 var session = service.Get(orderHeader.SessionId);
 
-                if (session.PaymentStatus.ToLower() == "paid")
+                if (string.Equals(session.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
                 {
                     UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
                     UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
