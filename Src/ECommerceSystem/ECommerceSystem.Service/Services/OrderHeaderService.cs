@@ -7,6 +7,8 @@ using ECommerceSystem.DataAccess.Repository;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services.IServices;
+using ECommerceSystem.Utility;
+using Stripe.Checkout;
 
 namespace ECommerceSystem.Service.Services
 {
@@ -15,7 +17,7 @@ namespace ECommerceSystem.Service.Services
         private readonly IOrderHeaderRepository orderHeaderRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public OrderHeaderService(IOrderHeaderRepository orderHeaderRepository,IUnitOfWork unitOfWork)
+        public OrderHeaderService(IOrderHeaderRepository orderHeaderRepository, IUnitOfWork unitOfWork)
         {
             this.orderHeaderRepository = orderHeaderRepository;
             _unitOfWork = unitOfWork;
@@ -44,11 +46,11 @@ namespace ECommerceSystem.Service.Services
             return orderHeaderRepository.GetAll();
         }
 
-        public OrderHeader? GetOrderHeaderById(int? id,string? includeProperty=null )
+        public OrderHeader? GetOrderHeaderById(int? id, string? includeProperty = null)
         {
-            if(includeProperty != null)
+            if (includeProperty != null)
             {
-                return orderHeaderRepository.Get(u=>u.Id == id,includeProperty);
+                return orderHeaderRepository.Get(u => u.Id == id, includeProperty);
             }
             else
             {
@@ -72,6 +74,29 @@ namespace ECommerceSystem.Service.Services
         {
             orderHeaderRepository.UpdateStripePaymentID(id, sessionId, paymentIntentId);
             _unitOfWork.Commit();
+        }
+
+        public OrderHeader OrderConfirmation(int id)
+        {
+            var orderHeader = GetOrderHeaderById(id, "ApplicationUser");
+            if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
+            {
+
+
+                var service = new SessionService();
+                var session = service.Get(orderHeader.SessionId);
+
+                if (session.PaymentStatus.ToLower() == "paid")
+                {
+                    UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
+                    UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
+                    _unitOfWork.Commit();
+
+                }
+            }
+
+            return orderHeader;
+
         }
     }
 }
