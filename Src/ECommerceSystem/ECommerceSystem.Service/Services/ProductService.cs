@@ -4,119 +4,122 @@ using ECommerceSystem.Service.Services.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-
 namespace ECommerceWebApp.Services
 {
     public class ProductService : IProductService
-        {
-        private readonly IProductRepository productRepositroy;
-        private readonly ICategoryRepository categoryRepository;
+    {
+        private readonly IProductRepository _productRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public ProductService(IProductRepository productRepositroy,ICategoryRepository categoryRepository,IUnitOfWork unitOfWork)
-            {
- 
-            this.productRepositroy = productRepositroy;
-            this.categoryRepository = categoryRepository;
+        public ProductService(
+            IProductRepository productRepository,
+            ICategoryRepository categoryRepository,
+            IUnitOfWork unitOfWork)
+        {
+            _productRepository = productRepository;
+            _categoryRepository = categoryRepository;
             _unitOfWork = unitOfWork;
         }
 
-            public IEnumerable<Product> GetAllProducts()
+        public IEnumerable<Product> GetAllProducts()
         {
-                return productRepositroy.GetAll(includeProperties: "Category");
-            }
+            return _productRepository.GetAll(includeProperties: "Category");
+        }
 
-            public Product GetProductById(int? id)
-            {
-                return productRepositroy.Get(u => u.Id == id);
-            }
+        public Product? GetProductById(int? id)
+        {
+            return id == null ? null : _productRepository.Get(u => u.Id == id);
+        }
 
-            public void AddProduct(Product Product)
-            {
-                productRepositroy.Add(Product);
-               _unitOfWork.Commit();
-            
-            }
+        public void AddProduct(Product product)
+        {
+            if (product == null) return;
 
-            public void UpdateProduct(Product Product)
-            {
-                productRepositroy.Update(Product);
-                _unitOfWork.Commit();
-         
-            }
+            _productRepository.Add(product);
+            _unitOfWork.Commit();
+        }
 
-            public void DeleteProduct(int? id)
-            {
-            if (id != null)
-            {
-                var Product = GetProductById(id);
-                if (Product != null)
-                {
-                    productRepositroy.Remove(Product);
-                    _unitOfWork.Commit();
+        public void UpdateProduct(Product product)
+        {
+            if (product == null) return;
 
+            _productRepository.Update(product);
+            _unitOfWork.Commit();
+        }
 
-                }
-            }
-            }
+        public void DeleteProduct(int? id)
+        {
+            if (id == null) return;
+
+            var product = GetProductById(id);
+            if (product == null) return;
+
+            _productRepository.Remove(product);
+            _unitOfWork.Commit();
+        }
 
         public IEnumerable<SelectListItem> CategoryList()
         {
-            return categoryRepository.GetAll().Select(u => new SelectListItem
-            {
-                Text = u.Name,
-                Value = u.Id.ToString()
-            });
+            return _categoryRepository.GetAll()
+                .Select(u => new SelectListItem
+                {
+                    Text = u.Name,
+                    Value = u.Id.ToString()
+                });
         }
 
-        public void EditPathOfProduct(Product obj,IFormFile? file,string wwwRootPath) {
-            
+        public void EditPathOfProduct(Product product, IFormFile? file, string wwwRootPath)
+        {
+            if (product == null || file == null || string.IsNullOrWhiteSpace(wwwRootPath)) return;
 
-            if (file != null)
+            var imageFolder = Path.Combine(wwwRootPath, "images", "product");
+            Directory.CreateDirectory(imageFolder);
+
+            if (!string.IsNullOrEmpty(product.ImageUrl))
             {
-                var oldPath = Path.Combine(wwwRootPath, obj.ImageUrl.TrimStart('\\'));//ImageUrl in database has a \ in front so we need to trim it 1st to get the acutal path
-                if (System.IO.File.Exists(oldPath))
+                var fileNameOnly = Path.GetFileName(product.ImageUrl);
+                var oldImagePath = Path.Combine(imageFolder, fileNameOnly);
+                var canonicalOldPath = Path.GetFullPath(oldImagePath);
+                if (canonicalOldPath.StartsWith(Path.GetFullPath(imageFolder)) && File.Exists(canonicalOldPath))
                 {
-                    System.IO.File.Delete(oldPath);
+                    File.Delete(canonicalOldPath);
                 }
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                var productPath = Path.Combine(wwwRootPath, @"images\product");
-
-                using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
-                {
-                    file.CopyTo(fileStream);
-                }
-
-                obj.ImageUrl = @"\images\product\" + fileName;
-
             }
 
+            var newFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+            var newFilePath = Path.Combine(imageFolder, newFileName);
 
-
-        }
-
-        public void CreatePathOfProduct(Product obj, IFormFile? file, string wwwRootPath)
-        {
-          
-
-            if (file != null)
+            using (var stream = new FileStream(newFilePath, FileMode.Create))
             {
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                var productPath = Path.Combine(wwwRootPath, @"images\product");
-
-                using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
-                {
-                    file.CopyTo(fileStream);
-                }
-
-                obj.ImageUrl = @"\images\product\" + fileName;
-
+                file.CopyTo(stream);
             }
+
+            product.ImageUrl = $"/images/product/{newFileName}";
         }
 
-        public Product GetProductByIdwithCategory(int id)
+
+
+        public void CreatePathOfProduct(Product product, IFormFile? file, string wwwRootPath)
         {
-            return productRepositroy.Get(u => u.Id == id, includeProperties: "Category");
+            if (product == null || file == null || string.IsNullOrWhiteSpace(wwwRootPath)) return;
+
+            var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+            var productPath = Path.Combine(wwwRootPath, @"images\product");
+
+            Directory.CreateDirectory(productPath); 
+
+            var fullPath = Path.Combine(productPath, fileName);
+            using var fileStream = new FileStream(fullPath, FileMode.Create);
+            file.CopyTo(fileStream);
+
+            product.ImageUrl = $"/images/product/{fileName}";
+
+        }
+
+        public Product? GetProductByIdwithCategory(int id)
+        {
+            return _productRepository.Get(u => u.Id == id, includeProperties: "Category");
         }
     }
-    }
+}

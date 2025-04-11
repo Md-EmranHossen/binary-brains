@@ -44,7 +44,7 @@ namespace ECommerceSystem.Service.Services
             return orderHeaderRepository.GetAll();
         }
 
-        public OrderHeader GetOrderHeaderById(int? id,string? includeProperty=null )
+        public OrderHeader? GetOrderHeaderById(int? id,string? includeProperty=null )
         {
             if(includeProperty != null)
             {

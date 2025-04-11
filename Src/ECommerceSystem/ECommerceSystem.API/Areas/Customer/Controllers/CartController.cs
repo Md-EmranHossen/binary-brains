@@ -72,6 +72,8 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             };
             shoppingCartVM.OrderHeader.ApplicationUser =_applicationUserService.GetUserById(userId);
 
+            
+
             shoppingCartVM.OrderHeader.Name = shoppingCartVM.OrderHeader.ApplicationUser.Name;
             shoppingCartVM.OrderHeader.PhoneNumber = shoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
             shoppingCartVM.OrderHeader.StreetAddress = shoppingCartVM.OrderHeader.ApplicationUser.StreetAddress;
