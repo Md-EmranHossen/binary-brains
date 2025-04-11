@@ -74,29 +74,30 @@ namespace ECommerceWebApp.Services
             if (product == null || file == null || string.IsNullOrWhiteSpace(wwwRootPath)) return;
 
             var imageFolder = Path.Combine(wwwRootPath, "images", "product");
-            Directory.CreateDirectory(imageFolder); 
+            Directory.CreateDirectory(imageFolder);
 
             if (!string.IsNullOrEmpty(product.ImageUrl))
             {
-                var fileNameOnly = Path.GetFileName(product.ImageUrl); 
+                var fileNameOnly = Path.GetFileName(product.ImageUrl);
                 var oldImagePath = Path.Combine(imageFolder, fileNameOnly);
-
-                if (File.Exists(oldImagePath))
+                var canonicalOldPath = Path.GetFullPath(oldImagePath);
+                if (canonicalOldPath.StartsWith(Path.GetFullPath(imageFolder)) && File.Exists(canonicalOldPath))
                 {
-                    File.Delete(oldImagePath);
+                    File.Delete(canonicalOldPath);
                 }
             }
 
-            string newFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-            string newFilePath = Path.Combine(imageFolder, newFileName);
+            var newFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+            var newFilePath = Path.Combine(imageFolder, newFileName);
 
             using (var stream = new FileStream(newFilePath, FileMode.Create))
             {
                 file.CopyTo(stream);
             }
 
-            product.ImageUrl = $@"/images/product/{newFileName}"; 
+            product.ImageUrl = $"/images/product/{newFileName}";
         }
+
 
 
         public void CreatePathOfProduct(Product product, IFormFile? file, string wwwRootPath)
