@@ -50,7 +50,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Edit(int? id)
+        private IActionResult LoadProductViewWithCategories(int? id, string viewName)
         {
             if (id is null || id == 0)
             {
@@ -65,7 +65,13 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
             var categoryList = _productService.CategoryList();
             ViewBag.CategoryList = categoryList;
-            return View(productFromDb);
+
+            return View(viewName, productFromDb);
+        }
+
+        public IActionResult Edit(int? id)
+        {
+            return LoadProductViewWithCategories(id, "Edit");
         }
 
         [HttpPost]
@@ -87,20 +93,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
         public IActionResult Delete(int? id)
         {
-            if (id is null || id == 0)
-            {
-                return NotFound();
-            }
-
-            var productFromDb = _productService.GetProductById(id);
-            if (productFromDb == null)
-            {
-                return NotFound();
-            }
-
-            var categoryList = _productService.CategoryList();
-            ViewBag.CategoryList = categoryList;
-            return View(productFromDb);
+            return LoadProductViewWithCategories(id, "Delete");
         }
 
         [HttpPost, ActionName("Delete")]
