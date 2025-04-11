@@ -42,9 +42,8 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             TempData["success"] = "Company created successfully";
             return RedirectToAction(nameof(Index));
         }
-        [HttpGet]
-        // SonarCloud: ModelState.IsValid is not applicable here – no model binding is done in GET
-        public IActionResult Edit(int? id)
+
+        private IActionResult LoadCompanyView(int? id, string viewName)
         {
             if (id is null || id == 0)
             {
@@ -57,7 +56,13 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            return View(companyFromDb);
+            return View(viewName, companyFromDb);
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int? id)
+        {
+            return LoadCompanyView(id, "Edit");
         }
 
         [HttpPost]
@@ -75,21 +80,9 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        // SonarCloud: ModelState.IsValid is not applicable here – no model binding is done in GET
         public IActionResult Delete(int? id)
         {
-            if (id is null || id == 0)
-            {
-                return NotFound();
-            }
-
-            var companyFromDb = _companyService.GetCompanyById(id);
-            if (companyFromDb == null)
-            {
-                return NotFound();
-            }
-
-            return View(companyFromDb);
+            return LoadCompanyView(id, "Delete");
         }
 
         [HttpPost, ActionName("Delete")]
