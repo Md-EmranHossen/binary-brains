@@ -1,5 +1,6 @@
 ﻿using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ECommerceSystem.Service.Services.IServices
 {
@@ -18,6 +19,16 @@ namespace ECommerceSystem.Service.Services.IServices
         ShoppingCart CreateCartWithProduct(Product product);
 
         bool AddOrUpdateShoppingCart(ShoppingCart shoppingCart, string userId);
+
+        ShoppingCartVM GetShoppingCartVM(string? userId);
+
+        void RemoveShoppingCarts(OrderHeader orderHeader);
+
+        void Plus(int cartId);
+
+        void Minus(int cartId);
+
+        void RemoveCartValue(int cartId);
 
 
 
