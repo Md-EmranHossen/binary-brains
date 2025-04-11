@@ -62,6 +62,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Edit(int? id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             return LoadCategoryView(id, "Edit");
         }
 
@@ -80,10 +84,14 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // SonarQube: No need to check ModelState in GET action – this action doesn't bind any model
+  
         [HttpGet]
         public IActionResult Delete(int? id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             return LoadCategoryView(id, "Delete");
         }
 
@@ -91,6 +99,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int? id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (id is null)
             {
                 return NotFound();
