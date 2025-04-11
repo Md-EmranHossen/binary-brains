@@ -66,6 +66,10 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         [ActionName("Summary")]
         public IActionResult SummaryPost(ShoppingCartVM shoppingCartVM)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId) ?? new List<ShoppingCart>();
@@ -169,6 +173,10 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
         public IActionResult OrderConfirmation(int id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
             var orderHeader = _orderHeaderService.OrderConfirmation(id);
 
@@ -179,6 +187,10 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
         public IActionResult Plus(int cartId)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             _shoppingCartService.Plus(cartId);
 
             return RedirectToAction(nameof(Index));
@@ -186,13 +198,21 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         }
         public IActionResult Minus(int cartId)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             _shoppingCartService.Minus(cartId);
             return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Remove(int cartId)
         {
-           
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             return RedirectToAction(nameof(Index));
         }
 

@@ -62,6 +62,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Edit(int? id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             return LoadCompanyView(id, "Edit");
         }
 
@@ -82,6 +86,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Delete(int? id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             return LoadCompanyView(id, "Delete");
         }
 
@@ -89,6 +97,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int? id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (id is null)
             {
                 return NotFound();

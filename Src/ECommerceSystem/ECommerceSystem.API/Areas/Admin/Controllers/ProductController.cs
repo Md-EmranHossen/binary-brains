@@ -71,6 +71,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
         public IActionResult Edit(int? id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             return LoadProductViewWithCategories(id, "Edit");
         }
 
@@ -93,6 +97,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
         public IActionResult Delete(int? id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             return LoadProductViewWithCategories(id, "Delete");
         }
 
@@ -100,6 +108,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult DeletePost(int? id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (id is null)
             {
                 return NotFound();
