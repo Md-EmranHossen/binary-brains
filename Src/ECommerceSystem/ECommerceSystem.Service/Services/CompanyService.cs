@@ -22,7 +22,7 @@ namespace ECommerceWebApp.Services
             return CompanyRepositroy.GetAll();
         }
 
-        public Company GetCompanyById(int? id)
+        public Company? GetCompanyById(int? id)
         {
             return CompanyRepositroy.Get(u => u.Id == id);
         }

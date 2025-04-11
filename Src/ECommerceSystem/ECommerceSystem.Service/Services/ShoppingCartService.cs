@@ -24,9 +24,9 @@ namespace ECommerceSystem.Service.Services
             _unitOfWork = unitOfWork;
         }
 
-        public void AddShoppingCart(ShoppingCart ShoppingCart)
+        public void AddShoppingCart(ShoppingCart shoppingCart)
         {
-            _shoppingCartRepository.Add(ShoppingCart);
+            _shoppingCartRepository.Add(shoppingCart);
             _unitOfWork.Commit();
         }
 
@@ -46,12 +46,12 @@ namespace ECommerceSystem.Service.Services
 
         }
 
-        public ShoppingCart GetShoppingCartById(int? id)
+        public ShoppingCart? GetShoppingCartById(int? id)
         {
             return _shoppingCartRepository.Get(u => u.Id == id);
         }
 
-        public ShoppingCart GetShoppingCartByUserAndProduct(string userId, int productId)
+        public ShoppingCart? GetShoppingCartByUserAndProduct(string userId, int productId)
         {
             return _shoppingCartRepository.Get(u => u.ApplicationUserId == userId && u.ProductId == productId);
         }

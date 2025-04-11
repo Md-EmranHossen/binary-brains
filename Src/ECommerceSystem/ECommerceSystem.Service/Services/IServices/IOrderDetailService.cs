@@ -11,7 +11,7 @@ namespace ECommerceSystem.Service.Services.IServices
     {
 
         IEnumerable<OrderDetail> GetAllOrderDetails();
-        OrderDetail GetOrderDetailById(int? id);
+        OrderDetail? GetOrderDetailById(int? id);
         void AddOrderDetail(OrderDetail orderDetail);
         void UpdateOrderDetail(OrderDetail orderDetail);
         void DeleteOrderDetail(int? id);

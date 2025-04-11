@@ -6,10 +6,10 @@ namespace ECommerceSystem.Service.Services.IServices
     public interface IShoppingCartService
     {
 
-        ShoppingCart GetShoppingCartById(int? id);
-        void AddShoppingCart(ShoppingCart ShoppingCart);
-        void UpdateShoppingCart(ShoppingCart ShoppingCart);
-        ShoppingCart GetShoppingCartByUserAndProduct(string userId, int productId);
+        ShoppingCart? GetShoppingCartById(int? id);
+        void AddShoppingCart(ShoppingCart shoppingCart);
+        void UpdateShoppingCart(ShoppingCart shoppingCart);
+        ShoppingCart? GetShoppingCartByUserAndProduct(string userId, int productId);
         IEnumerable<ShoppingCart> GetShoppingCartsByUserId(string userId);
         void RemoveRange(List<ShoppingCart> shoppingCarts);
 

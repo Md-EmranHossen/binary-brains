@@ -73,23 +73,31 @@ namespace ECommerceWebApp.Services
         {
             if (product == null || file == null || string.IsNullOrWhiteSpace(wwwRootPath)) return;
 
-            var oldPath = Path.Combine(wwwRootPath, product.ImageUrl.TrimStart('\\'));
-            if (File.Exists(oldPath))
+            var imageFolder = Path.Combine(wwwRootPath, "images", "product");
+            Directory.CreateDirectory(imageFolder); 
+
+            if (!string.IsNullOrEmpty(product.ImageUrl))
             {
-                File.Delete(oldPath);
+                var fileNameOnly = Path.GetFileName(product.ImageUrl); 
+                var oldImagePath = Path.Combine(imageFolder, fileNameOnly);
+
+                if (File.Exists(oldImagePath))
+                {
+                    File.Delete(oldImagePath);
+                }
             }
 
-            var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-            var productPath = Path.Combine(wwwRootPath, @"images\product");
+            string newFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+            string newFilePath = Path.Combine(imageFolder, newFileName);
 
-            Directory.CreateDirectory(productPath); 
+            using (var stream = new FileStream(newFilePath, FileMode.Create))
+            {
+                file.CopyTo(stream);
+            }
 
-            var fullPath = Path.Combine(productPath, fileName);
-            using var fileStream = new FileStream(fullPath, FileMode.Create);
-            file.CopyTo(fileStream);
-
-            product.ImageUrl = $@"\images\product\{fileName}";
+            product.ImageUrl = $@"/images/product/{newFileName}"; 
         }
+
 
         public void CreatePathOfProduct(Product product, IFormFile? file, string wwwRootPath)
         {
@@ -104,7 +112,8 @@ namespace ECommerceWebApp.Services
             using var fileStream = new FileStream(fullPath, FileMode.Create);
             file.CopyTo(fileStream);
 
-            product.ImageUrl = $@"\images\product\{fileName}";
+            product.ImageUrl = $"/images/product/{fileName}";
+
         }
 
         public Product? GetProductByIdwithCategory(int id)

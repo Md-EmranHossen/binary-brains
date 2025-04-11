@@ -22,7 +22,7 @@ namespace ECommerceWebApp.Services
             return categoryRepositroy.GetAll();
         }
 
-        public Category GetCategoryById(int? id)
+        public Category? GetCategoryById(int? id)
         {
             return categoryRepositroy.Get(u => u.Id == id);
         }

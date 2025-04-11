@@ -44,7 +44,7 @@ namespace ECommerceSystem.Service.Services
             return orderDetailRepository.GetAll();
         }
 
-        public OrderDetail GetOrderDetailById(int? id)
+        public OrderDetail? GetOrderDetailById(int? id)
         {
             return orderDetailRepository.Get(u => u.Id == id);
         }
