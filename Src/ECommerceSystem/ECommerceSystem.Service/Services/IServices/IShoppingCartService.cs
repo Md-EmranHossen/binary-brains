@@ -28,6 +28,8 @@ namespace ECommerceSystem.Service.Services.IServices
 
         void Minus(int cartId);
 
+        void RemoveCartValue(int cartId);
+
 
 
     }

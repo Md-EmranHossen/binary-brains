@@ -160,7 +160,34 @@ namespace ECommerceSystem.Service.Services
 
         public void Minus(int cartId)
         {
+            var cartFromDb =GetShoppingCartById(cartId);
+            if (cartFromDb == null)
+            {
+                return;
+            }
 
+            if (cartFromDb.Count <= 1)
+            {
+                DeleteShoppingCart(cartId);
+            }
+            else
+            {
+                cartFromDb.Count -= 1;
+                UpdateShoppingCart(cartFromDb);
+            }
+
+            _unitOfWork.Commit();
+        }
+
+        public void RemoveCartValue(int cartId)
+        {
+            var cartFromDb = GetShoppingCartById(cartId);
+            if (cartFromDb == null)
+            {
+                return;
+            }
+            DeleteShoppingCart(cartId);
+            _unitOfWork.Commit();
         }
     }
 }

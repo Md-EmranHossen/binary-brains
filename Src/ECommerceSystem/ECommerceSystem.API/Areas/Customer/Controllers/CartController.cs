@@ -186,36 +186,14 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         }
         public IActionResult Minus(int cartId)
         {
-            var cartFromDb = _shoppingCartService.GetShoppingCartById(cartId);
-            if (cartFromDb == null)
-            {
-                return RedirectToAction("Index");
-            }
-
-            if (cartFromDb.Count <= 1)
-            {
-                _shoppingCartService.DeleteShoppingCart(cartId);
-            }
-            else
-            {
-                cartFromDb.Count -= 1;
-                _shoppingCartService.UpdateShoppingCart(cartFromDb);
-            }
-
-            _unitOfWork.Commit();
+            _shoppingCartService.Minus(cartId);
             return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Remove(int cartId)
         {
-            var cartFromDb = _shoppingCartService.GetShoppingCartById(cartId);
-            if (cartFromDb == null)
-            {
-                return RedirectToAction("Index");
-            }
-            _shoppingCartService.DeleteShoppingCart(cartId);
-            _unitOfWork.Commit();
-            return RedirectToAction("Index");
+           
+            return RedirectToAction(nameof(Index));
         }
 
     }
