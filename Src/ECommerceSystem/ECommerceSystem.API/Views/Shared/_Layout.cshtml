@@ -41,30 +41,11 @@
                     <li class="nav-item">
                         <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                    </li>
+                    
                     @if (User.IsInRole(SD.Role_Admin))
                     {
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Options
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="Admin" asp-controller="Category" asp-action="Index">Category</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="Admin" asp-controller="Product" asp-action="Index">Product</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="Admin" asp-controller="Company" asp-action="Index">Company</a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                            </ul>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
                         </li>
                     }
                     <li class="nav-item">
@@ -121,20 +102,34 @@
                                             <p>Dashboard v1</p>
                                         </a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a href="/Dashboard2" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Dashboard v2</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="/Dashboard3" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Dashboard v3</p>
-                                        </a>
-                                    </li>
+                                  
                                 </ul>
                             </li>
+
+
+                            <!-- MANAGEMENT Section -->
+                            <li class="nav-header">MANAGEMENT</li>
+                            <li class="nav-item">
+                                <a class="nav-link dynamic-load" asp-area="Admin" asp-controller="Category" asp-action="Index">
+                                    <i class="nav-icon bi bi-tags"></i>
+                                    <p>Category</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link dynamic-load" asp-area="Admin" asp-controller="Product" asp-action="Index">
+                                    <i class="nav-icon bi bi-box-seam"></i>
+                                    <p>Product</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link dynamic-load" asp-area="Admin" asp-controller="Company" asp-action="Index">
+                                    <i class="nav-icon bi bi-building"></i>
+                                    <p>Company</p>
+                                </a>
+                            </li>
+                            <!-- End of MANAGEMENT Section -->
+
+
                             <li class="nav-item">
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-gear"></i>
@@ -152,40 +147,8 @@
                                     </li>
                                 </ul>
                             </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon bi bi-box"></i>
-                                    <p>
-                                        UI Elements
-                                        <i class="nav-arrow bi bi-chevron-right"></i>
-                                    </p>
-                                </a>
-                                <ul class="nav nav-treeview">
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>General</p>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon bi bi-pen"></i>
-                                    <p>
-                                        Forms
-                                        <i class="nav-arrow bi bi-chevron-right"></i>
-                                    </p>
-                                </a>
-                                <ul class="nav nav-treeview">
-                                    <li class="nav-item">
-                                        <a href="#" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>General Elements</p>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
+                           
+                           
                             <li class="nav-item">
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-table"></i>
@@ -203,6 +166,7 @@
                                     </li>
                                 </ul>
                             </li>
+
                             <li class="nav-header">EXAMPLES</li>
                             <li class="nav-item">
                                 <a href="#" class="nav-link">
@@ -210,13 +174,8 @@
                                     <p>Calendar</p>
                                 </a>
                             </li>
-                            <li class="nav-header">LABELS</li>
-                            <li class="nav-item">
-                                <a href="#" class="nav-link">
-                                    <i class="nav-icon bi bi-circle text-danger"></i>
-                                    <p class="text">Important</p>
-                                </a>
-                            </li>
+                          
+                         
                             <li class="nav-item">
                                 <a href="#" class="nav-link">
                                     <i class="nav-icon bi bi-circle text-warning"></i>
@@ -302,6 +261,67 @@
     <!-- jsVectorMap -->
     <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/js/jsvectormap.min.js" integrity="sha256-/t1nN2956BT869E6H4V1dnt0X5pAQHPytli+1nTZm2Y=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsvectormap@1.5.3/dist/maps/world.js" integrity="sha256-XPpPaZlU8S/HWf7FZLAncLg2SAkP8ScUTII89x9D3lY=" crossorigin="anonymous"></script>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+    <!-- Dynamic Content Loading Script -->
+    <script>
+        $(document).ready(function () {
+            // Handle clicks on sidebar links with the 'dynamic-load' class
+            $('.dynamic-load').on('click', function (e) {
+                e.preventDefault(); // Prevent default navigation
+
+                // Get the URL from the link's href
+                const url = $(this).attr('href');
+
+                // Remove 'active' class from all sidebar links
+                $('.sidebar-menu .nav-link').removeClass('active');
+
+                // Add 'active' class to the clicked link
+                $(this).addClass('active');
+
+                // Use AJAX to load the content
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (data) {
+                        // Directly replace the content of .app-main with the loaded content
+                        $('.app-main').html(data);
+
+                        // Update the browser's URL without reloading
+                        history.pushState(null, '', url);
+
+                        // Update the page title (optional)
+                        document.title = $(data).find('h3').first().text() || 'AdminLTE Dashboard';
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error loading content:', error);
+                        $('.app-main').html('<div class="alert alert-danger">Error loading content. Please try again.</div>');
+                    }
+                });
+            });
+
+            // Handle browser back/forward buttons
+            $(window).on('popstate', function () {
+                const url = window.location.pathname + window.location.search;
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (data) {
+                        $('.app-main').html(data);
+                        // Update the active link in the sidebar
+                        $('.sidebar-menu .nav-link').removeClass('active');
+                        $(`.sidebar-menu .nav-link[href="${url}"]`).addClass('active');
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error loading content:', error);
+                        $('.app-main').html('<div class="alert alert-danger">Error loading content. Please try again.</div>');
+                    }
+                });
+            });
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
