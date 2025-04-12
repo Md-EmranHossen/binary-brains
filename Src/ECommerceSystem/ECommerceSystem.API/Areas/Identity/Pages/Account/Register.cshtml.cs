@@ -12,7 +12,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
-using ECommerceSystem.Utility;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

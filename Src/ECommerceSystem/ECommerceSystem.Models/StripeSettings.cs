@@ -1,4 +1,4 @@
-﻿namespace ECommerceSystem.Utility
+﻿namespace ECommerceSystem.Models
 {
     public class StripeSettings
     {

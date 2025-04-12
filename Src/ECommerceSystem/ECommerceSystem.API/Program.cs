@@ -9,8 +9,8 @@ using ECommerceWebApp;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using ECommerceSystem.Service.Services.IServices;
 using ECommerceSystem.Service.Services;
-using ECommerceSystem.Utility;
 using Stripe;
+using ECommerceSystem.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +28,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkSto
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = $"/Identity/Account/Login";
-    options.LoginPath = $"/Identity/Account/Logout";
+    options.LogoutPath = $"/Identity/Account/Logout";
     options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
 });
 

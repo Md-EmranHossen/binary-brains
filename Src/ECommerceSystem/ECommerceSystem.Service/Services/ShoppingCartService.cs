@@ -2,7 +2,6 @@
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services.IServices;
-using ECommerceSystem.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
