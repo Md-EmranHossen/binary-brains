@@ -7,7 +7,6 @@ using ECommerceSystem.DataAccess.Repository;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services.IServices;
-using ECommerceSystem.Utility;
 using Stripe.Checkout;
 
 namespace ECommerceSystem.Service.Services

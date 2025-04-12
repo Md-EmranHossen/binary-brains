@@ -2,7 +2,6 @@
 using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services;
 using ECommerceSystem.Service.Services.IServices;
-using ECommerceSystem.Utility;
 using ECommerceWebApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
