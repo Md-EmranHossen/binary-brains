@@ -246,3 +246,22 @@
         </div>
     </div>
 </form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function validateInput() {
+            if (document.getElementById("trackingNumber").value == "") {
+                alert('Please enter tracking number!');
+                return false;
+            }
+            if (document.getElementById("carrier").value == "") {
+                alert('Please enter carrier!');
+                return false;
+            }
+            return true;
+        }
+    </script>
+
+}
