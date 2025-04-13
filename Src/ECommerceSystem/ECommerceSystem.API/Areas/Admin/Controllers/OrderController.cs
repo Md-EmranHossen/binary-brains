@@ -2,6 +2,7 @@
 using ECommerceSystem.Service.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 using System.Security.Claims;
 
 namespace ECommerceWebApp.Areas.Admin.Controllers
@@ -115,6 +116,35 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             _orderHeaderService.UpdateOrderHeader(orderHeader);
 
             return RedirectToAction(nameof(Details), new { id = orderVM.orderHeader.Id });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+        public IActionResult CancelOrder(OrderVM orderVM)
+        {
+
+            var orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id);
+
+            if (orderHeader.PaymentStatus == SD.PaymentStatusApproved)
+            {
+                var options = new RefundCreateOptions
+                {
+                    Reason = RefundReasons.RequestedByCustomer,
+                    PaymentIntent = orderHeader.PaymentIntentId
+                };
+
+                var service = new RefundService();
+                Refund refund = service.Create(options);
+
+                _orderHeaderService.UpdateStatus(orderHeader.Id, SD.StatusCancelled, SD.StatusRefunded);
+            }
+            else
+            {
+                _orderHeaderService.UpdateStatus(orderHeader.Id, SD.StatusCancelled, SD.StatusCancelled);
+            }
+          
+            return RedirectToAction(nameof(Details), new { id = orderVM.orderHeader.Id });
+
         }
 
     }

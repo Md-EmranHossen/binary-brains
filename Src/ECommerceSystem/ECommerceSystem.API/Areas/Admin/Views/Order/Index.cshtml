@@ -14,7 +14,7 @@
         case "pending":
             pending = "active text-white bg-primary";
             break;
-        case "inprocess":
+        case "processing":
             inprocess = "active text-white bg-primary";
             break;
         case "completed":
@@ -47,7 +47,7 @@
         <div class="d-flex justify-content-between pb-5 pt-2">
             <span></span>
             <ul class="list-group list-group-horizontal-sm">
-                <a style="text-decoration:none;" asp-controller="Order" asp-action="Index" asp-route-status="inprocess">
+                <a style="text-decoration:none;" asp-controller="Order" asp-action="Index" asp-route-status="processing">
                 <li class="list-group-item @inprocess">In Process</li>
                 </a>
                 <a style="text-decoration:none;" asp-controller="Order" asp-action="Index" asp-route-status="pending">
@@ -88,7 +88,7 @@
                         <td>@obj.Name</td>
                         <td>@obj.PhoneNumber</td>
                         <td>@obj.ApplicationUser.Email</td>
-                        <td>@obj.PaymentStatus</td>
+                        <td>@obj.OrderStatus</td>
                         <td>@obj.OrderTotal.ToString("C", new System.Globalization.CultureInfo("bn-BD"))</td>
                         <td>
                             <div class="w-75 btn-group" role="group">
