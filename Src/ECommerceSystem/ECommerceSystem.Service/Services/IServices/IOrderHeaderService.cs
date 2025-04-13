@@ -10,7 +10,7 @@ namespace ECommerceSystem.Service.Services.IServices
     public interface IOrderHeaderService
     {
 
-        IEnumerable<OrderHeader> GetAllOrderHeaders();
+        IEnumerable<OrderHeader> GetAllOrderHeaders(string? includeProperties = null);
         OrderHeader? GetOrderHeaderById(int? id, string? includeProperty = null);
         void AddOrderHeader(OrderHeader orderHeader);
         void UpdateOrderHeader(OrderHeader orderHeader);
