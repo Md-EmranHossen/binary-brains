@@ -11,10 +11,12 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     public class OrderController : Controller
     {
         private readonly IOrderHeaderService _orderHeaderService;
+        private readonly IOrderDetailService _orderDetailService;
 
-        public OrderController(IOrderHeaderService orderHeaderService)
+        public OrderController(IOrderHeaderService orderHeaderService,IOrderDetailService orderDetailService)
         {
             _orderHeaderService = orderHeaderService;
+            _orderDetailService = orderDetailService;
         }
 
 
@@ -30,9 +32,16 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             }
 
 
+            
+
+            return View(orderData);
+        }
+        public IActionResult Details(int id)
+        {
             OrderVM orderVM = new OrderVM()
             {
-                orderHeader = orderData
+                orderHeader = _orderHeaderService.GetOrderHeaderById(id, "ApplicationUser"),
+                orderDetails=_orderDetailService.GetAllOrders(id,"Product")
             };
 
             return View(orderVM);

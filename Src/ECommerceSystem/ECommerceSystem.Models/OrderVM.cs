@@ -8,7 +8,7 @@ namespace ECommerceSystem.Models
 {
     public class OrderVM
     {
-        public IEnumerable<OrderHeader> orderHeader { get; set; }
+        public OrderHeader orderHeader { get; set; }
         public IEnumerable<OrderDetail> orderDetails { get; set; }
     }
 }

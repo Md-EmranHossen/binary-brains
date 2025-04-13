@@ -1,5 +1,5 @@
 ﻿@using ECommerceSystem.Models
-@model OrderVM
+@model IEnumerable<OrderHeader>
 
 ﻿@{
     var status = Context.Request.Query["status"];
@@ -78,7 +78,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var obj in Model.orderHeader)
+                @foreach (var obj in Model)
                 {
                     <tr>
                         <td>
