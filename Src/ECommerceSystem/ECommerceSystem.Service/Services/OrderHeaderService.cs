@@ -99,5 +99,10 @@ namespace ECommerceSystem.Service.Services
             return orderHeader;
 
         }
+
+        public IEnumerable<OrderHeader> GetAllOrderHeadersById(string id, string? includeProperties = null)
+        {
+            return orderHeaderRepository.GetAll(u=>u.ApplicationUserId == id, includeProperties);  
+        }
     }
 }

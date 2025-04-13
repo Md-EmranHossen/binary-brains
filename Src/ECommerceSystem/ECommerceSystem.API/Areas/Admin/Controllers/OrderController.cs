@@ -2,11 +2,12 @@
 using ECommerceSystem.Service.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ECommerceWebApp.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = SD.Role_Admin)]
+
 
     public class OrderController : Controller
     {
@@ -24,7 +25,22 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
         public IActionResult Index(string? status) 
         {
-            var orderData=_orderHeaderService.GetAllOrderHeaders("ApplicationUser");
+            IEnumerable<OrderHeader> orderData;
+
+            if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+            {
+               orderData = _orderHeaderService.GetAllOrderHeaders("ApplicationUser");
+            }
+
+            else
+            {
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+
+                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+
+                orderData=_orderHeaderService.GetAllOrderHeadersById(userId,"ApplicationUser");
+            }
 
             if (!string.IsNullOrEmpty(status) && status.ToLower() != "all")
             {

@@ -19,5 +19,7 @@ namespace ECommerceSystem.Service.Services.IServices
         void UpdateStripePaymentID(int id, string sessionId, string paymentIntentId);
 
         OrderHeader? OrderConfirmation(int id);
+
+        IEnumerable<OrderHeader> GetAllOrderHeadersById(string id,string? includeProperties = null);
     }
 }
