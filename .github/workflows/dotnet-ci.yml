@@ -1,55 +1,67 @@
-New-Item -Path .\.github\workflows -ItemType Directory -Force
-Set-Content -Path .\.github\workflows\ci.yml -Value @"
-name: CI with Code Coverage
-
+name: .NET CI with SonarCloud Analysis
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
-
+    types: [reopened, synchronize, opened]
+  push:
+    branches:
+      - main
 jobs:
-  build-and-test:
-    runs-on: windows-latest
+  build-and-analyze:
+    name: Build and Analyze
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetching full history for SonarCloud
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.0.x"
+      - name: Set up JDK 17 for SonarCloud
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: "zulu"
 
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
-
-    - name: Restore dependencies
-      run: dotnet restore ./binary-brains.sln
-
-    - name: Build
-      run: dotnet build ./binary-brains.sln --configuration Debug --no-restore
-
-    - name: Run tests with coverage
-      run: |
-        dotnet test ./Tests/ECommerceSystem.Tests/ECommerceSystem.Tests.csproj `
-          --no-build `
-          --configuration Debug `
-          --collect:"XPlat Code Coverage" `
-          --settings coverlet.runsettings
-
-    - name: Install reportgenerator
-      run: dotnet tool install --global dotnet-reportgenerator-globaltool
-
-    - name: Generate coverage report
-      run: |
-        reportgenerator `
-          -reports:"Tests/ECommerceSystem.Tests/TestResults/**/coverage.cobertura.xml" `
-          -targetdir:"coverage-report" `
-          -reporttypes:Html
-
-    - name: Upload coverage report artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: coverage-report/
-"@
+      - name: Install SonarCloud scanner
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+      - name: Restore dependencies
+        run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln
+      - name: Begin SonarCloud analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner begin \
+            /k:"Learnathon-By-Geeky-Solutions_binary-brains" \
+            /o:"learnathon-by-geeky-solutions" \
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
+            /d:sonar.sources="Src" \
+            /d:sonar.exclusions="**/bin/**,**/obj/**,**/*.Designer.cs,**/Migrations/**,**/*.cshtml,**/*.css,**/*.cshtml.cs" \
+            /d:sonar.tests="Src" \
+            /d:sonar.test.inclusions="**/*Tests/**/*.cs,**/*.Tests.cs,**/*.Test.cs" \
+            /d:sonar.sourceEncoding="UTF-8" \
+            /d:sonar.projectBaseDir="${{ github.workspace }}" \
+            /d:sonar.qualitygate.wait=true \
+            /d:sonar.scm.provider=git \
+            /d:sonar.alm.github.api.url=https://api.github.com \
+            /d:sonar.cfamily.build-wrapper-output.bypass=true \
+            /d:sonar.analytics.ci=github-actions
+      - name: Build
+        run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --no-restore --configuration Release
+      - name: Test with coverage
+        run: |
+          dotnet tool install --global dotnet-coverage
+          dotnet test Src/ECommerceSystem/ECommerceSystem.sln --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+      - name: End SonarCloud analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
