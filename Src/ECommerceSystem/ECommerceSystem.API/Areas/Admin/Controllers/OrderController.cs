@@ -87,7 +87,16 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     
 
 
-            return RedirectToAction(nameof(Details), new { orderId = orderHeaderFromDb.Id });
+            return RedirectToAction(nameof(Details), new { id = orderHeaderFromDb.Id });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+        public IActionResult StartProcessing(OrderVM orderVM)
+        {
+            _orderHeaderService.UpdateStatus(orderVM.orderHeader.Id, SD.StatusInProcess);
+
+            return RedirectToAction(nameof(Details), new { id=orderVM.orderHeader.Id });
         }
 
     }
