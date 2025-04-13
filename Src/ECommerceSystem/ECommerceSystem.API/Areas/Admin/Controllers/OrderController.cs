@@ -147,9 +147,8 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return RedirectToAction(nameof(Details), new { id = orderVM.orderHeader.Id });
 
         }
-        [ActionName("PayDetails")]
         [HttpPost]
-        public IActionResult Details_PAY_NOW(OrderVM orderVM)
+        public IActionResult PayDetails(OrderVM orderVM)
         {
             orderVM.orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id,  "ApplicationUser");
             orderVM.orderDetails = _orderDetailService.GetAllOrders(orderVM.orderHeader.Id, "Product");
@@ -191,6 +190,30 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             Response.Headers.Add("Location", session.Url);
             return new StatusCodeResult(303);
         }
+        public IActionResult PaymentConfirmation(int orderHeaderId)
+        {
+
+            var orderHeader = _orderHeaderService.GetOrderHeaderById(orderHeaderId);
+            if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
+            {
+                //this is an order by company
+
+                var service = new SessionService();
+                Session session = service.Get(orderHeader.SessionId);
+
+                if (session.PaymentStatus.ToLower() == "paid")
+                {
+                    _orderHeaderService.UpdateStripePaymentID(orderHeaderId, session.Id, session.PaymentIntentId);
+                    _orderHeaderService.UpdateStatus(orderHeaderId, orderHeader.OrderStatus, SD.PaymentStatusApproved);
+                }
+
+
+            }
+
+
+            return View(orderHeaderId);
+        }
+
 
 
 
