@@ -44,7 +44,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
             if (!string.IsNullOrEmpty(status) && status.ToLower() != "all")
             {
-                orderData = orderData.Where(u => u.PaymentStatus.ToLower() == status.ToLower());
+                orderData = orderData.Where(u => u.OrderStatus.ToLower() == status.ToLower());
             }
 
 
@@ -97,6 +97,24 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             _orderHeaderService.UpdateStatus(orderVM.orderHeader.Id, SD.StatusInProcess);
 
             return RedirectToAction(nameof(Details), new { id=orderVM.orderHeader.Id });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+        public IActionResult ShipOrder(OrderVM orderVM)
+        {
+            var orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id);
+            orderHeader.TrackingNumber = orderVM.orderHeader.TrackingNumber;
+            orderHeader.Carrier = orderVM.orderHeader.Carrier;
+            orderHeader.OrderStatus = SD.StatusShipped;
+            orderHeader.ShippingDate = DateTime.Now;
+            if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
+            {
+                orderHeader.PaymentDueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+            }
+            _orderHeaderService.UpdateOrderHeader(orderHeader);
+
+            return RedirectToAction(nameof(Details), new { id = orderVM.orderHeader.Id });
         }
 
     }
