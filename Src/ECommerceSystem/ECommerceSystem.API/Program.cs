@@ -23,15 +23,7 @@ options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectio
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options=>
-    {
-        options.Password.RequireNonAlphanumeric = false;
-
-}
-
-
-)
-    .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
