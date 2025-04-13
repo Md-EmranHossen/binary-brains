@@ -47,5 +47,32 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return View(orderVM);
         }
 
+        [HttpPost]
+        [Authorize(Roles = SD.Role_Admin+","+SD.Role_Employee)]
+        public IActionResult Details(OrderVM orderVM)
+        {
+            var orderHeaderFromDb = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id);
+
+            orderHeaderFromDb.Name = orderVM.orderHeader.Name;
+            orderHeaderFromDb.PhoneNumber = orderVM.orderHeader.PhoneNumber;
+            orderHeaderFromDb.StreetAddress = orderVM.orderHeader.StreetAddress;
+            orderHeaderFromDb.City = orderVM.orderHeader.City;
+            orderHeaderFromDb.State = orderVM.orderHeader.State;
+            orderHeaderFromDb.PostalCode = orderVM.orderHeader.PostalCode;
+            if (!string.IsNullOrEmpty(orderVM.orderHeader.Carrier))
+            {
+                orderHeaderFromDb.Carrier = orderVM.orderHeader.Carrier;
+            }
+            if (!string.IsNullOrEmpty(orderVM.orderHeader.TrackingNumber))
+            {
+                orderHeaderFromDb.TrackingNumber = orderVM.orderHeader.TrackingNumber;
+            }
+            _orderHeaderService.UpdateOrderHeader(orderHeaderFromDb);
+    
+
+
+            return RedirectToAction(nameof(Details), new { orderId = orderHeaderFromDb.Id });
+        }
+
     }
 }
