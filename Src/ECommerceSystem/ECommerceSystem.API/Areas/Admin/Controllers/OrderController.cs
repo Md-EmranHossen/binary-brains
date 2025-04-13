@@ -3,6 +3,7 @@ using ECommerceSystem.Service.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
+using Stripe.Checkout;
 using System.Security.Claims;
 
 namespace ECommerceWebApp.Areas.Admin.Controllers
@@ -146,6 +147,53 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return RedirectToAction(nameof(Details), new { id = orderVM.orderHeader.Id });
 
         }
+        [ActionName("PayDetails")]
+        [HttpPost]
+        public IActionResult Details_PAY_NOW(OrderVM orderVM)
+        {
+            orderVM.orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id,  "ApplicationUser");
+            orderVM.orderDetails = _orderDetailService.GetAllOrders(orderVM.orderHeader.Id, "Product");
+
+
+            //stripe logic
+            var domain = Request.Scheme + "://" + Request.Host.Value + "/";
+            var options = new SessionCreateOptions
+            {
+                SuccessUrl = domain + $"admin/order/PaymentConfirmation?orderHeaderId={orderVM.orderHeader.Id}",
+                CancelUrl = domain + $"admin/order/details?id={orderVM.orderHeader.Id}",
+                LineItems = new List<SessionLineItemOptions>(),
+                Mode = "payment",
+            };
+
+            foreach (var item in orderVM.orderDetails)
+            {
+                var sessionLineItem = new SessionLineItemOptions
+                {
+                    PriceData = new SessionLineItemPriceDataOptions
+                    {
+                        UnitAmount = (long)(item.Price * 100), // $20.50 => 2050
+                        Currency = "usd",
+                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        {
+                            Name = item.Product.Title
+                        }
+                    },
+                    Quantity = item.Count
+                };
+                options.LineItems.Add(sessionLineItem);
+            }
+
+
+            var service = new SessionService();
+            Session session = service.Create(options);
+            _orderHeaderService.UpdateStripePaymentID(orderVM.orderHeader.Id, session.Id, session.PaymentIntentId);
+
+            Response.Headers.Add("Location", session.Url);
+            return new StatusCodeResult(303);
+        }
+
+
+
 
     }
 }
