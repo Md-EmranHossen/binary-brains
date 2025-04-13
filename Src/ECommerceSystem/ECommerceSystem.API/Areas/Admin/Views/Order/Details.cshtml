@@ -220,7 +220,7 @@
 
                             @if (Model.orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment &&
                             Model.orderHeader.OrderStatus == SD.StatusShipped) {
-                                <button type="submit" class="btn btn-success form-control my-1">Pay Now</button>
+                                <button type="submit" asp-action="PayDetails" class="btn btn-success form-control my-1">Pay Now</button>
                             }
                             @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee)) {
                                 @if (Model.orderHeader.OrderStatus == SD.StatusApproved) {
