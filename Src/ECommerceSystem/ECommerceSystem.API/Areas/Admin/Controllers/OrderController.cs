@@ -7,6 +7,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = SD.Role_Admin)]
+
     public class OrderController : Controller
     {
         private readonly IOrderHeaderService _orderHeaderService;
@@ -19,9 +20,15 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
 
 
-        public IActionResult Index()
+        public IActionResult Index(string? status) 
         {
             var orderData=_orderHeaderService.GetAllOrderHeaders("ApplicationUser");
+
+            if (!string.IsNullOrEmpty(status) && status.ToLower() != "all")
+            {
+                orderData = orderData.Where(u => u.PaymentStatus.ToLower() == status.ToLower());
+            }
+
 
             OrderVM orderVM = new OrderVM()
             {
@@ -30,5 +37,6 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
             return View(orderVM);
         }
+
     }
 }
