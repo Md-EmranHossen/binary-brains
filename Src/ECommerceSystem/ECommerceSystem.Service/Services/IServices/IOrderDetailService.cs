@@ -15,5 +15,7 @@ namespace ECommerceSystem.Service.Services.IServices
         void AddOrderDetail(OrderDetail orderDetail);
         void UpdateOrderDetail(OrderDetail orderDetail);
         void DeleteOrderDetail(int? id);
+
+        IEnumerable<OrderDetail> GetAllOrders(int? id,string? includeProperties=null);
     }
 }

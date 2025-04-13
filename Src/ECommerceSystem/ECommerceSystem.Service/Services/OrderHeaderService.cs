@@ -40,9 +40,11 @@ namespace ECommerceSystem.Service.Services
             }
         }
 
-        public IEnumerable<OrderHeader> GetAllOrderHeaders()
+        public IEnumerable<OrderHeader> GetAllOrderHeaders(string? includeProperties = null)
         {
-            return orderHeaderRepository.GetAll();
+            
+                return orderHeaderRepository.GetAll(includeProperties: includeProperties);
+            
         }
 
         public OrderHeader? GetOrderHeaderById(int? id, string? includeProperty = null)
@@ -96,6 +98,11 @@ namespace ECommerceSystem.Service.Services
 
             return orderHeader;
 
+        }
+
+        public IEnumerable<OrderHeader> GetAllOrderHeadersById(string id, string? includeProperties = null)
+        {
+            return orderHeaderRepository.GetAll(u=>u.ApplicationUserId == id, includeProperties);  
         }
     }
 }
