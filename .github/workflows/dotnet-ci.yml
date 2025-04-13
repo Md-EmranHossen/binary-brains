@@ -1,67 +1,55 @@
-name: .NET CI with SonarCloud Analysis
+name: SonarCloud
 on:
-  pull_request:
-    branches:
-      - main
-    types: [reopened, synchronize, opened]
   push:
     branches:
       - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
 jobs:
-  build-and-analyze:
-    name: Build and Analyze
+  sonarcloud:
+    name: SonarCloud Scan
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # Fetching full history for SonarCloud
-      - name: Setup .NET
+
+      - name: Set up .NET
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: "8.0.x"
-      - name: Set up JDK 17 for SonarCloud
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: "zulu"
+          dotnet-version: '8.0.x'
 
-      - name: Install SonarCloud scanner
-        run: |
-          dotnet tool install --global dotnet-sonarscanner
-      - name: Restore dependencies
+      - name: Install dependencies
         run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln
-      - name: Begin SonarCloud analysis
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Build the project
+        run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --no-restore
+
+      - name: Run tests and collect coverage
+        run: dotnet test Src/ECommerceSystem/ECommerceSystem.sln --no-build --collect:"XPlat Code Coverage"
+
+      - name: Debug - List coverage files
+        run: find . -type f -name "*.xml"
+
+      - name: Generate Coverage Report
         run: |
-          dotnet sonarscanner begin \
-            /k:"Learnathon-By-Geeky-Solutions_binary-brains" \
-            /o:"learnathon-by-geeky-solutions" \
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
-            /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
-            /d:sonar.sources="Src" \
-            /d:sonar.exclusions="**/bin/**,**/obj/**,**/*.Designer.cs,**/Migrations/**,**/*.cshtml,**/*.css,**/*.cshtml.cs" \
-            /d:sonar.tests="Src" \
-            /d:sonar.test.inclusions="**/*Tests/**/*.cs,**/*.Tests.cs,**/*.Test.cs" \
-            /d:sonar.sourceEncoding="UTF-8" \
-            /d:sonar.projectBaseDir="${{ github.workspace }}" \
-            /d:sonar.qualitygate.wait=true \
-            /d:sonar.scm.provider=git \
-            /d:sonar.alm.github.api.url=https://api.github.com \
-            /d:sonar.cfamily.build-wrapper-output.bypass=true \
-            /d:sonar.analytics.ci=github-actions
-      - name: Build
-        run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --no-restore --configuration Release
-      - name: Test with coverage
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          export PATH="$PATH:/home/runner/.dotnet/tools"
+          reportgenerator "-reports:**/coverage.cobertura.xml" "-targetdir:coverage-report" -reporttypes:Html
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectKey: Learnathon-By-Geeky-Solutions_binary-brains
+          organization: learnathon-by-geeky-solutions
+          scanner-mode: CLI
+          token: ${{ secrets.SONAR_TOKEN }}
+          extraProperties: |
+            sonar.cs.opencover.reportsPaths=**/coverage.cobertura.xml
+            sonar.cs.vstest.reportsPaths=**/*.trx
+            sonar.exclusions=**/bin/**,**/obj/**,**/*.Designer.cs,**/Migrations/**,**/*.cshtml,**/*.css,**/*.cshtml.cs
+
+      - name: Execute Application
         run: |
-          dotnet tool install --global dotnet-coverage
-          dotnet test Src/ECommerceSystem/ECommerceSystem.sln --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-      - name: End SonarCloud analysis
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          dotnet run --project Src/ECommerceSystem/ECommerceSystem.csproj
