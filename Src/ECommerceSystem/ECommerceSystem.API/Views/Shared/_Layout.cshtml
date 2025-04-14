@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -41,7 +45,7 @@
                     <li class="nav-item">
                         <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
-                    
+
                     @if (User.IsInRole(SD.Role_Admin))
                     {
                         <li class="nav-item">
@@ -64,12 +68,27 @@
                             <i class="bi bi-search"></i>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" data-lte-toggle="fullscreen">
-                            <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
-                            <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none"></i>
-                        </a>
-                    </li>
+                    @if (HttpContextAccessor.HttpContext.Session.GetInt32(SD.SessionCart) != null)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-lte-toggle="fullscreen">
+                                <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
+                                <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none"></i>
+                                (@HttpContextAccessor.HttpContext.Session.GetInt32(SD.SessionCart))
+                            </a>
+                        </li>
+                    }
+                   else
+                   {
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-lte-toggle="fullscreen">
+                                <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
+                                <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none"></i>
+                                (0)
+                            </a>
+                        </li>
+                   }
+
                     <li class="nav-item user-footer">
                         <partial name="_LoginPartial" />
                     </li>
