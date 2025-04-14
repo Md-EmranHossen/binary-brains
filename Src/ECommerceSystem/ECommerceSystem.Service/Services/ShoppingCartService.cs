@@ -139,10 +139,11 @@ namespace ECommerceSystem.Service.Services
 
         public void RemoveShoppingCarts(OrderHeader? orderHeader)
         {
-            if (orderHeader != null) { 
-            var shoppingCarts = GetShoppingCartsByUserId(orderHeader.ApplicationUserId).ToList();
-            RemoveRange(shoppingCarts);
-            _unitOfWork.Commit();
+            if (orderHeader != null)
+            {
+                var shoppingCarts = GetShoppingCartsByUserId(orderHeader.ApplicationUserId).ToList();
+                RemoveRange(shoppingCarts);
+                _unitOfWork.Commit();
             }
         }
         public void Plus(int cartId)
@@ -161,7 +162,7 @@ namespace ECommerceSystem.Service.Services
 
         public void Minus(int cartId)
         {
-            var cartFromDb =GetShoppingCartById(cartId);
+            var cartFromDb = GetShoppingCartById(cartId);
             if (cartFromDb == null)
             {
                 return;
@@ -189,6 +190,11 @@ namespace ECommerceSystem.Service.Services
             }
             DeleteShoppingCart(cartId);
             _unitOfWork.Commit();
+        }
+
+        public ShoppingCart GetShoppingCartByUserId(string userId)
+        {
+            return _shoppingCartRepository.Get(u => u.ApplicationUserId == userId);
         }
     }
 }

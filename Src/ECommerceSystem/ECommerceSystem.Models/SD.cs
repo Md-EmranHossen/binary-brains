@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ECommerceSystem.Models
 {
-  public static class SD
+    public static class SD
     {
         public const string Role_Customer = "Customer";
         public const string Role_Company = "Company";
@@ -25,6 +25,8 @@ namespace ECommerceSystem.Models
         public const string PaymentStatusApproved = "Approved";
         public const string PaymentStatusDelayedPayment = "ApprovedForDelayedPayment";
         public const string PaymentStatusRejected = "Rejected";
+
+        public const string SessionCart = "SessionShoppingCart";
 
 
     }
