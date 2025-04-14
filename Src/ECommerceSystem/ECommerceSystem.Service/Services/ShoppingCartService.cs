@@ -2,6 +2,7 @@
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services.IServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -10,6 +11,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace ECommerceSystem.Service.Services
 {
@@ -22,6 +24,7 @@ namespace ECommerceSystem.Service.Services
         {
             _shoppingCartRepository = shoppingCartRepository;
             _unitOfWork = unitOfWork;
+
         }
 
         public void AddShoppingCart(ShoppingCart shoppingCart)
@@ -171,6 +174,7 @@ namespace ECommerceSystem.Service.Services
             if (cartFromDb.Count <= 1)
             {
                 DeleteShoppingCart(cartId);
+
             }
             else
             {
@@ -192,9 +196,9 @@ namespace ECommerceSystem.Service.Services
             _unitOfWork.Commit();
         }
 
-        public ShoppingCart GetShoppingCartByUserId(string userId)
+        public IEnumerable<ShoppingCart> GetShoppingCartByUserId(string userId)
         {
-            return _shoppingCartRepository.Get(u => u.ApplicationUserId == userId);
+            return _shoppingCartRepository.GetAll(u => u.ApplicationUserId == userId);
         }
     }
 }

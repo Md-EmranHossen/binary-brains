@@ -29,7 +29,7 @@ namespace ECommerceSystem.Service.Services.IServices
         void Minus(int cartId);
 
         void RemoveCartValue(int cartId);
-        ShoppingCart GetShoppingCartByUserId(string userId);
+        IEnumerable<ShoppingCart> GetShoppingCartByUserId(string userId);
 
 
 

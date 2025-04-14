@@ -211,6 +211,10 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             {
                 return BadRequest(ModelState);
             }
+            var cartFromDb = _shoppingCartService.GetShoppingCartById(cartId);
+            _shoppingCartService.RemoveCartValue(cartId);
+            HttpContext.Session.SetInt32(SD.SessionCart, _shoppingCartService.
+GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count() - 1);
 
             return RedirectToAction(nameof(Index));
         }

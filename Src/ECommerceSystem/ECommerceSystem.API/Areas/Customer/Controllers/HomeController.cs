@@ -83,7 +83,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             }
 
             HttpContext.Session.SetInt32(SD.SessionCart,
-   _shoppingCartService.GetShoppingCartByUserId(userId).Count);
+   _shoppingCartService.GetShoppingCartByUserId(userId).Count());
 
             return RedirectToAction(nameof(Index));
         }
