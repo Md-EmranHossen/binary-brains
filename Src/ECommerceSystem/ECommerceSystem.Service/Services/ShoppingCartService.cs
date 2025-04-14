@@ -49,9 +49,9 @@ namespace ECommerceSystem.Service.Services
 
         }
 
-        public ShoppingCart? GetShoppingCartById(int? id)
+        public ShoppingCart? GetShoppingCartById(int? id, bool track = false)
         {
-            return _shoppingCartRepository.Get(u => u.Id == id);
+            return _shoppingCartRepository.Get(u => u.Id == id, tracked: track);
         }
 
         public ShoppingCart? GetShoppingCartByUserAndProduct(string userId, int productId)
