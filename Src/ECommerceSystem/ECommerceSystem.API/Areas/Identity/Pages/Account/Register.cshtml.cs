@@ -115,11 +115,11 @@ namespace ECommerceWebApp.Areas.Identity.Pages.Account
 
             [Required]
             public string? Name { get; set; }
-            public string? StreetAddress {  get; set; }
-            public string? City {  get; set; }
-            public string? State {  get; set; }
-            public string? PostCode {  get; set; }
-            public string? PhoneNumber {  get; set; }
+            public string? StreetAddress { get; set; }
+            public string? City { get; set; }
+            public string? State { get; set; }
+            public string? PostCode { get; set; }
+            public string? PhoneNumber { get; set; }
             public int? CompanyId { get; set; }
             [ValidateNever]
             public IEnumerable<SelectListItem> CompanyList { get; set; }
@@ -168,8 +168,6 @@ namespace ECommerceWebApp.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
-
                 user.Name = Input.Name;
                 user.StreetAddress = Input.StreetAddress;
                 user.City = Input.City;
@@ -223,7 +221,15 @@ namespace ECommerceWebApp.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        if (User.IsInRole(SD.Role_Admin))
+                        {
+                            TempData["Success"] = "New User Created Successfully";
+                        }
+                        else
+                        {
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+
+                        }
                         return LocalRedirect(returnUrl);
                     }
                 }

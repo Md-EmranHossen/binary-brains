@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Security.Claims;
+using ECommerceSystem.DataAccess.Repository;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services;
@@ -80,6 +81,9 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 _logger.LogWarning("Failed to add/update shopping cart for user {UserId}", userId);
                 return StatusCode(500, "Failed to update shopping cart.");
             }
+
+            HttpContext.Session.SetInt32(SD.SessionCart,
+   _shoppingCartService.GetShoppingCartByUserId(userId).Count());
 
             return RedirectToAction(nameof(Index));
         }

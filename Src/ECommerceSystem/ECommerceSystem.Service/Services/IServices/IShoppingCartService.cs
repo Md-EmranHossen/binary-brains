@@ -7,7 +7,7 @@ namespace ECommerceSystem.Service.Services.IServices
     public interface IShoppingCartService
     {
 
-        ShoppingCart? GetShoppingCartById(int? id);
+        ShoppingCart? GetShoppingCartById(int? id, bool track = false);
         void AddShoppingCart(ShoppingCart shoppingCart);
         void UpdateShoppingCart(ShoppingCart shoppingCart);
         ShoppingCart? GetShoppingCartByUserAndProduct(string userId, int productId);
@@ -29,6 +29,7 @@ namespace ECommerceSystem.Service.Services.IServices
         void Minus(int cartId);
 
         void RemoveCartValue(int cartId);
+        IEnumerable<ShoppingCart> GetShoppingCartByUserId(string userId);
 
 
 

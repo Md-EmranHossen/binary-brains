@@ -211,6 +211,8 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             {
                 return BadRequest(ModelState);
             }
+            _shoppingCartService.RemoveCartValue(cartId);
+
 
             return RedirectToAction(nameof(Index));
         }
