@@ -11,27 +11,30 @@ jobs:
   build-and-analyze:
     name: Build and Analyze
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Fetching full history for SonarCloud
+      
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: "8.0.x"
+      
       - name: Set up JDK 17 for SonarCloud
         uses: actions/setup-java@v3
         with:
           java-version: 17
           distribution: "zulu"
-
+      
       - name: Install SonarCloud scanner
         run: |
           dotnet tool install --global dotnet-sonarscanner
+      
       - name: Restore dependencies
         run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln
+      
       - name: Begin SonarCloud analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -46,20 +49,25 @@ jobs:
             /d:sonar.sources="Src" \
             /d:sonar.exclusions="**/bin/**,**/obj/**,**/*.Designer.cs,**/Migrations/**,**/*.cshtml,**/*.css,**/*.cshtml.cs" \
             /d:sonar.tests="Src" \
-            /d:sonar.test.inclusions="**/*Tests/**/*.cs,**/*.Tests.cs,**/*.Test.cs" \
+            /d:sonar.test.inclusions="**/*Tests/**/*.cs,**/*.Tests.cs,**/*.Test.cs,**/ECommerceSystem.Test/**/*.cs" \
             /d:sonar.sourceEncoding="UTF-8" \
-            /d:sonar.projectBaseDir="${{ github.workspace }}" \
-            /d:sonar.qualitygate.wait=true \
-            /d:sonar.scm.provider=git \
-            /d:sonar.alm.github.api.url=https://api.github.com \
-            /d:sonar.cfamily.build-wrapper-output.bypass=true \
-            /d:sonar.analytics.ci=github-actions
+            /d:sonar.projectBaseDir="${{ github.workspace }}"
+      
       - name: Build
         run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --no-restore --configuration Release
-      - name: Test with coverage
+      
+      - name: Run tests with coverage
         run: |
-          dotnet tool install --global dotnet-coverage
-          dotnet test Src/ECommerceSystem/ECommerceSystem.sln --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          dotnet test Src/ECommerceSystem/ECommerceSystem.sln \
+            --no-build \
+            --configuration Release \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=./coverage.opencover.xml \
+            /p:Include="[ECommerceWebApp]*,[ECommerceSystem.Service]*,[ECommerceSystem.DataAccess]*" \
+            /p:Exclude="[*]*.Migrations.*" \
+            --verbosity normal
+      
       - name: End SonarCloud analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
