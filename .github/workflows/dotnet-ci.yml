@@ -15,7 +15,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Fetching full history for SonarCloud
       
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
@@ -46,8 +46,7 @@ jobs:
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
-            /d:sonar.cs.vstest.reportsPaths="**/*.trx" \
-            /d:sonar.coverage.exclusions="**/Program.cs,**/Startup.cs,**/*Migrations*/**,**/*Models*/**,**/*Dto*/**,**/*Entities*/**,**/*Context*/**" \
+            /d:sonar.sources="Src" \
             /d:sonar.exclusions="**/bin/**,**/obj/**,**/*.Designer.cs,**/Migrations/**,**/*.cshtml,**/*.css,**/*.cshtml.cs" \
             /d:sonar.tests="Src" \
             /d:sonar.test.inclusions="**/*Tests/**/*.cs,**/*.Tests.cs,**/*.Test.cs,**/ECommerceSystem.Test/**/*.cs" \
@@ -62,12 +61,11 @@ jobs:
           dotnet test Src/ECommerceSystem/ECommerceSystem.sln \
             --no-build \
             --configuration Release \
-            --logger trx \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput=./coverage.opencover.xml \
-            /p:Include="[ECommerceWebApp*]*,[ECommerceSystem.Service*]*,[ECommerceSystem.DataAccess*]*" \
-            /p:Exclude="[*]*.Migrations.*,[*]*.Startup,[*]*.Program" \
+            "/p:Include=[ECommerceWebApp]*,[ECommerceSystem.Service]*,[ECommerceSystem.DataAccess]*" \
+            "/p:Exclude=[*]*.Migrations.*" \
             --verbosity normal
       
       - name: End SonarCloud analysis
