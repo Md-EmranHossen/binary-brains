@@ -34,6 +34,12 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
 });
 
+builder.Services.AddAuthentication().AddFacebook(options =>
+{
+    options.AppId = "";
+    options.AppSecret = "";
+});
+
 // Register IHttpContextAccessor for session access in services
 builder.Services.AddHttpContextAccessor();
 
