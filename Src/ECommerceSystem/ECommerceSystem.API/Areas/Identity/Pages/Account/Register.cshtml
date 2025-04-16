@@ -7,7 +7,12 @@
 
         <div class="row">
             <div class="col-12 text-cneter">
-                <h2 class="py-2 text-white"> Register</h2>
+                @if(User.IsInRole(SD.Role_Admin)){
+                    <h2 class="py-2 text-white"> Register - ADIMIN PORTAL</h2>
+                }
+                else{
+                    <h2 class="py-2 text-white"> Register</h2>
+                }
             </div>
         </div>
     </div>
@@ -18,7 +23,7 @@
             <div class="col-md-12">
                 <form id="registerForm" class="row"  asp-route-returnUrl="@Model.ReturnUrl" method="post">
                     <h3 class="border-bottom pb-3 mb-4 text-secondary text-center" >Create a new account.</h3>
-                    
+
                     <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
                     <div class="form-floating mb-3 col-mid-12">
                         <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
@@ -54,7 +59,7 @@
 
 
 
-                   
+
 
 
                     <div class="form-floating mb-3 col-mid-6">
@@ -89,7 +94,7 @@
                     </div>
 
 
-                    
+
 
                     @if(User.IsInRole(SD.Role_Admin))
                     {
@@ -112,6 +117,9 @@
                     </div>
                 </form>
             </div>
+            @if(!User.IsInRole(SD.Role_Admin))
+            {
+         
             <div class="col-md-12 p-3 text-center">
                 <section>
                     <p class="divider-text d-flex pt-3">or</p>
@@ -144,6 +152,7 @@
                     }
                 </section>
             </div>
+            }
         </div>
 
     </div>
