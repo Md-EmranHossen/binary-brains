@@ -15,7 +15,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Fetching full history for SonarCloud
+          fetch-depth: 0
       
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
@@ -46,7 +46,8 @@ jobs:
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
-            /d:sonar.sources="Src" \
+            /d:sonar.cs.vstest.reportsPaths="**/*.trx" \
+            /d:sonar.coverage.exclusions="**/Program.cs,**/Startup.cs,**/*Migrations*/**,**/*Models*/**,**/*Dto*/**,**/*Entities*/**,**/*Context*/**" \
             /d:sonar.exclusions="**/bin/**,**/obj/**,**/*.Designer.cs,**/Migrations/**,**/*.cshtml,**/*.css,**/*.cshtml.cs" \
             /d:sonar.tests="Src" \
             /d:sonar.test.inclusions="**/*Tests/**/*.cs,**/*.Tests.cs,**/*.Test.cs,**/ECommerceSystem.Test/**/*.cs" \
@@ -56,36 +57,17 @@ jobs:
       - name: Build
         run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --no-restore --configuration Release
       
-      - name: Create runsettings file
-        run: |
-          cat > coverlet.runsettings << EOF
-          <?xml version="1.0" encoding="utf-8" ?>
-          <RunSettings>
-            <DataCollectionRunSettings>
-              <DataCollectors>
-                <DataCollector friendlyName="XPlat code coverage">
-                  <Configuration>
-                    <Format>opencover</Format>
-                    <Exclude>[*]*.Migrations.*</Exclude>
-                    <Include>[ECommerceWebApp]*,[ECommerceSystem.Service]*,[ECommerceSystem.DataAccess]*</Include>
-                    <UseSourceLink>true</UseSourceLink>
-                    <IncludeTestAssembly>false</IncludeTestAssembly>
-                    <SingleHit>false</SingleHit>
-                    <SkipAutoProps>true</SkipAutoProps>
-                  </Configuration>
-                </DataCollector>
-              </DataCollectors>
-            </DataCollectionRunSettings>
-          </RunSettings>
-          EOF
-      
       - name: Run tests with coverage
         run: |
           dotnet test Src/ECommerceSystem/ECommerceSystem.sln \
             --no-build \
             --configuration Release \
-            --collect:"XPlat Code Coverage" \
-            --settings coverlet.runsettings \
+            --logger trx \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=./coverage.opencover.xml \
+            /p:Include="[ECommerceWebApp*]*,[ECommerceSystem.Service*]*,[ECommerceSystem.DataAccess*]*" \
+            /p:Exclude="[*]*.Migrations.*,[*]*.Startup,[*]*.Program" \
             --verbosity normal
       
       - name: End SonarCloud analysis
