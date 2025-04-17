@@ -64,9 +64,12 @@ jobs:
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput=./coverage.opencover.xml \
-            "/p:Include=[ECommerceWebApp]*,[ECommerceSystem.Service]*,[ECommerceSystem.DataAccess]*" \
-            "/p:Exclude=[*]*.Migrations.*" \
+            '/p:Include=\[ECommerceWebApp\]*,\[ECommerceSystem.Service\]*,\[ECommerceSystem.DataAccess\]*' \
+            '/p:Exclude=\[*\]*.Migrations.*' \
             --verbosity normal
+      
+      - name: List coverage files (Debugging)
+        run: find . -name "coverage.opencover.xml"
       
       - name: End SonarCloud analysis
         env:
