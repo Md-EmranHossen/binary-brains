@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Moq;
 
-namespace ECommerceWebApp.Tests.Controllers
+namespace ECommerceSystem.Test.ControllerTests
 {
     public class CategoryControllerTests
     {
@@ -246,6 +246,20 @@ namespace ECommerceWebApp.Tests.Controllers
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
             _mockCategoryService.Verify(s => s.DeleteCategory(It.IsAny<int?>()), Times.Never);
+        }
+        [Fact]
+        public void Delete_Get_WithInvalidModelState_ReturnsBadRequest()
+        {
+            // Arrange
+            int categoryId = 1;
+            _controller.ModelState.AddModelError("Key", "Error message");
+
+            // Act
+            var result = _controller.Delete(categoryId);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+            _mockCategoryService.Verify(s => s.GetCategoryById(It.IsAny<int>()), Times.Never);
         }
     }
 }
