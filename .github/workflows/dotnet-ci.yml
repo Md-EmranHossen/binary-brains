@@ -11,27 +11,31 @@ jobs:
   build-and-analyze:
     name: Build and Analyze
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Fetching full history for SonarCloud
+      
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: "8.0.x"
+      
       - name: Set up JDK 17 for SonarCloud
         uses: actions/setup-java@v3
         with:
           java-version: 17
           distribution: "zulu"
-
-      - name: Install SonarCloud scanner
+      
+      - name: Install SonarCloud scanner and Coverlet
         run: |
           dotnet tool install --global dotnet-sonarscanner
+          dotnet tool install --global coverlet.console
+      
       - name: Restore dependencies
         run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln
+      
       - name: Begin SonarCloud analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,24 +46,42 @@ jobs:
             /o:"learnathon-by-geeky-solutions" \
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
+            /d:sonar.cs.opencover.reportsPaths="${{ github.workspace }}/coverage.xml" \
             /d:sonar.sources="Src" \
             /d:sonar.exclusions="**/bin/**,**/obj/**,**/*.Designer.cs,**/Migrations/**,**/*.cshtml,**/*.css,**/*.cshtml.cs" \
             /d:sonar.tests="Src" \
-            /d:sonar.test.inclusions="**/*Tests/**/*.cs,**/*.Tests.cs,**/*.Test.cs" \
+            /d:sonar.test.inclusions="**/*Tests/**/*.cs,**/*.Tests.cs,**/*.Test.cs,**/ECommerceSystem.Test/**/*.cs" \
             /d:sonar.sourceEncoding="UTF-8" \
-            /d:sonar.projectBaseDir="${{ github.workspace }}" \
-            /d:sonar.qualitygate.wait=true \
-            /d:sonar.scm.provider=git \
-            /d:sonar.alm.github.api.url=https://api.github.com \
-            /d:sonar.cfamily.build-wrapper-output.bypass=true \
-            /d:sonar.analytics.ci=github-actions
+            /d:sonar.projectBaseDir="${{ github.workspace }}"
+      
       - name: Build
-        run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --no-restore --configuration Release
-      - name: Test with coverage
+        run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --no-restore --configuration Release --no-incremental
+      
+      # First, identify the test project DLL path
+      - name: Find test project path
+        id: find-test-dll
         run: |
-          dotnet tool install --global dotnet-coverage
-          dotnet test Src/ECommerceSystem/ECommerceSystem.sln --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+          TEST_DLL_PATH=$(find . -path "*/bin/Release/*/ECommerceSystem.Test.dll" | head -1)
+          echo "TEST_DLL_PATH=$TEST_DLL_PATH" >> $GITHUB_ENV
+          echo "Found test DLL at: $TEST_DLL_PATH"
+      
+      # Then run coverlet with that path
+      - name: Run tests with Coverlet
+        run: |
+          coverlet "${{ env.TEST_DLL_PATH }}" \
+            --target "dotnet" \
+            --targetargs "test Src/ECommerceSystem/ECommerceSystem.sln --no-build --configuration Release" \
+            --include "[ECommerceWebApp]*" \
+            --include "[ECommerceSystem.Service]*" \
+            --include "[ECommerceSystem.DataAccess]*" \
+            --exclude "[*]*.Migrations.*" \
+            -f=opencover \
+            -o="${{ github.workspace }}/coverage.xml" \
+            --verbosity detailed
+      
+      - name: List coverage files (Debugging)
+        run: ls -la ${{ github.workspace }}/coverage.xml
+      
       - name: End SonarCloud analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -9,7 +9,7 @@
     <title>@ViewData["Title"] - AdminLTE Dashboard</title>
     <!-- Primary Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="title" content="AdminLTE v4 | Dashboard" />
+    <meta name="title" content="Amar Tech | Dashboard" />
     <meta name="author" content="ColorlibHQ" />
     <meta name="description" content="AdminLTE is a Free Bootstrap 5 Admin Dashboard, 30 example pages using Vanilla JS." />
     <meta name="keywords" content="bootstrap 5, bootstrap, bootstrap 5 admin dashboard, bootstrap 5 dashboard, bootstrap 5 charts, bootstrap 5 calendar, bootstrap 5 datepicker, bootstrap 5 tables, bootstrap 5 datatable, vanilla js datatable, colorlibhq, colorlibhq dashboard, colorlibhq admin dashboard" />
@@ -57,9 +57,7 @@
                             <i class="bi bi-cart"></i>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-area="Admin" asp-controller="Order" asp-action="Index">Manage Order</a>
-                    </li>
+                    
                 </ul>
                 <!-- End Navbar Links -->
                 <ul class="navbar-nav ms-auto">
@@ -103,7 +101,7 @@
                 <div class="sidebar-brand">
                     <a href="/" class="brand-link">
                         <img src="https://adminlte.io/themes/v3/dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow" />
-                        <span class="brand-text fw-light">AdminLTE 4</span>
+                        <span class="brand-text fw-light">Amar Tech</span>
                     </a>
                 </div>
                 <div class="sidebar-wrapper">
@@ -117,41 +115,40 @@
                                         <i class="nav-arrow bi bi-chevron-right"></i>
                                     </p>
                                 </a>
-                                <ul class="nav nav-treeview">
-                                    <li class="nav-item">
-                                        <a href="/Dashboard" class="nav-link active">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Dashboard v1</p>
-                                        </a>
-                                    </li>
-                                  
-                                </ul>
                             </li>
 
 
                             <!-- MANAGEMENT Section -->
                             <li class="nav-header">MANAGEMENT</li>
                             <li class="nav-item">
-                                <a class="nav-link dynamic-load" asp-area="Admin" asp-controller="Category" asp-action="Index">
+                                <a class="nav-link" asp-area="Admin" asp-controller="Category" asp-action="Index">
                                     <i class="nav-icon bi bi-tags"></i>
                                     <p>Category</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link dynamic-load" asp-area="Admin" asp-controller="Product" asp-action="Index">
+                                <a class="nav-link " asp-area="Admin" asp-controller="Product" asp-action="Index">
                                     <i class="nav-icon bi bi-box-seam"></i>
                                     <p>Product</p>
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link dynamic-load" asp-area="Admin" asp-controller="Company" asp-action="Index">
+                                <a class="nav-link" asp-area="Admin" asp-controller="Company" asp-action="Index">
                                     <i class="nav-icon bi bi-building"></i>
                                     <p>Company</p>
                                 </a>
                             </li>
+
                             <li class="nav-item">
-                                <a class="nav-link dynamic-load" asp-area="Identity" asp-controller="Account" asp-action="Register">
-                                    <i class="nav-icon bi bi-building"></i>
+                                <a class="nav-link" asp-area="Admin" asp-controller="Order" asp-action="Index">
+                                    <i class="nav-icon bi bi-list-check"></i>
+                                    <p>Manage Order</p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-controller="Account" asp-action="Register">
+                                    <i class="nav-icon bi bi-person-plus"></i>
                                     <p>Create User</p>
                                 </a>
                             </li>
@@ -229,10 +226,10 @@
         <!-- End App Main -->
         <!-- Footer -->
         <footer class="app-footer">
-            <div class="float-end d-none d-sm-inline">Anything you want</div>
+            <div class="float-end d-none d-sm-inline"></div>
             <strong>
-                Copyright © 2014-2024
-                <a href="https://adminlte.io" class="text-decoration-none">AdminLTE.io</a>.
+                Copyright © 2025
+                <a href="https://adminlte.io" class="text-decoration-none">Binary-Brains</a>.
             </strong>
             All rights reserved.
         </footer>
