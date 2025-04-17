@@ -10,6 +10,8 @@ namespace ECommerceSystem.Service.Services.IServices
 
         string GetUserrole(string userId);
 
+        void UpdateUser(ApplicationUser user);
+
 
     }
 }

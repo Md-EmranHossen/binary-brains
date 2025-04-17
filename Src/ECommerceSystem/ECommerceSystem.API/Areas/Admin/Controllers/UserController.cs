@@ -14,11 +14,9 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     {
         private readonly IApplicationUserService _applicationUserService;
 
-
         public UserController(IApplicationUserService applicationUserService)
         {
             _applicationUserService = applicationUserService;
-
         }
 
         public IActionResult Index()
@@ -33,8 +31,33 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
         }
 
+        public IActionResult LockUnlock(string? userId)
+        {
+            var userObj = _applicationUserService.GetUserById(userId);
+
+            if (userObj == null)
+            {
+                return NotFound();
+            }
+
+            if(userObj.LockoutEnd!=null && userObj.LockoutEnd > DateTime.Now)
+            {
+                userObj.LockoutEnd = DateTime.Now;
+            }
+            else
+            {
+                userObj.LockoutEnd = DateTime.Now.AddDays(10);
+            }
+            _applicationUserService.UpdateUser(userObj);
+  
 
 
-    
+            return RedirectToAction(nameof(Index));
+
+        }
+
+
+
+
     }
 }

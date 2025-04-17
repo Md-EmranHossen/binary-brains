@@ -31,8 +31,12 @@ namespace ECommerceSystem.DataAccess.Repository
 
             return role;
         }
+        public void Update(ApplicationUser obj)
+        {
+            _db.ApplicationUsers.Update(obj);
+        }
 
 
-        
+
     }
 }

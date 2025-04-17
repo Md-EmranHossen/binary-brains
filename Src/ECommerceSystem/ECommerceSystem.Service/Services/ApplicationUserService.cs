@@ -7,9 +7,12 @@ namespace ECommerceWebApp.Services
     public class ApplicationUserService : IApplicationUserService
     {
         private readonly IApplicationUserRepository _applicationUserRepositroy;
-        public ApplicationUserService(IApplicationUserRepository ApplicationUserRepositroy)
+        private readonly IUnitOfWork _unitOfWork;
+
+        public ApplicationUserService(IApplicationUserRepository ApplicationUserRepositroy,IUnitOfWork unitOfWork)
         {
             _applicationUserRepositroy = ApplicationUserRepositroy;
+            _unitOfWork = unitOfWork;
         }
 
         public IEnumerable<ApplicationUser> GetAllUsers()
@@ -21,6 +24,13 @@ namespace ECommerceWebApp.Services
         public string GetUserrole(string userId)
         {
            return _applicationUserRepositroy.GetUserRole(userId);
+        }
+
+        public void UpdateUser(ApplicationUser user)
+        {
+            _applicationUserRepositroy.Update(user);
+            _unitOfWork.Commit();
+
         }
 
         ApplicationUser? IApplicationUserService.GetUserById(string? id)
