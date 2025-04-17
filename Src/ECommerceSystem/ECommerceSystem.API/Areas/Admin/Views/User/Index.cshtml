@@ -39,7 +39,7 @@
                         <td>@obj.Email</td>
                         <td>@obj.PhoneNumber</td>
                         <td>@(obj.Company?.Name ?? "")</td>
-                        <td></td>
+                        <td>@obj.Role</td>
                         <td>
                             <div class="w-75 btn-group" role="group">
                                 <a asp-controller="User" asp-action="Edit" asp-route-id="@obj.Id" class="btn btn-primary mx-2">

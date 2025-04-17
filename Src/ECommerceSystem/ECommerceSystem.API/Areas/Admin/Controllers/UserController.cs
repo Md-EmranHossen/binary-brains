@@ -24,6 +24,11 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         public IActionResult Index()
         {
             var userList = _applicationUserService.GetAllUsers();
+
+            foreach (var user in userList)
+            {
+                user.Role=_applicationUserService.GetUserrole(user.Id);
+            }
             return View(userList);
 
         }

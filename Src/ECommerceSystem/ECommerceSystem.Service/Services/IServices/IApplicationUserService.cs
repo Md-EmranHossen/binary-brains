@@ -8,6 +8,8 @@ namespace ECommerceSystem.Service.Services.IServices
      
      IEnumerable<ApplicationUser> GetAllUsers();
 
+        string GetUserrole(string userId);
+
 
     }
 }

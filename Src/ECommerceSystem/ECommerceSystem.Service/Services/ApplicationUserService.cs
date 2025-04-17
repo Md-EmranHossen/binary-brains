@@ -18,6 +18,11 @@ namespace ECommerceWebApp.Services
             return obj;
         }
 
+        public string GetUserrole(string userId)
+        {
+           return _applicationUserRepositroy.GetUserRole(userId);
+        }
+
         ApplicationUser? IApplicationUserService.GetUserById(string? id)
         {
             return _applicationUserRepositroy.Get(u => u.Id == id);
