@@ -28,9 +28,10 @@ jobs:
           java-version: 17
           distribution: "zulu"
       
-      - name: Install SonarCloud scanner
+      - name: Install SonarCloud scanner and Coverlet
         run: |
           dotnet tool install --global dotnet-sonarscanner
+          dotnet tool install --global coverlet.console
       
       - name: Restore dependencies
         run: dotnet restore Src/ECommerceSystem/ECommerceSystem.sln
@@ -45,7 +46,7 @@ jobs:
             /o:"learnathon-by-geeky-solutions" \
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
+            /d:sonar.cs.opencover.reportsPaths="${{ github.workspace }}/coverage.xml" \
             /d:sonar.sources="Src" \
             /d:sonar.exclusions="**/bin/**,**/obj/**,**/*.Designer.cs,**/Migrations/**,**/*.cshtml,**/*.css,**/*.cshtml.cs" \
             /d:sonar.tests="Src" \
@@ -54,22 +55,32 @@ jobs:
             /d:sonar.projectBaseDir="${{ github.workspace }}"
       
       - name: Build
-        run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --no-restore --configuration Release
+        run: dotnet build Src/ECommerceSystem/ECommerceSystem.sln --no-restore --configuration Release --no-incremental
       
-      - name: Run tests with coverage
+      # First, identify the test project DLL path
+      - name: Find test project path
+        id: find-test-dll
         run: |
-          dotnet test Src/ECommerceSystem/ECommerceSystem.sln \
-            --no-build \
-            --configuration Release \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=./coverage.opencover.xml \
-            '/p:Include=\[ECommerceWebApp\]*,\[ECommerceSystem.Service\]*,\[ECommerceSystem.DataAccess\]*' \
-            '/p:Exclude=\[*\]*.Migrations.*' \
-            --verbosity normal
+          TEST_DLL_PATH=$(find . -path "*/bin/Release/*/ECommerceSystem.Test.dll" | head -1)
+          echo "TEST_DLL_PATH=$TEST_DLL_PATH" >> $GITHUB_ENV
+          echo "Found test DLL at: $TEST_DLL_PATH"
+      
+      # Then run coverlet with that path
+      - name: Run tests with Coverlet
+        run: |
+          coverlet "${{ env.TEST_DLL_PATH }}" \
+            --target "dotnet" \
+            --targetargs "test Src/ECommerceSystem/ECommerceSystem.sln --no-build --configuration Release" \
+            --include "[ECommerceWebApp]*" \
+            --include "[ECommerceSystem.Service]*" \
+            --include "[ECommerceSystem.DataAccess]*" \
+            --exclude "[*]*.Migrations.*" \
+            -f=opencover \
+            -o="${{ github.workspace }}/coverage.xml" \
+            --verbosity detailed
       
       - name: List coverage files (Debugging)
-        run: find . -name "coverage.opencover.xml"
+        run: ls -la ${{ github.workspace }}/coverage.xml
       
       - name: End SonarCloud analysis
         env:
