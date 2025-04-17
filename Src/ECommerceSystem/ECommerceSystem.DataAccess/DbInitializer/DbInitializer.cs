@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 
 namespace ECommerceSystem.DataAccess.DbInitializer
 {
-
-    internal class DbInitializer : IDbInitializer
+    public class DbInitializer : IDbInitializer
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -37,10 +36,8 @@ namespace ECommerceSystem.DataAccess.DbInitializer
             }
             catch (Exception ex)
             {
-
-
+                // Consider logging the exception details here
             }
-
 
             if (!_roleManager.RoleExistsAsync(SD.Role_Customer).GetAwaiter().GetResult())
             {
@@ -51,8 +48,7 @@ namespace ECommerceSystem.DataAccess.DbInitializer
 
                 _userManager.CreateAsync(new ApplicationUser
                 {
-
-                    UserName = "binarybrains",
+                    UserName = "admin@binarybrains.com", // Make sure username matches email for consistency
                     Email = "admin@binarybrains.com",
                     Name = "Emran Hossen",
                     PhoneNumber = "01794307576",
@@ -60,17 +56,17 @@ namespace ECommerceSystem.DataAccess.DbInitializer
                     State = "Dhaka",
                     PostalCode = "23422",
                     City = "Dhaka"
-
-                }, "Admin123*").GetAwaiter().GetResult();
-
+                }, "Admin1234").GetAwaiter().GetResult();
 
                 ApplicationUser user = _db.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@binarybrains.com");
-                _userManager.AddToRoleAsync(user, SD.Role_Admin).GetAwaiter().GetResult();
 
+                if (user != null) // Add null check for safety
+                {
+                    _userManager.AddToRoleAsync(user, SD.Role_Admin).GetAwaiter().GetResult();
+                }
             }
 
             return;
-
         }
     }
 }

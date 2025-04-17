@@ -24,7 +24,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
 // Identity setup
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+{
+    options.Password.RequireNonAlphanumeric = false;
+})
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
@@ -37,8 +40,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddAuthentication().AddFacebook(options =>
 {
-    options.AppId = "";
-    options.AppSecret = "";
+    options.AppId = "979605807612339";
+    options.AppSecret = "d9022fcc94c664820e180d962b250e59";
 });
 
 // Register IHttpContextAccessor for session access in services
@@ -52,6 +55,7 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 // Razor pages
 builder.Services.AddRazorPages();
@@ -75,7 +79,6 @@ builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
 builder.Services.AddScoped<IOrderHeaderService, OrderHeaderService>();
-
 
 
 var app = builder.Build();
