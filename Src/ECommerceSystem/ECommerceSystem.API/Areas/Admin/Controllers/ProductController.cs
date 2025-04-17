@@ -1,9 +1,5 @@
-﻿using ECommerceWebApp.Services;
-using ECommerceSystem.DataAccess.Repository;
-using ECommerceSystem.DataAccess.Repository.IRepository;
-using ECommerceSystem.Models;
+﻿using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using ECommerceSystem.Service.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 
