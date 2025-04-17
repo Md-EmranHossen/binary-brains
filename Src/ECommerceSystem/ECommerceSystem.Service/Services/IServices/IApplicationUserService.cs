@@ -4,6 +4,10 @@ namespace ECommerceSystem.Service.Services.IServices
 {
     public interface IApplicationUserService
     {
-     ApplicationUser? GetUserById(string? id);  
+     ApplicationUser? GetUserById(string? id);
+     
+     IEnumerable<ApplicationUser> GetAllUsers();
+
+
     }
 }

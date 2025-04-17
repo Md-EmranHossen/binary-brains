@@ -6,15 +6,22 @@ namespace ECommerceWebApp.Services
 {
     public class ApplicationUserService : IApplicationUserService
     {
-        private readonly IApplicationUserRepository ApplicationUserRepositroy;
+        private readonly IApplicationUserRepository _applicationUserRepositroy;
         public ApplicationUserService(IApplicationUserRepository ApplicationUserRepositroy)
         {
-            this.ApplicationUserRepositroy = ApplicationUserRepositroy;
+            _applicationUserRepositroy = ApplicationUserRepositroy;
+        }
+
+        public IEnumerable<ApplicationUser> GetAllUsers()
+        {
+            var obj= _applicationUserRepositroy.GetAll(includeProperties: "Company");
+            return obj;
         }
 
         ApplicationUser? IApplicationUserService.GetUserById(string? id)
         {
-            return ApplicationUserRepositroy.Get(u => u.Id == id);
+            return _applicationUserRepositroy.Get(u => u.Id == id);
         }
+
     }
 }

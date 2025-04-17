@@ -10,6 +10,6 @@ namespace ECommerceSystem.DataAccess.Repository.IRepository
 {
     public interface IApplicationUserRepository : IRepository<ApplicationUser>
     {
-       
+       string GetUserRole(string userId);
     }
 }
