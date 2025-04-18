@@ -100,6 +100,10 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                     PostalCode = applicationUser.PostalCode
                 }
             };
+            foreach (var i in shoppingCartVM.ShoppingCartList)
+            {
+                i.Price = (double)i.Product.Price;
+            }
 
             // Set payment & order status
             if (applicationUser.CompanyId.GetValueOrDefault() == 0)
@@ -149,7 +153,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            UnitAmount = (long)(20 * 100), // cents
+                            UnitAmount = (long)item.Price*100, // cents
                             Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {

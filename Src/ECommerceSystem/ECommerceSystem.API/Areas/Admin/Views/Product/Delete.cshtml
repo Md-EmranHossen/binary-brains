@@ -54,7 +54,7 @@
                     </div>
                 </div>
                 <div class="col-2">
-                    <img src="@Model.ImageUrl" style="border-radius:5px; border:1px solid #bbb9b9; width: 100%" />
+                    <img src="@(Model.ImageUrl ?? "https://placehold.co/600x400")" style="border-radius:5px; border:1px solid #bbb9b9; width: 100%" />
                 </div>
             </div>
         </form>
