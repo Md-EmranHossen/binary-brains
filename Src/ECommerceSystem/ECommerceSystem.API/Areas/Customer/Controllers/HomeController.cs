@@ -26,7 +26,10 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var productList = _productService.GetAllProducts();
+            HttpContext.Session.SetInt32(SD.SessionCart,
+   _shoppingCartService.GetShoppingCartByUserId(userId).Count());
             return View(productList);
         }
 
