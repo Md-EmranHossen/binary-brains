@@ -146,7 +146,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                     LineItems = new List<SessionLineItemOptions>(),
                     Mode = "payment",
                 };
-                var val = 0;
+             //   var val = 0;
                 foreach (var item in shoppingCartVM.ShoppingCartList)
                 {
                     var sessionLineItem = new SessionLineItemOptions
