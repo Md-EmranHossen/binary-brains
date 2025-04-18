@@ -136,6 +136,7 @@ namespace ECommerceSystem.Service.Services
                     OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
                                              .Sum(cart => cart.Product.Price * cart.Count)
                 }
+                
 
 
             };

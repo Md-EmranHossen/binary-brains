@@ -50,6 +50,11 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
             shoppingCartVM.OrderHeader.ApplicationUser = _applicationUserService.GetUserById(userId);
 
+            foreach(var i in shoppingCartVM.ShoppingCartList)
+            {
+                i.Price =(double) i.Product.Price;
+            }
+
 
 
             shoppingCartVM.OrderHeader.Name = shoppingCartVM.OrderHeader.ApplicationUser.Name;

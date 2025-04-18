@@ -10,7 +10,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-12 col-lg-4 text-center mb-3">
-                    <img src="@Model.Product.ImageUrl" width="100%" class="rounded" alt="@Model.Product.Title" />
+                    <img src="@(Model.Product.ImageUrl ?? "https://placehold.co/600x400")" width="100%" class="rounded" alt="@Model.Product.Title" />
                 </div>
                 <div class="col-12 col-lg-8">
                     <h5 class="text-muted">Description</h5>
