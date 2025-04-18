@@ -7,6 +7,7 @@ using ECommerceSystem.DataAccess.Repository;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services.IServices;
+using Microsoft.AspNetCore.Http;
 using Stripe.Checkout;
 
 namespace ECommerceSystem.Service.Services
@@ -15,11 +16,13 @@ namespace ECommerceSystem.Service.Services
     {
         private readonly IOrderHeaderRepository orderHeaderRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public OrderHeaderService(IOrderHeaderRepository orderHeaderRepository, IUnitOfWork unitOfWork)
+        public OrderHeaderService(IOrderHeaderRepository orderHeaderRepository, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
         {
             this.orderHeaderRepository = orderHeaderRepository;
             _unitOfWork = unitOfWork;
+            _httpContextAccessor = httpContextAccessor;
         }
         public void AddOrderHeader(OrderHeader orderHeader)
         {
@@ -94,6 +97,8 @@ namespace ECommerceSystem.Service.Services
                     _unitOfWork.Commit();
 
                 }
+                _httpContextAccessor.HttpContext.Session.Clear();
+                
             }
 
             return orderHeader;
