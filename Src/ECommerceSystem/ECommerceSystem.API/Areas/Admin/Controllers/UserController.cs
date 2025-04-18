@@ -17,11 +17,13 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     {
         private readonly IApplicationUserService _applicationUserService;
         private readonly ICompanyService _companyService;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public UserController(IApplicationUserService applicationUserService,ICompanyService companyService)
+        public UserController(IApplicationUserService applicationUserService,ICompanyService companyService, UserManager<IdentityUser> userManager)
         {
             _applicationUserService = applicationUserService;
             _companyService = companyService;
+            _userManager = userManager;
         }
 
         public IActionResult Index()
@@ -83,6 +85,39 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return View(RoleVM);
 
 
+        }
+
+        [HttpPost]
+        public IActionResult RoleManagement(RoleManagemantVM roleManagmentVM)
+        {
+
+            string oldRole = _userManager.GetRolesAsync(_applicationUserService.GetUserById(roleManagmentVM.User.Id))
+                    .GetAwaiter().GetResult().FirstOrDefault();
+
+            ApplicationUser applicationUser = _applicationUserService.GetUserById(roleManagmentVM.User.Id);
+
+
+            if (!(roleManagmentVM.User.Role == oldRole))
+            {
+                //a role was updated
+                if (roleManagmentVM.User.Role == SD.Role_Company)
+                {
+                    applicationUser.CompanyId = roleManagmentVM.User.CompanyId;
+                }
+                if (oldRole == SD.Role_Company)
+                {
+                    applicationUser.CompanyId = null;
+                }
+                _applicationUserService.UpdateUser(applicationUser);
+
+
+                _userManager.RemoveFromRoleAsync(applicationUser, oldRole).GetAwaiter().GetResult();
+                _userManager.AddToRoleAsync(applicationUser, roleManagmentVM.User.Role).GetAwaiter().GetResult();
+
+            }
+
+
+            return RedirectToAction("Index");
         }
 
 
