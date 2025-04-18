@@ -1,6 +1,7 @@
 ﻿using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,17 @@ namespace ECommerceSystem.DataAccess.Repository
         public void Update(ApplicationUser obj)
         {
             _db.ApplicationUsers.Update(obj);
+        }
+
+        public IEnumerable<SelectListItem> GetAllRoles()
+        {
+            return _db.Roles.Select(i => new SelectListItem
+            {
+                Text = i.Name,
+                Value = i.Name,
+
+
+            });
         }
 
 

@@ -1,4 +1,5 @@
 ﻿using ECommerceSystem.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +13,6 @@ namespace ECommerceSystem.DataAccess.Repository.IRepository
     {
        string GetUserRole(string userId);
         void Update(ApplicationUser applicationUser);
+        IEnumerable<SelectListItem> GetAllRoles();
     }
 }
