@@ -50,6 +50,11 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
             shoppingCartVM.OrderHeader.ApplicationUser = _applicationUserService.GetUserById(userId);
 
+            foreach(var i in shoppingCartVM.ShoppingCartList)
+            {
+                i.Price =(double) i.Product.Price;
+            }
+
 
 
             shoppingCartVM.OrderHeader.Name = shoppingCartVM.OrderHeader.ApplicationUser.Name;
@@ -95,6 +100,10 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                     PostalCode = applicationUser.PostalCode
                 }
             };
+            foreach (var i in shoppingCartVM.ShoppingCartList)
+            {
+                i.Price = (double)i.Product.Price;
+            }
 
             // Set payment & order status
             if (applicationUser.CompanyId.GetValueOrDefault() == 0)
@@ -119,7 +128,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 {
                     ProductId = cart.ProductId,
                     OrderHeaderId = shoppingCartVM.OrderHeader.Id,
-                    Price = cart.Price,
+                    Price = (double)cart.Product.Price,
                     Count = cart.Count
                 };
                 _orderDetailService.AddOrderDetail(orderDetail);
@@ -129,7 +138,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             // Stripe Checkout for individual users
             if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
-                var domain = "https://localhost:7000/";
+                var domain = "https://localhost:44360/";//change port as per your need (By FI)
                 var options = new Stripe.Checkout.SessionCreateOptions
                 {
                     SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={shoppingCartVM.OrderHeader.Id}",
@@ -144,7 +153,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            UnitAmount = (long)(20 * 100), // cents
+                            UnitAmount = (long)0, // cents item.Price * 100
                             Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
@@ -165,7 +174,6 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 Response.Headers.Add("Location", session.Url);
                 return new StatusCodeResult(303);
             }
-
             return RedirectToAction(nameof(OrderConfirmation), new { id = shoppingCartVM.OrderHeader.Id });
         }
 

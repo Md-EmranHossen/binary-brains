@@ -45,7 +45,7 @@
                 {
                     <tr>
                         <td>
-                            <img src="@obj.ImageUrl" alt="@obj.Title" style="width: 50px; height: 50px; object-fit: contain; border-radius: 5px; background-color: white;" />
+                            <img src="@(obj.ImageUrl ?? "https://placehold.co/600x400")" alt="@obj.Title" style="width: 50px; height: 50px; object-fit: contain; border-radius: 5px; background-color: white;" />
 
                         </td>
                         <td>@obj.Title</td>

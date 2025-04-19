@@ -10,14 +10,17 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-12 col-lg-4 text-center mb-3">
-                    <img src="@Model.Product.ImageUrl" width="100%" class="rounded" alt="@Model.Product.Title" />
+                    <img src="@(Model.Product.ImageUrl ?? "https://placehold.co/600x400")" width="100%" class="rounded" alt="@Model.Product.Title" />
                 </div>
                 <div class="col-12 col-lg-8">
                     <h5 class="text-muted">Description</h5>
                     <p class="text-secondary">@Model.Product.Description</p>
 
                     <h6 class="text-dark text-opacity-50">
-                        Stock: <b>@Model.Product.StockQuantity</b>
+                        @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+                        {
+                            <p>Stock: <b>@Model.Product.StockQuantity</b></p>
+                        }
                     </h6>
 
                     <h6 class="text-dark text-opacity-50">

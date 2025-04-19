@@ -44,13 +44,27 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 orderData=_orderHeaderService.GetAllOrderHeadersById(userId,"ApplicationUser");
             }
 
-            if (!string.IsNullOrEmpty(status) && status.ToLower() != "all")
+            switch (status)
             {
-                orderData = orderData.Where(u => u.OrderStatus.ToLower() == status.ToLower());
+                case "pending":
+                    orderData = orderData.Where(u => u.PaymentStatus == SD.PaymentStatusPending);
+                    break;
+                case "inprocess":
+                    orderData = orderData.Where(u => u.OrderStatus == SD.StatusInProcess);
+                    break;
+                case "completed":
+                    orderData = orderData.Where(u => u.OrderStatus == SD.StatusShipped);
+                    break;
+                case "approved":
+                    orderData = orderData.Where(u => u.OrderStatus == SD.StatusApproved); ;
+                    break;
+                default:
+                    break;
+
             }
 
 
-            
+
 
             return View(orderData);
         }
@@ -126,7 +140,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
             var orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id);
 
-            if (orderHeader.PaymentStatus == SD.PaymentStatusApproved)
+            if (orderHeader.PaymentStatus == SD.PaymentStatusApproved && orderHeader.PaymentIntentId!=null)
             {
                 var options = new RefundCreateOptions
                 {
