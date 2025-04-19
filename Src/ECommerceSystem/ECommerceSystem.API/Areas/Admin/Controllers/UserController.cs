@@ -111,7 +111,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             var oldRole = _userManager.GetRolesAsync(applicationUser)
                 .GetAwaiter().GetResult().FirstOrDefault() ?? string.Empty;
 
-            if (applicationUser != null &&
+            if (
      !string.IsNullOrEmpty(roleManagmentVM.User.Role) &&
      !string.Equals(roleManagmentVM.User.Role, oldRole, StringComparison.OrdinalIgnoreCase))
             {

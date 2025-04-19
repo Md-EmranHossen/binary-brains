@@ -27,11 +27,19 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         public IActionResult Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
             var productList = _productService.GetAllProducts();
-            HttpContext.Session.SetInt32(SD.SessionCart,
-   _shoppingCartService.GetShoppingCartByUserId(userId).Count());
+            var shoppingCartCount = _shoppingCartService.GetShoppingCartByUserId(userId)?.Count() ?? 0;
+            HttpContext.Session.SetInt32(SD.SessionCart, shoppingCartCount);
+
             return View(productList);
         }
+
 
         public IActionResult Details(int productId)
         {

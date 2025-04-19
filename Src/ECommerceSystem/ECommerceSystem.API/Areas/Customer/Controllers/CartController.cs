@@ -19,6 +19,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         private readonly IApplicationUserService _applicationUserService;
         private readonly IOrderHeaderService _orderHeaderService;
         private readonly IOrderDetailService _orderDetailService;
+        private const string HeaderLocation = "Location";
         public CartController(IShoppingCartService shoppingCartService, IUnitOfWork unitOfWork, IOrderHeaderService orderHeaderService, IApplicationUserService applicationUserService, IOrderDetailService orderDetailService)
         {
             _shoppingCartService = shoppingCartService;
@@ -60,7 +61,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             var user = _applicationUserService.GetUserById(userId);
             if (user == null)
             {
-                return NotFound(); // or redirect to error page
+                return NotFound(); 
             }
 
             shoppingCartVM.OrderHeader.ApplicationUser = user;
@@ -93,15 +94,29 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         [ActionName("Summary")]
         public IActionResult SummaryPost(ShoppingCartVM shoppingCartVM)
         {
-            /*if (!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
-            }*/
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId) ?? new List<ShoppingCart>();
+                return BadRequest(ModelState); 
+            }
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId) ?? new List<ShoppingCart>();
             var applicationUser = _applicationUserService.GetUserById(userId);
+
+            if (applicationUser == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            double orderTotal = shoppingCartList
+                .Where(cart => cart.Product != null)
+                .Sum(cart => (double)cart.Product.Price * cart.Count);
 
             shoppingCartVM = new ShoppingCartVM
             {
@@ -110,25 +125,24 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 {
                     ApplicationUserId = userId,
                     OrderDate = DateTime.Now,
-                    OrderTotal = (double)shoppingCartList
-                                    .Where(cart => cart.Product != null)
-                                    .Sum(cart => cart.Product.Price * cart.Count),
-
-                    // ✅ Fill required fields from ApplicationUser
+                    OrderTotal = orderTotal,
                     Name = applicationUser.Name,
-                    PhoneNumber = applicationUser.PhoneNumber,
-                    StreetAddress = applicationUser.StreetAddress,
-                    City = applicationUser.City,
-                    State = applicationUser.State,
-                    PostalCode = applicationUser.PostalCode
+                    PhoneNumber = applicationUser.PhoneNumber??string.Empty,
+                    StreetAddress = applicationUser.StreetAddress??string.Empty,
+                    City = applicationUser.City??string.Empty,
+                    State = applicationUser.State??string.Empty,
+                    PostalCode = applicationUser.PostalCode??string.Empty
                 }
             };
-            foreach (var i in shoppingCartVM.ShoppingCartList)
+
+            foreach (var item in shoppingCartVM.ShoppingCartList)
             {
-                i.Price = (double)i.Product.Price;
+                if (item.Product != null)
+                {
+                    item.Price = (double)item.Product.Price;
+                }
             }
 
-            // Set payment & order status
             if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
                 shoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
@@ -140,14 +154,14 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 shoppingCartVM.OrderHeader.OrderStatus = SD.StatusApproved;
             }
 
-            // Save OrderHeader
             _orderHeaderService.AddOrderHeader(shoppingCartVM.OrderHeader);
-            _unitOfWork.Commit(); // commit early to generate OrderHeader.Id
+            _unitOfWork.Commit();
 
-            // Save OrderDetails
             foreach (var cart in shoppingCartVM.ShoppingCartList)
             {
-                OrderDetail orderDetail = new()
+                if (cart.Product == null) continue;
+
+                var orderDetail = new OrderDetail
                 {
                     ProductId = cart.ProductId,
                     OrderHeaderId = shoppingCartVM.OrderHeader.Id,
@@ -158,25 +172,26 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             }
             _unitOfWork.Commit();
 
-            // Stripe Checkout for individual users
             if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
-                var domain = "https://localhost:7000/";//change port as per your need (By FI)
+                var domain = "https://localhost:7000/";
                 var options = new Stripe.Checkout.SessionCreateOptions
                 {
                     SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={shoppingCartVM.OrderHeader.Id}",
                     CancelUrl = domain + "customer/cart/index",
                     LineItems = new List<SessionLineItemOptions>(),
-                    Mode = "payment",
+                    Mode = "payment"
                 };
 
                 foreach (var item in shoppingCartVM.ShoppingCartList)
                 {
+                    if (item.Product == null) continue;
+
                     var sessionLineItem = new SessionLineItemOptions
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            UnitAmount = (long)item.Price * 100, // cents 
+                            UnitAmount = (long)(item.Price * 100),
                             Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
@@ -194,11 +209,14 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 _orderHeaderService.UpdateStripePaymentID(shoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
                 _unitOfWork.Commit();
 
-                Response.Headers.Add("Location", session.Url);
+                Response.Headers[HeaderLocation] = session.Url;
+
                 return new StatusCodeResult(303);
             }
+
             return RedirectToAction(nameof(OrderConfirmation), new { id = shoppingCartVM.OrderHeader.Id });
         }
+
 
 
         public IActionResult OrderConfirmation(int id)

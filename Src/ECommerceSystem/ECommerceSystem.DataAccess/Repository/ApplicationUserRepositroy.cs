@@ -20,18 +20,28 @@ namespace ECommerceSystem.DataAccess.Repository
             _db = db;
         }
 
-       public string GetUserRole(string userId)
+        public string GetUserRole(string userId)
         {
-            if(userId == null)
+            if (string.IsNullOrEmpty(userId))
             {
-                return "";
+                return string.Empty;
             }
-            var roleId=_db.UserRoles.FirstOrDefault(x => x.UserId == userId).RoleId;
-            var role = _db.Roles.FirstOrDefault(u => u.Id == roleId).Name;
 
+            var userRole = _db.UserRoles.FirstOrDefault(x => x.UserId == userId);
+            if (userRole == null)
+            {
+                return string.Empty;
+            }
 
-            return role;
+            var role = _db.Roles.FirstOrDefault(u => u.Id == userRole.RoleId);
+            if (role == null)
+            {
+                return string.Empty;
+            }
+
+            return role.Name ?? string.Empty;
         }
+
         public void Update(ApplicationUser applicationUser)
         {
             _db.ApplicationUsers.Update(applicationUser);
