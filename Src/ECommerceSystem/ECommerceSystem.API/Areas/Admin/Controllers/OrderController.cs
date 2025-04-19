@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 using Stripe.Checkout;
+using Stripe.Climate;
 using System.Security.Claims;
 
 namespace ECommerceWebApp.Areas.Admin.Controllers
@@ -70,6 +71,13 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         }
         public IActionResult Details(int id)
         {
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+
             OrderVM orderVM = new OrderVM()
             {
                 orderHeader = _orderHeaderService.GetOrderHeaderById(id, ApplicationUser),
@@ -83,6 +91,16 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [Authorize(Roles = SD.Role_Admin+","+SD.Role_Employee)]
         public IActionResult Details(OrderVM orderVM)
         {
+
+
+
+            if (!ModelState.IsValid)
+            {
+                return View(orderVM);
+            }
+
+
+
             var orderHeaderFromDb = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id);
 
             orderHeaderFromDb.Name = orderVM.orderHeader.Name;
@@ -110,6 +128,12 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public IActionResult StartProcessing(OrderVM orderVM)
         {
+
+            if (!ModelState.IsValid)
+            {
+                return View(orderVM);
+            }
+
             _orderHeaderService.UpdateStatus(orderVM.orderHeader.Id, SD.StatusInProcess);
 
             return RedirectToAction(nameof(Details), new { id=orderVM.orderHeader.Id });
@@ -119,6 +143,12 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public IActionResult ShipOrder(OrderVM orderVM)
         {
+
+            if (!ModelState.IsValid)
+            {
+                return View(orderVM);
+            }
+
             var orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id);
             orderHeader.TrackingNumber = orderVM.orderHeader.TrackingNumber;
             orderHeader.Carrier = orderVM.orderHeader.Carrier;
@@ -137,6 +167,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public IActionResult CancelOrder(OrderVM orderVM)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(orderVM);
+            }
 
             var orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id);
 
@@ -164,6 +198,11 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult PayDetails(OrderVM orderVM)
         {
+
+            if (!ModelState.IsValid)
+            {
+                return View(orderVM);
+            }
             orderVM.orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id,  ApplicationUser);
             orderVM.orderDetails = _orderDetailService.GetAllOrders(orderVM.orderHeader.Id, "Product");
 
@@ -206,6 +245,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         }
         public IActionResult PaymentConfirmation(int orderHeaderId)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(orderHeaderId);
+            }
 
             var orderHeader = _orderHeaderService.GetOrderHeaderById(orderHeaderId);
             if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
