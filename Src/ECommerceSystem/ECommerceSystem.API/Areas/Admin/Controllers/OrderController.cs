@@ -17,6 +17,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         private readonly IOrderHeaderService _orderHeaderService;
         private readonly IOrderDetailService _orderDetailService;
         private const string ApplicationUser = "ApplicationUser";
+        private const string HeaderLocation = "Location";
         public OrderController(IOrderHeaderService orderHeaderService,IOrderDetailService orderDetailService)
         {
             _orderHeaderService = orderHeaderService;
@@ -250,7 +251,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 {
                     PriceData = new SessionLineItemPriceDataOptions
                     {
-                        UnitAmount = (long)item.Price*100,
+                        UnitAmount = (long)(item.Price*100),
                         Currency = "usd",
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
@@ -268,7 +269,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
             _orderHeaderService.UpdateStripePaymentID(orderHeader.Id, session.Id, session.PaymentIntentId);
 
-            Response.Headers["Location"] = session.Url;
+            
+
+           Response.Headers[HeaderLocation] = session.Url;
+
             return new StatusCodeResult(303);
         }
 
