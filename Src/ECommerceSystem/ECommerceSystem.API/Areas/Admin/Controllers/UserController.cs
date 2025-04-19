@@ -90,32 +90,43 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult RoleManagement(RoleManagemantVM roleManagmentVM)
         {
-
-            string oldRole = _userManager.GetRolesAsync(_applicationUserService.GetUserById(roleManagmentVM.User.Id))
-                    .GetAwaiter().GetResult().FirstOrDefault();
-
-            ApplicationUser applicationUser = _applicationUserService.GetUserById(roleManagmentVM.User.Id);
-
-
-            if (!(roleManagmentVM.User.Role == oldRole))
+            if (!ModelState.IsValid)
             {
-                //a role was updated
-                if (roleManagmentVM.User.Role == SD.Role_Company)
-                {
-                    applicationUser.CompanyId = roleManagmentVM.User.CompanyId;
-                }
-                if (oldRole == SD.Role_Company)
-                {
-                    applicationUser.CompanyId = null;
-                }
-                _applicationUserService.UpdateUser(applicationUser);
-
-
-                _userManager.RemoveFromRoleAsync(applicationUser, oldRole).GetAwaiter().GetResult();
-                _userManager.AddToRoleAsync(applicationUser, roleManagmentVM.User.Role).GetAwaiter().GetResult();
-
+                return View(roleManagmentVM);
             }
 
+            ApplicationUser? applicationUser = _applicationUserService.GetUserById(roleManagmentVM.User.Id);
+            if (applicationUser == null)
+            {
+                ModelState.AddModelError("", "User not found.");
+                return View(roleManagmentVM);
+            }
+
+            string oldRole = _userManager.GetRolesAsync(applicationUser)
+                .GetAwaiter().GetResult().FirstOrDefault() ?? string.Empty;
+
+            if (roleManagmentVM.User.Role != oldRole)
+            {
+                // A role was updated
+                if (applicationUser != null) 
+                {
+                    if (roleManagmentVM.User.Role == SD.Role_Company)
+                    {
+                        applicationUser.CompanyId = roleManagmentVM.User.CompanyId;
+                    }
+                    if (oldRole == SD.Role_Company)
+                    {
+                        applicationUser.CompanyId = null;
+                    }
+                    _applicationUserService.UpdateUser(applicationUser);
+
+                    if (!string.IsNullOrEmpty(oldRole))
+                    {
+                        _userManager.RemoveFromRoleAsync(applicationUser, oldRole).GetAwaiter().GetResult();
+                    }
+                    _userManager.AddToRoleAsync(applicationUser, roleManagmentVM.User.Role).GetAwaiter().GetResult();
+                }
+            }
 
             return RedirectToAction("Index");
         }

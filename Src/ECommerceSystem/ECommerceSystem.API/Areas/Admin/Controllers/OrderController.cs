@@ -37,7 +37,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
             else
             {
-                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                var claimsIdentity = User.Identity as ClaimsIdentity;
 
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -63,10 +63,6 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                     break;
 
             }
-
-
-
-
             return View(orderData);
         }
         public IActionResult Details(int id)
@@ -183,7 +179,6 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 };
 
                 var service = new RefundService();
-                Refund refund = service.Create(options);
 
                 _orderHeaderService.UpdateStatus(orderHeader.Id, SD.StatusCancelled, SD.StatusRefunded);
             }
