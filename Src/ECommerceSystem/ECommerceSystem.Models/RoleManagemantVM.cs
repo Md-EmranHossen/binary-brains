@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace ECommerceSystem.Models
 {
-    public class RoleManagementVM
+    public class RoleManagemantVM
     {
         public ApplicationUser? User { get; set; } 
 
