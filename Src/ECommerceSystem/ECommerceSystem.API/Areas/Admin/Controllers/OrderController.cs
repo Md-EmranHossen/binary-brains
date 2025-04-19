@@ -15,7 +15,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
     {
         private readonly IOrderHeaderService _orderHeaderService;
         private readonly IOrderDetailService _orderDetailService;
-
+        private const string ApplicationUser = "ApplicationUser";
         public OrderController(IOrderHeaderService orderHeaderService,IOrderDetailService orderDetailService)
         {
             _orderHeaderService = orderHeaderService;
@@ -31,7 +31,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
             if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
             {
-               orderData = _orderHeaderService.GetAllOrderHeaders("ApplicationUser");
+               orderData = _orderHeaderService.GetAllOrderHeaders(ApplicationUser);
             }
 
             else
@@ -41,7 +41,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
 
-                orderData=_orderHeaderService.GetAllOrderHeadersById(userId,"ApplicationUser");
+                orderData=_orderHeaderService.GetAllOrderHeadersById(userId, ApplicationUser);
             }
 
             switch (status)
@@ -72,7 +72,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         {
             OrderVM orderVM = new OrderVM()
             {
-                orderHeader = _orderHeaderService.GetOrderHeaderById(id, "ApplicationUser"),
+                orderHeader = _orderHeaderService.GetOrderHeaderById(id, ApplicationUser),
                 orderDetails=_orderDetailService.GetAllOrders(id,"Product")
             };
 
@@ -164,7 +164,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult PayDetails(OrderVM orderVM)
         {
-            orderVM.orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id,  "ApplicationUser");
+            orderVM.orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id,  ApplicationUser);
             orderVM.orderDetails = _orderDetailService.GetAllOrders(orderVM.orderHeader.Id, "Product");
 
 
