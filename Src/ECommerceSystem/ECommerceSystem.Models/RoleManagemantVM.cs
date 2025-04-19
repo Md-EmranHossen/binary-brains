@@ -1,17 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ECommerceSystem.Models
 {
-    public class RoleManagemantVM
+    public class RoleManagementVM
     {
-        public ApplicationUser User { get; set; }
-        public IEnumerable<SelectListItem> RoleList { get; set; }
+        public ApplicationUser? User { get; set; } 
 
-        public IEnumerable<SelectListItem> CompanyList { get; set; }
+        public IEnumerable<SelectListItem> RoleList { get; set; } = new List<SelectListItem>();
+
+        public IEnumerable<SelectListItem> CompanyList { get; set; } = new List<SelectListItem>();
     }
 }

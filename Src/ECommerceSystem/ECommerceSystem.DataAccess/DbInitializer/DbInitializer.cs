@@ -36,7 +36,7 @@ namespace ECommerceSystem.DataAccess.DbInitializer
             }
             catch (Exception)
             {
-               
+                // Exception intentionally ignored: migrations are optional during startup
             }
 
             if (!_roleManager.RoleExistsAsync(SD.Role_Customer).GetAwaiter().GetResult())
