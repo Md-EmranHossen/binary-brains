@@ -138,7 +138,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             // Stripe Checkout for individual users
             if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
-                var domain = "https://localhost:44360/";//change port as per your need (By FI)
+                var domain = "https://localhost:7000/";//change port as per your need (By FI)
                 var options = new Stripe.Checkout.SessionCreateOptions
                 {
                     SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={shoppingCartVM.OrderHeader.Id}",
@@ -153,7 +153,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            UnitAmount = (long)0, // cents item.Price * 100
+                            UnitAmount = (long)item.Price * 100, // cents 
                             Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
