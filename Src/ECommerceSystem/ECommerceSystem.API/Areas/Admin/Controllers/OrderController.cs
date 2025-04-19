@@ -26,23 +26,24 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
 
 
-        public IActionResult Index(string? status) 
+        public IActionResult Index(string? status)
         {
             IEnumerable<OrderHeader> orderData;
 
             if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
             {
-               orderData = _orderHeaderService.GetAllOrderHeaders(ApplicationUser);
+                orderData = _orderHeaderService.GetAllOrderHeaders(ApplicationUser);
             }
-
+            else if (User.Identity is ClaimsIdentity identity &&
+                     identity.FindFirst(ClaimTypes.NameIdentifier) is Claim userIdClaim &&
+                     !string.IsNullOrEmpty(userIdClaim.Value))
+            {
+                orderData = _orderHeaderService.GetAllOrderHeadersById(userIdClaim.Value, ApplicationUser);
+            }
             else
             {
-                var claimsIdentity = User.Identity as ClaimsIdentity;
-
-                var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-
-                orderData=_orderHeaderService.GetAllOrderHeadersById(userId, ApplicationUser);
+                // Unauthorized or invalid identity
+                return Unauthorized(); // or return View with empty list or error message
             }
 
             switch (status)
@@ -57,47 +58,53 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                     orderData = orderData.Where(u => u.OrderStatus == SD.StatusShipped);
                     break;
                 case "approved":
-                    orderData = orderData.Where(u => u.OrderStatus == SD.StatusApproved); 
+                    orderData = orderData.Where(u => u.OrderStatus == SD.StatusApproved);
                     break;
                 default:
                     break;
-
             }
+
             return View(orderData);
         }
+
         public IActionResult Details(int id)
         {
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
+            var orderHeader = _orderHeaderService.GetOrderHeaderById(id, ApplicationUser);
+            if (orderHeader == null)
+            {
+                return NotFound(); // or return an error view/message
+            }
 
             OrderVM orderVM = new OrderVM()
             {
-                orderHeader = _orderHeaderService.GetOrderHeaderById(id, ApplicationUser),
-                orderDetails=_orderDetailService.GetAllOrders(id,"Product")
+                orderHeader = orderHeader,
+                orderDetails = _orderDetailService.GetAllOrders(id, "Product")
             };
 
             return View(orderVM);
         }
 
+
         [HttpPost]
-        [Authorize(Roles = SD.Role_Admin+","+SD.Role_Employee)]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public IActionResult Details(OrderVM orderVM)
         {
-
-
-
             if (!ModelState.IsValid)
             {
                 return View(orderVM);
             }
 
-
-
             var orderHeaderFromDb = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id);
+
+            if (orderHeaderFromDb == null)
+            {
+                return NotFound(); // Or return an error message view
+            }
 
             orderHeaderFromDb.Name = orderVM.orderHeader.Name;
             orderHeaderFromDb.PhoneNumber = orderVM.orderHeader.PhoneNumber;
@@ -105,6 +112,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             orderHeaderFromDb.City = orderVM.orderHeader.City;
             orderHeaderFromDb.State = orderVM.orderHeader.State;
             orderHeaderFromDb.PostalCode = orderVM.orderHeader.PostalCode;
+
             if (!string.IsNullOrEmpty(orderVM.orderHeader.Carrier))
             {
                 orderHeaderFromDb.Carrier = orderVM.orderHeader.Carrier;
@@ -113,12 +121,12 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             {
                 orderHeaderFromDb.TrackingNumber = orderVM.orderHeader.TrackingNumber;
             }
-            _orderHeaderService.UpdateOrderHeader(orderHeaderFromDb);
-    
 
+            _orderHeaderService.UpdateOrderHeader(orderHeaderFromDb);
 
             return RedirectToAction(nameof(Details), new { id = orderHeaderFromDb.Id });
         }
+
 
         [HttpPost]
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
@@ -146,6 +154,12 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             }
 
             var orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id);
+
+            if (orderHeader == null)
+            {
+                return NotFound(); // Or return an error view
+            }
+
             orderHeader.TrackingNumber = orderVM.orderHeader.TrackingNumber;
             orderHeader.Carrier = orderVM.orderHeader.Carrier;
             orderHeader.OrderStatus = SD.StatusShipped;
@@ -170,6 +184,12 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
             var orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id);
 
+            if (orderHeader == null)
+            {
+                return NotFound(); // or return an appropriate error view
+            }
+
+
             if (orderHeader.PaymentStatus == SD.PaymentStatusApproved && orderHeader.PaymentIntentId!=null)
             {
                 var options = new RefundCreateOptions
@@ -193,32 +213,40 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult PayDetails(OrderVM orderVM)
         {
-
             if (!ModelState.IsValid)
             {
                 return View(orderVM);
             }
-            orderVM.orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id,  ApplicationUser);
-            orderVM.orderDetails = _orderDetailService.GetAllOrders(orderVM.orderHeader.Id, "Product");
 
+            var orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id, ApplicationUser);
 
-            //stripe logic
-            var domain = Request.Scheme + "://" + Request.Host.Value + "/";
+            if (orderHeader == null)
+            {
+                return NotFound(); // Or show an error view
+            }
+
+            var orderDetails = _orderDetailService.GetAllOrders(orderHeader.Id, "Product");
+
+            orderVM.orderHeader = orderHeader;
+            orderVM.orderDetails = orderDetails;
+
+            // Stripe logic
+            var domain = $"{Request.Scheme}://{Request.Host.Value}/";
             var options = new SessionCreateOptions
             {
-                SuccessUrl = domain + $"admin/order/PaymentConfirmation?orderHeaderId={orderVM.orderHeader.Id}",
-                CancelUrl = domain + $"admin/order/details?id={orderVM.orderHeader.Id}",
+                SuccessUrl = domain + $"admin/order/PaymentConfirmation?orderHeaderId={orderHeader.Id}",
+                CancelUrl = domain + $"admin/order/details?id={orderHeader.Id}",
                 LineItems = new List<SessionLineItemOptions>(),
                 Mode = "payment",
             };
 
-            foreach (var item in orderVM.orderDetails)
+            foreach (var item in orderDetails)
             {
                 var sessionLineItem = new SessionLineItemOptions
                 {
                     PriceData = new SessionLineItemPriceDataOptions
                     {
-                        UnitAmount = (long)(item.Price * 100), // $20.50 => 2050
+                        UnitAmount = (long)(item.Price * 100),
                         Currency = "usd",
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
@@ -227,17 +255,19 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                     },
                     Quantity = item.Count
                 };
+
                 options.LineItems.Add(sessionLineItem);
             }
 
-
             var service = new SessionService();
             Session session = service.Create(options);
-            _orderHeaderService.UpdateStripePaymentID(orderVM.orderHeader.Id, session.Id, session.PaymentIntentId);
+
+            _orderHeaderService.UpdateStripePaymentID(orderHeader.Id, session.Id, session.PaymentIntentId);
 
             Response.Headers.Add("Location", session.Url);
             return new StatusCodeResult(303);
         }
+
         public IActionResult PaymentConfirmation(int orderHeaderId)
         {
             if (!ModelState.IsValid)

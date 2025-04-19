@@ -29,14 +29,14 @@ namespace ECommerceSystem.DataAccess.DbInitializer
         {
             try
             {
-                if (_db.Database.GetPendingMigrations().Count() > 0)
+                if (_db.Database.GetPendingMigrations().Any())
                 {
                     _db.Database.Migrate();
                 }
             }
             catch (Exception)
             {
-                // Consider logging the exception details here
+               
             }
 
             if (!_roleManager.RoleExistsAsync(SD.Role_Customer).GetAwaiter().GetResult())
@@ -58,15 +58,15 @@ namespace ECommerceSystem.DataAccess.DbInitializer
                     City = "Dhaka"
                 }, "Admin1234").GetAwaiter().GetResult();
 
-                ApplicationUser user = _db.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@binarybrains.com");
+                var user = _db.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@binarybrains.com");
 
-                if (user != null) // Add null check for safety
+                if (user != null)
                 {
                     _userManager.AddToRoleAsync(user, SD.Role_Admin).GetAwaiter().GetResult();
                 }
+
             }
 
-            return;
         }
     }
 }
