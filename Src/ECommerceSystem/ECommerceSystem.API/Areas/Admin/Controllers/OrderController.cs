@@ -242,6 +242,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
             foreach (var item in orderDetails)
             {
+                if (item.Product == null)
+                {
+                    continue; 
+                }
                 var sessionLineItem = new SessionLineItemOptions
                 {
                     PriceData = new SessionLineItemPriceDataOptions
