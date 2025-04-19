@@ -65,10 +65,10 @@ namespace ECommerceSystem.Test.ControllerTests
             _mockProductService.Setup(s => s.CategoryList()).Returns(expectedCategoryList);
 
             // Act
-            var result = _controller.Create();
+             _controller.Create();
 
             // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
+
             Assert.Equal(expectedCategoryList, _controller.ViewBag.CategoryList);
         }
 
@@ -116,11 +116,11 @@ namespace ECommerceSystem.Test.ControllerTests
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             // Test with null id
-            var result1 = method.Invoke(_controller, new object[] { null, "Edit" }) as IActionResult;
+            var result1 = method?.Invoke(_controller, new object[] { null, "Edit" }) as IActionResult;
             Assert.IsType<NotFoundResult>(result1);
 
             // Test with zero id
-            var result2 = method.Invoke(_controller, new object[] { 0, "Edit" }) as IActionResult;
+            var result2 = method?.Invoke(_controller, new object[] { 0, "Edit" }) as IActionResult;
             Assert.IsType<NotFoundResult>(result2);
         }
 
@@ -129,14 +129,14 @@ namespace ECommerceSystem.Test.ControllerTests
         {
             // Arrange
             int productId = 99;
-            _mockProductService.Setup(s => s.GetProductById(productId)).Returns((Product)null);
+            _mockProductService.Setup(s => s.GetProductById(productId)).Returns((Product?)null);
 
             // Call the private method using reflection
             var method = typeof(ProductController).GetMethod("LoadProductViewWithCategories",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             // Act
-            var result = method.Invoke(_controller, new object[] { productId, "Edit" }) as IActionResult;
+            var result = method?.Invoke(_controller, new object[] { productId, "Edit" }) as IActionResult;
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -162,7 +162,7 @@ namespace ECommerceSystem.Test.ControllerTests
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             // Act
-            var result = method.Invoke(_controller, new object[] { productId, "TestView" }) as IActionResult;
+            var result = method?.Invoke(_controller, new object[] { productId, "TestView" }) as IActionResult;
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);

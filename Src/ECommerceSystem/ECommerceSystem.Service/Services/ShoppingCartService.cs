@@ -5,6 +5,7 @@ using ECommerceSystem.Service.Services.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Stripe.Checkout;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -199,13 +200,90 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
             }
             DeleteShoppingCart(cartId);
             _httpContextAccessor.HttpContext.Session.SetInt32(SD.SessionCart,
-GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
+            GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
             _unitOfWork.Commit();
         }
 
         public IEnumerable<ShoppingCart> GetShoppingCartByUserId(string userId)
         {
             return _shoppingCartRepository.GetAll(u => u.ApplicationUserId == userId);
+        }
+
+        public ShoppingCartVM GetShoppingCartVMForSummaryPost(IEnumerable<ShoppingCart> shoppingCartList,ApplicationUser applicationUser,string userId)
+        {
+            double orderTotal = shoppingCartList
+             .Where(cart => cart.Product != null)
+             .Sum(cart => (double)cart.Product.Price * cart.Count);
+
+
+            var shoppingCartVM= new ShoppingCartVM
+            {
+                ShoppingCartList = shoppingCartList,
+                OrderHeader = new OrderHeader
+                {
+                    ApplicationUserId = userId,
+                    OrderDate = DateTime.Now,
+                    OrderTotal = orderTotal,
+                    Name = applicationUser.Name,
+                    PhoneNumber = applicationUser.PhoneNumber ?? string.Empty,
+                    StreetAddress = applicationUser.StreetAddress ?? string.Empty,
+                    City = applicationUser.City ?? string.Empty,
+                    State = applicationUser.State ?? string.Empty,
+                    PostalCode = applicationUser.PostalCode ?? string.Empty
+                }
+            };
+            foreach (var item in shoppingCartVM.ShoppingCartList)
+            {
+                if (item.Product != null)
+                {
+                    item.Price = (double)item.Product.Price;
+                }
+            }
+
+            if (applicationUser.CompanyId.GetValueOrDefault() == 0)
+            {
+                shoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
+                shoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
+            }
+            else
+            {
+                shoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPayment;
+                shoppingCartVM.OrderHeader.OrderStatus = SD.StatusApproved;
+            }
+            return shoppingCartVM;
+        }
+
+        public SessionCreateOptions CheckOutForUser(ShoppingCartVM shoppingCartVM)
+        {
+            var domain = "https://localhost:7000/";
+            var options = new Stripe.Checkout.SessionCreateOptions
+            {
+                SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={shoppingCartVM.OrderHeader.Id}",
+                CancelUrl = domain + "customer/cart/index",
+                LineItems = new List<SessionLineItemOptions>(),
+                Mode = "payment"
+            };
+
+            foreach (var item in shoppingCartVM.ShoppingCartList)
+            {
+                if (item.Product == null) continue;
+
+                var sessionLineItem = new SessionLineItemOptions
+                {
+                    PriceData = new SessionLineItemPriceDataOptions
+                    {
+                        UnitAmount = (long)(item.Price * 100),
+                        Currency = "usd",
+                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        {
+                            Name = item.Product.Title
+                        }
+                    },
+                    Quantity = item.Count
+                };
+                options.LineItems.Add(sessionLineItem);
+            }
+            return options;
         }
     }
 }

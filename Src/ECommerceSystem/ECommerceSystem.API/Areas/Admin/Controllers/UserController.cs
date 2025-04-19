@@ -101,18 +101,17 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 return View(roleManagmentVM);
             }
 
-            ApplicationUser? applicationUser = _applicationUserService.GetUserById(roleManagmentVM.User.Id);
+            ApplicationUser? applicationUser = _applicationUserService.GetUserById(roleManagmentVM.User?.Id);
             if (applicationUser == null)
             {
-                ModelState.AddModelError("", "User not found.");
-                return View(roleManagmentVM);
+                return NotFound("User not found");
             }
 
             var oldRole = _userManager.GetRolesAsync(applicationUser)
                 .GetAwaiter().GetResult().FirstOrDefault() ?? string.Empty;
 
             if (
-     !string.IsNullOrEmpty(roleManagmentVM.User.Role) &&
+     !string.IsNullOrEmpty(roleManagmentVM.User?.Role) &&
      !string.Equals(roleManagmentVM.User.Role, oldRole, StringComparison.OrdinalIgnoreCase))
             {
                 // A role was updated
