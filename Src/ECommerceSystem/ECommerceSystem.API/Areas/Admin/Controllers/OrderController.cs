@@ -242,6 +242,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
             foreach (var item in orderDetails)
             {
+                if (item.Product == null)
+                {
+                    continue; 
+                }
                 var sessionLineItem = new SessionLineItemOptions
                 {
                     PriceData = new SessionLineItemPriceDataOptions
@@ -276,6 +280,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             }
 
             var orderHeader = _orderHeaderService.GetOrderHeaderById(orderHeaderId);
+            if (orderHeader == null)
+            {
+                return NotFound(); // or handle accordingly (e.g., show error page)
+            }
             if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
             {
                 //this is an order by company
