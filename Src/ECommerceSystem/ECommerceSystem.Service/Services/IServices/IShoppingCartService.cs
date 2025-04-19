@@ -1,5 +1,6 @@
 ﻿using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
+using Stripe.Checkout;
 using System.Security.Claims;
 
 namespace ECommerceSystem.Service.Services.IServices
@@ -30,6 +31,10 @@ namespace ECommerceSystem.Service.Services.IServices
 
         void RemoveCartValue(int cartId);
         IEnumerable<ShoppingCart> GetShoppingCartByUserId(string userId);
+
+        ShoppingCartVM GetShoppingCartVMForSummaryPost(IEnumerable<ShoppingCart> shoppingCartList, ApplicationUser applicationUser, string userId);
+
+        SessionCreateOptions CheckOutForUser(ShoppingCartVM shoppingCartVM);
 
 
 

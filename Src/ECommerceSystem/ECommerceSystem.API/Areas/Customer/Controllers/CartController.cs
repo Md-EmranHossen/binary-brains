@@ -15,15 +15,14 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
     public class CartController : Controller
     {
         private readonly IShoppingCartService _shoppingCartService;
-        private readonly IUnitOfWork _unitOfWork;
+
         private readonly IApplicationUserService _applicationUserService;
         private readonly IOrderHeaderService _orderHeaderService;
         private readonly IOrderDetailService _orderDetailService;
         private const string HeaderLocation = "Location";
-        public CartController(IShoppingCartService shoppingCartService, IUnitOfWork unitOfWork, IOrderHeaderService orderHeaderService, IApplicationUserService applicationUserService, IOrderDetailService orderDetailService)
+        public CartController(IShoppingCartService shoppingCartService, IOrderHeaderService orderHeaderService, IApplicationUserService applicationUserService, IOrderDetailService orderDetailService)
         {
             _shoppingCartService = shoppingCartService;
-            _unitOfWork = unitOfWork;
             _orderHeaderService = orderHeaderService;
             _applicationUserService = applicationUserService;
             _orderDetailService = orderDetailService;
@@ -94,9 +93,9 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         [ActionName("Summary")]
         public IActionResult SummaryPost(ShoppingCartVM shoppingCartVM)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid)//need
             {
-                return BadRequest(ModelState); 
+                return BadRequest(ModelState);
             }
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -114,100 +113,20 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 return NotFound("User not found.");
             }
 
-            double orderTotal = shoppingCartList
-                .Where(cart => cart.Product != null)
-                .Sum(cart => (double)cart.Product.Price * cart.Count);
-
-            shoppingCartVM = new ShoppingCartVM
-            {
-                ShoppingCartList = shoppingCartList,
-                OrderHeader = new OrderHeader
-                {
-                    ApplicationUserId = userId,
-                    OrderDate = DateTime.Now,
-                    OrderTotal = orderTotal,
-                    Name = applicationUser.Name,
-                    PhoneNumber = applicationUser.PhoneNumber??string.Empty,
-                    StreetAddress = applicationUser.StreetAddress??string.Empty,
-                    City = applicationUser.City??string.Empty,
-                    State = applicationUser.State??string.Empty,
-                    PostalCode = applicationUser.PostalCode??string.Empty
-                }
-            };
-
-            foreach (var item in shoppingCartVM.ShoppingCartList)
-            {
-                if (item.Product != null)
-                {
-                    item.Price = (double)item.Product.Price;
-                }
-            }
-
-            if (applicationUser.CompanyId.GetValueOrDefault() == 0)
-            {
-                shoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
-                shoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
-            }
-            else
-            {
-                shoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPayment;
-                shoppingCartVM.OrderHeader.OrderStatus = SD.StatusApproved;
-            }
+            shoppingCartVM = _shoppingCartService.GetShoppingCartVMForSummaryPost(shoppingCartList, applicationUser,userId);
 
             _orderHeaderService.AddOrderHeader(shoppingCartVM.OrderHeader);
-            _unitOfWork.Commit();
 
-            foreach (var cart in shoppingCartVM.ShoppingCartList)
-            {
-                if (cart.Product == null) continue;
-
-                var orderDetail = new OrderDetail
-                {
-                    ProductId = cart.ProductId,
-                    OrderHeaderId = shoppingCartVM.OrderHeader.Id,
-                    Price = (double)cart.Product.Price,
-                    Count = cart.Count
-                };
-                _orderDetailService.AddOrderDetail(orderDetail);
-            }
-            _unitOfWork.Commit();
+            _orderDetailService.UpdateOrderDetailsValues(shoppingCartVM);
 
             if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
-                var domain = "https://localhost:7000/";
-                var options = new Stripe.Checkout.SessionCreateOptions
-                {
-                    SuccessUrl = domain + $"customer/cart/OrderConfirmation?id={shoppingCartVM.OrderHeader.Id}",
-                    CancelUrl = domain + "customer/cart/index",
-                    LineItems = new List<SessionLineItemOptions>(),
-                    Mode = "payment"
-                };
-
-                foreach (var item in shoppingCartVM.ShoppingCartList)
-                {
-                    if (item.Product == null) continue;
-
-                    var sessionLineItem = new SessionLineItemOptions
-                    {
-                        PriceData = new SessionLineItemPriceDataOptions
-                        {
-                            UnitAmount = (long)(item.Price * 100),
-                            Currency = "usd",
-                            ProductData = new SessionLineItemPriceDataProductDataOptions
-                            {
-                                Name = item.Product.Title
-                            }
-                        },
-                        Quantity = item.Count
-                    };
-                    options.LineItems.Add(sessionLineItem);
-                }
+                var options = _shoppingCartService.CheckOutForUser(shoppingCartVM);
 
                 var service = new SessionService();
                 var session = service.Create(options);
 
                 _orderHeaderService.UpdateStripePaymentID(shoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
-                _unitOfWork.Commit();
 
                 Response.Headers[HeaderLocation] = session.Url;
 

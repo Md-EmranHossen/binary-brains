@@ -98,11 +98,11 @@ namespace ECommerceSystem.Test.ControllerTests
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             // Test with null id
-            var result1 = method.Invoke(_controller, new object[] { null, "Edit" }) as IActionResult;
+            var result1 = method?.Invoke(_controller, new object[] { null, "Edit" }) as IActionResult;
             Assert.IsType<NotFoundResult>(result1);
 
             // Test with zero id
-            var result2 = method.Invoke(_controller, new object[] { 0, "Edit" }) as IActionResult;
+            var result2 = method?.Invoke(_controller, new object[] { 0, "Edit" }) as IActionResult;
             Assert.IsType<NotFoundResult>(result2);
         }
 
@@ -111,14 +111,14 @@ namespace ECommerceSystem.Test.ControllerTests
         {
             // Arrange
             int companyId = 99;
-            _mockCompanyService.Setup(s => s.GetCompanyById(companyId)).Returns((Company)null);
+            _mockCompanyService.Setup(s => s.GetCompanyById(companyId)).Returns((Company?)null);
 
             // Call the private method using reflection
             var method = typeof(CompanyController).GetMethod("LoadCompanyView",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             // Act
-            var result = method.Invoke(_controller, new object[] { companyId, "Edit" }) as IActionResult;
+            var result = method?.Invoke(_controller, new object[] { companyId, "Edit" }) as IActionResult;
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -138,7 +138,7 @@ namespace ECommerceSystem.Test.ControllerTests
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             // Act
-            var result = method.Invoke(_controller, new object[] { companyId, "TestView" }) as IActionResult;
+            var result = method?.Invoke(_controller, new object[] { companyId, "TestView" }) as IActionResult;
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);

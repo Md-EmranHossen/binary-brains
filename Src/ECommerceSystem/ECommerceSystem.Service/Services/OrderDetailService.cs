@@ -60,6 +60,24 @@ namespace ECommerceSystem.Service.Services
             _unitOfWork.Commit();
         }
 
+        public void UpdateOrderDetailsValues(ShoppingCartVM shoppingCartVM)
+        {
+            foreach (var cart in shoppingCartVM.ShoppingCartList)
+            {
+                if (cart.Product == null) continue;
+
+                var orderDetail = new OrderDetail
+                {
+                    ProductId = cart.ProductId,
+                    OrderHeaderId = shoppingCartVM.OrderHeader.Id,
+                    Price = (double)cart.Product.Price,
+                    Count = cart.Count
+                };
+                AddOrderDetail(orderDetail);
+            }
+            _unitOfWork.Commit();
+        }
+
         
     }
 }

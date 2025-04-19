@@ -17,5 +17,6 @@ namespace ECommerceSystem.Service.Services.IServices
         void DeleteOrderDetail(int? id);
 
         IEnumerable<OrderDetail> GetAllOrders(int? id,string? includeProperties=null);
+        void UpdateOrderDetailsValues(ShoppingCartVM shoppingCartVM);
     }
 }

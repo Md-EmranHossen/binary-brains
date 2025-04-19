@@ -28,13 +28,8 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized();
-            }
-
             var productList = _productService.GetAllProducts();
-            var shoppingCartCount = _shoppingCartService.GetShoppingCartByUserId(userId)?.Count() ?? 0;
+            var shoppingCartCount = _shoppingCartService.GetShoppingCartByUserId(userId??string.Empty)?.Count() ?? 0;
             HttpContext.Session.SetInt32(SD.SessionCart, shoppingCartCount);
 
             return View(productList);
