@@ -129,7 +129,7 @@ namespace ECommerceSystem.Test.ControllerTests
             // Arrange
             int categoryId = 999;
             _mockCategoryService.Setup(service => service.GetCategoryById(categoryId))
-                .Returns((Category)null);
+                .Returns((Category?)null);
 
             // Act
             var result = _controller.Edit(categoryId);
