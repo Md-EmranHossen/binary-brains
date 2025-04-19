@@ -44,7 +44,12 @@ namespace ECommerceSystem.Service.Services
             return orderDetailRepository.GetAll();
         }
 
-        public OrderDetail GetOrderDetailById(int? id)
+        public IEnumerable<OrderDetail> GetAllOrders(int? id, string? includeProperties = null)
+        {
+            return orderDetailRepository.GetAll(u=>u.OrderHeaderId == id, includeProperties);
+        }
+
+        public OrderDetail? GetOrderDetailById(int? id)
         {
             return orderDetailRepository.Get(u => u.Id == id);
         }
@@ -54,5 +59,7 @@ namespace ECommerceSystem.Service.Services
             orderDetailRepository.Update(orderDetail);
             _unitOfWork.Commit();
         }
+
+        
     }
 }

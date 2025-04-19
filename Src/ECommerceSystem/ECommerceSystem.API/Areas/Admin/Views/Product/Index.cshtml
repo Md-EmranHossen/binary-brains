@@ -1,8 +1,16 @@
 ﻿@using ECommerceSystem.Models
 @model List<Product>
 
+@{
+    ViewData["Title"] = "Product";
+   
+}
+
+
+
+
 <div class="card shadow border-0 my-4">
-    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+     <div class="card-header bg-secondary bg-gradient ml-0 py-2 col-12" style="width: 400px; text-align: center; margin: 7px auto;">
         <div class="row">
             <div class="col-12 text-center">
                 <h2 class="text-white py-2">Product List</h2>
@@ -37,7 +45,7 @@
                 {
                     <tr>
                         <td>
-                            <img src="@obj.ImageUrl" alt="@obj.Title" style="width: 50px; height: 50px; object-fit: contain; border-radius: 5px; background-color: white;" />
+                            <img src="@(obj.ImageUrl ?? "https://placehold.co/600x400")" alt="@obj.Title" style="width: 50px; height: 50px; object-fit: contain; border-radius: 5px; background-color: white;" />
 
                         </td>
                         <td>@obj.Title</td>

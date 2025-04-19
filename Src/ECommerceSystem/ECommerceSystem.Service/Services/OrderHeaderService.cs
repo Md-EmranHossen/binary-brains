@@ -7,6 +7,8 @@ using ECommerceSystem.DataAccess.Repository;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services.IServices;
+using Microsoft.AspNetCore.Http;
+using Stripe.Checkout;
 
 namespace ECommerceSystem.Service.Services
 {
@@ -14,11 +16,13 @@ namespace ECommerceSystem.Service.Services
     {
         private readonly IOrderHeaderRepository orderHeaderRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public OrderHeaderService(IOrderHeaderRepository orderHeaderRepository,IUnitOfWork unitOfWork)
+        public OrderHeaderService(IOrderHeaderRepository orderHeaderRepository, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
         {
             this.orderHeaderRepository = orderHeaderRepository;
             _unitOfWork = unitOfWork;
+            _httpContextAccessor = httpContextAccessor;
         }
         public void AddOrderHeader(OrderHeader orderHeader)
         {
@@ -39,16 +43,18 @@ namespace ECommerceSystem.Service.Services
             }
         }
 
-        public IEnumerable<OrderHeader> GetAllOrderHeaders()
+        public IEnumerable<OrderHeader> GetAllOrderHeaders(string? includeProperties = null)
         {
-            return orderHeaderRepository.GetAll();
+            
+                return orderHeaderRepository.GetAll(includeProperties: includeProperties);
+            
         }
 
-        public OrderHeader GetOrderHeaderById(int? id,string? includeProperty=null )
+        public OrderHeader? GetOrderHeaderById(int? id, string? includeProperty = null)
         {
-            if(includeProperty != null)
+            if (includeProperty != null)
             {
-                return orderHeaderRepository.Get(u=>u.Id == id,includeProperty);
+                return orderHeaderRepository.Get(u => u.Id == id, includeProperty);
             }
             else
             {
@@ -72,6 +78,36 @@ namespace ECommerceSystem.Service.Services
         {
             orderHeaderRepository.UpdateStripePaymentID(id, sessionId, paymentIntentId);
             _unitOfWork.Commit();
+        }
+
+        public OrderHeader? OrderConfirmation(int id)
+        {
+            var orderHeader = GetOrderHeaderById(id, "ApplicationUser");
+            if (orderHeader != null && orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
+            {
+
+
+                var service = new SessionService();
+                var session = service.Get(orderHeader.SessionId);
+
+                if (string.Equals(session.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
+                {
+                    UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
+                    UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
+                    _unitOfWork.Commit();
+
+                }
+                _httpContextAccessor.HttpContext.Session.Clear();
+                
+            }
+
+            return orderHeader;
+
+        }
+
+        public IEnumerable<OrderHeader> GetAllOrderHeadersById(string id, string? includeProperties = null)
+        {
+            return orderHeaderRepository.GetAll(u=>u.ApplicationUserId == id, includeProperties);  
         }
     }
 }

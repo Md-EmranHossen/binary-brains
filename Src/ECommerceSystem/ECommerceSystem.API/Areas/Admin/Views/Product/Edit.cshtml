@@ -2,7 +2,7 @@
 @model Product
 
 <div class="card shadow border-0 my-4">
-    <div class="card-header bg-secondary bg-gradient ml-0 py-3">
+     <div class="card-header bg-secondary bg-gradient ml-0 py-2 col-12" style="width: 400px; text-align: center; margin: 7px auto;">
         <div class="row">
             <div class="col-12 text-center">
                 <h2 class="text-white py-2">Edit Product</h2>
@@ -75,7 +75,7 @@
                 </div>
                 <!-- Image Section -->
                 <div class="col-2">
-                    <img src="@Model.ImageUrl" style="border-radius:5px; border:1px solid #bbb9b9; width: 100%" />
+                    <img src="@(Model.ImageUrl ?? "https://placehold.co/600x400")" style="border-radius:5px; border:1px solid #bbb9b9; width: 100%" />
                 </div>
             </div>
         </form>

@@ -1,7 +1,6 @@
 ﻿using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
-using ECommerceSystem.Utility;
 using Microsoft.AspNetCore.Authorization;
 using ECommerceSystem.Service.Services.IServices;
 
@@ -43,7 +42,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Edit(int? id)
+        private IActionResult LoadCategoryView(int? id, string viewName)
         {
             if (id is null || id == 0)
             {
@@ -56,7 +55,17 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            return View(category);
+            return View(viewName, category);
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int? id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            return LoadCategoryView(id, "Edit");
         }
 
         [HttpPost]
@@ -74,26 +83,25 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+  
+        [HttpGet]
         public IActionResult Delete(int? id)
         {
-            if (id is null || id == 0)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                return BadRequest(ModelState);
             }
-
-            var category = _categoryService.GetCategoryById(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return View(category);
+            return LoadCategoryView(id, "Delete");
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int? id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (id is null)
             {
                 return NotFound();

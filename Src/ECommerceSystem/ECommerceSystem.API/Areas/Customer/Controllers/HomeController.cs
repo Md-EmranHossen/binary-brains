@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Security.Claims;
+using ECommerceSystem.DataAccess.Repository;
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services;
@@ -25,12 +26,19 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var productList = _productService.GetAllProducts();
+            HttpContext.Session.SetInt32(SD.SessionCart,
+   _shoppingCartService.GetShoppingCartByUserId(userId).Count());
             return View(productList);
         }
 
         public IActionResult Details(int productId)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (productId <= 0)
             {
                 return BadRequest("Invalid product ID.");
@@ -52,6 +60,10 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Details(ShoppingCart shoppingCart)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (shoppingCart == null || shoppingCart.ProductId <= 0)
             {
                 _logger.LogWarning("Invalid shopping cart data submitted.");
@@ -72,6 +84,9 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 _logger.LogWarning("Failed to add/update shopping cart for user {UserId}", userId);
                 return StatusCode(500, "Failed to update shopping cart.");
             }
+
+            HttpContext.Session.SetInt32(SD.SessionCart,
+   _shoppingCartService.GetShoppingCartByUserId(userId).Count());
 
             return RedirectToAction(nameof(Index));
         }

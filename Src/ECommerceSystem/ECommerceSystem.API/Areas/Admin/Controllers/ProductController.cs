@@ -1,14 +1,12 @@
-﻿using ECommerceWebApp.Services;
-using ECommerceSystem.DataAccess.Repository;
-using ECommerceSystem.DataAccess.Repository.IRepository;
-using ECommerceSystem.Models;
+﻿using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using ECommerceSystem.Service.Services.IServices;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ECommerceWebApp.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles =SD.Role_Admin)]
     public class ProductController : Controller
     {
         private readonly IProductService _productService;
@@ -50,7 +48,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Edit(int? id)
+        private IActionResult LoadProductViewWithCategories(int? id, string viewName)
         {
             if (id is null || id == 0)
             {
@@ -65,7 +63,17 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
             var categoryList = _productService.CategoryList();
             ViewBag.CategoryList = categoryList;
-            return View(productFromDb);
+
+            return View(viewName, productFromDb);
+        }
+
+        public IActionResult Edit(int? id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            return LoadProductViewWithCategories(id, "Edit");
         }
 
         [HttpPost]
@@ -87,26 +95,21 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
         public IActionResult Delete(int? id)
         {
-            if (id is null || id == 0)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                return BadRequest(ModelState);
             }
-
-            var productFromDb = _productService.GetProductById(id);
-            if (productFromDb == null)
-            {
-                return NotFound();
-            }
-
-            var categoryList = _productService.CategoryList();
-            ViewBag.CategoryList = categoryList;
-            return View(productFromDb);
+            return LoadProductViewWithCategories(id, "Delete");
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeletePost(int? id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (id is null)
             {
                 return NotFound();

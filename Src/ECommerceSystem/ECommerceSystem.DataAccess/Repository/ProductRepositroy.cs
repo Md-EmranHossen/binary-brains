@@ -11,7 +11,7 @@ namespace ECommerceSystem.DataAccess.Repository
 {
   public  class ProductRepositroy : Repository<Product>, IProductRepository
     {
-        private ApplicationDbContext _db;
+        private readonly ApplicationDbContext _db;
         public ProductRepositroy(ApplicationDbContext db) : base(db)
         {
             _db = db;

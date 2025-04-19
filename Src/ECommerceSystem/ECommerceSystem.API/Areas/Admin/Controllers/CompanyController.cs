@@ -1,7 +1,6 @@
 ﻿using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using Microsoft.AspNetCore.Mvc;
-using ECommerceSystem.Utility;
 using Microsoft.AspNetCore.Authorization;
 using ECommerceSystem.Service.Services.IServices;
 
@@ -43,7 +42,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Edit(int? id)
+        private IActionResult LoadCompanyView(int? id, string viewName)
         {
             if (id is null || id == 0)
             {
@@ -56,7 +55,17 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            return View(companyFromDb);
+            return View(viewName, companyFromDb);
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int? id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            return LoadCompanyView(id, "Edit");
         }
 
         [HttpPost]
@@ -73,26 +82,24 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
         public IActionResult Delete(int? id)
         {
-            if (id is null || id == 0)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
+                return BadRequest(ModelState);
             }
-
-            var companyFromDb = _companyService.GetCompanyById(id);
-            if (companyFromDb == null)
-            {
-                return NotFound();
-            }
-
-            return View(companyFromDb);
+            return LoadCompanyView(id, "Delete");
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeleteConfirmed(int? id)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (id is null)
             {
                 return NotFound();

@@ -2,6 +2,7 @@
 using ECommerceSystem.DataAccess.Repository.IRepository;
 using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services.IServices;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,22 +12,26 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace ECommerceSystem.Service.Services
 {
     public class ShoppingCartService : IShoppingCartService
     {
         private readonly IShoppingCartRepository _shoppingCartRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository, IUnitOfWork unitOfWork)
+        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
         {
             _shoppingCartRepository = shoppingCartRepository;
             _unitOfWork = unitOfWork;
+            _httpContextAccessor = httpContextAccessor;
+
         }
 
-        public void AddShoppingCart(ShoppingCart ShoppingCart)
+        public void AddShoppingCart(ShoppingCart shoppingCart)
         {
-            _shoppingCartRepository.Add(ShoppingCart);
+            _shoppingCartRepository.Add(shoppingCart);
             _unitOfWork.Commit();
         }
 
@@ -46,12 +51,12 @@ namespace ECommerceSystem.Service.Services
 
         }
 
-        public ShoppingCart GetShoppingCartById(int? id)
+        public ShoppingCart? GetShoppingCartById(int? id, bool track = false)
         {
-            return _shoppingCartRepository.Get(u => u.Id == id);
+            return _shoppingCartRepository.Get(u => u.Id == id, tracked: track);
         }
 
-        public ShoppingCart GetShoppingCartByUserAndProduct(string userId, int productId)
+        public ShoppingCart? GetShoppingCartByUserAndProduct(string userId, int productId)
         {
             return _shoppingCartRepository.Get(u => u.ApplicationUserId == userId && u.ProductId == productId);
         }
@@ -67,7 +72,7 @@ namespace ECommerceSystem.Service.Services
             }
         }
 
-       public IEnumerable<ShoppingCart> GetShoppingCartsByUserId(string userId)
+        public IEnumerable<ShoppingCart> GetShoppingCartsByUserId(string userId)
         {
             return _shoppingCartRepository.GetAll(
                 u => u.ApplicationUserId == userId,
@@ -95,7 +100,7 @@ namespace ECommerceSystem.Service.Services
         {
             if (string.IsNullOrEmpty(userId) || shoppingCart == null || shoppingCart.ProductId == 0)
             {
-                return false; 
+                return false;
             }
 
             shoppingCart.ApplicationUserId = userId;
@@ -116,8 +121,91 @@ namespace ECommerceSystem.Service.Services
             return true;
         }
 
+        public ShoppingCartVM GetShoppingCartVM(string? userId)
+        {
 
 
+            var shoppingCartList = GetShoppingCartsByUserId(userId ?? "") ?? new List<ShoppingCart>(); // Ensure not null
 
+
+            var shoppingCartVM = new ShoppingCartVM
+            {
+                ShoppingCartList = shoppingCartList,
+                OrderHeader = new OrderHeader
+                {
+                    OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
+                                             .Sum(cart => cart.Product.Price * cart.Count)
+                }
+                
+
+
+            };
+            return shoppingCartVM;
+        }
+
+        public void RemoveShoppingCarts(OrderHeader? orderHeader)
+        {
+            if (orderHeader != null)
+            {
+                var shoppingCarts = GetShoppingCartsByUserId(orderHeader.ApplicationUserId).ToList();
+                RemoveRange(shoppingCarts);
+                _unitOfWork.Commit();
+            }
+        }
+        public void Plus(int cartId)
+        {
+            var cartFromDb = GetShoppingCartById(cartId);
+            if (cartFromDb == null)
+            {
+                return;
+            }
+
+            cartFromDb.Count += 1;
+            UpdateShoppingCart(cartFromDb);
+            _unitOfWork.Commit();
+
+        }
+
+        public void Minus(int cartId)
+        {
+            var cartFromDb = GetShoppingCartById(cartId);
+            if (cartFromDb == null)
+            {
+                return;
+            }
+
+            if (cartFromDb.Count <= 1)
+            {
+                DeleteShoppingCart(cartId);
+                _httpContextAccessor.HttpContext.Session.SetInt32(SD.SessionCart,
+GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
+
+            }
+            else
+            {
+                cartFromDb.Count -= 1;
+                UpdateShoppingCart(cartFromDb);
+            }
+
+            _unitOfWork.Commit();
+        }
+
+        public void RemoveCartValue(int cartId)
+        {
+            var cartFromDb = GetShoppingCartById(cartId);
+            if (cartFromDb == null)
+            {
+                return;
+            }
+            DeleteShoppingCart(cartId);
+            _httpContextAccessor.HttpContext.Session.SetInt32(SD.SessionCart,
+GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
+            _unitOfWork.Commit();
+        }
+
+        public IEnumerable<ShoppingCart> GetShoppingCartByUserId(string userId)
+        {
+            return _shoppingCartRepository.GetAll(u => u.ApplicationUserId == userId);
+        }
     }
 }

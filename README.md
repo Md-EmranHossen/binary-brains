@@ -1,3 +1,13 @@
+## 🌐 Live Website
+
+<p align="center">
+  <a href="#">
+    <img src="https://img.shields.io/badge/Live_Site-Visit_Now-brightgreen?style=for-the-badge&logo=internet-explorer" alt="Live Site" />
+  </a>
+</p>
+
+👉 **[Click here to visit the live site]()**
+
 ## 📚 Explore Project Resources: Wiki, DevLogs, and Trello Board
 Check out our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki) for docs, stay updated with [DevLog](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/tree/main/DevLog), and manage the project on [Trello](https://trello.com/b/67a6303580ff372f899865ae/e-commerce-system-binary-brains).
 
