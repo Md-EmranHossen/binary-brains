@@ -39,30 +39,56 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
         public IActionResult Summary()
         {
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-
-            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            var shoppingCartVM = _shoppingCartService.GetShoppingCartVM(userId);
-
-            shoppingCartVM.OrderHeader.ApplicationUser = _applicationUserService.GetUserById(userId);
-
-            foreach(var i in shoppingCartVM.ShoppingCartList)
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            if (claimsIdentity == null)
             {
-                i.Price =(double) i.Product.Price;
+                return Unauthorized();
             }
 
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
 
+            var shoppingCartVM = _shoppingCartService.GetShoppingCartVM(userId);
+            if (shoppingCartVM == null)
+            {
+                return NotFound();
+            }
 
-            shoppingCartVM.OrderHeader.Name = shoppingCartVM.OrderHeader.ApplicationUser.Name;
-            shoppingCartVM.OrderHeader.PhoneNumber = shoppingCartVM.OrderHeader.ApplicationUser.PhoneNumber;
-            shoppingCartVM.OrderHeader.StreetAddress = shoppingCartVM.OrderHeader.ApplicationUser.StreetAddress;
-            shoppingCartVM.OrderHeader.City = shoppingCartVM.OrderHeader.ApplicationUser.City;
-            shoppingCartVM.OrderHeader.State = shoppingCartVM.OrderHeader.ApplicationUser.State;
-            shoppingCartVM.OrderHeader.PostalCode = shoppingCartVM.OrderHeader.ApplicationUser.PostalCode;
+            var user = _applicationUserService.GetUserById(userId);
+            if (user == null)
+            {
+                return NotFound(); // or redirect to error page
+            }
+
+            shoppingCartVM.OrderHeader.ApplicationUser = user;
+
+            foreach (var i in shoppingCartVM.ShoppingCartList)
+            {
+                if (i.Product != null)
+                {
+                    i.Price = (double)i.Product.Price;
+                }
+            }
+
+            var header = shoppingCartVM.OrderHeader;
+            var appUser = header.ApplicationUser;
+
+            if (appUser != null)
+            {
+                header.Name = appUser.Name ?? string.Empty;
+                header.PhoneNumber = appUser.PhoneNumber ?? string.Empty;
+                header.StreetAddress = appUser.StreetAddress ?? string.Empty;
+                header.City = appUser.City ?? string.Empty;
+                header.State = appUser.State ?? string.Empty;
+                header.PostalCode = appUser.PostalCode ?? string.Empty;
+            }
 
             return View(shoppingCartVM);
         }
+
         [HttpPost]
         [ActionName("Summary")]
         public IActionResult SummaryPost(ShoppingCartVM shoppingCartVM)
