@@ -56,7 +56,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-//data seeding 
+//Data seeding 
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 // Razor pages

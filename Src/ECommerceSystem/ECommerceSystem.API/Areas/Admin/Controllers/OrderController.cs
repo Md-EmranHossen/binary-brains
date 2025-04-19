@@ -56,7 +56,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                     orderData = orderData.Where(u => u.OrderStatus == SD.StatusShipped);
                     break;
                 case "approved":
-                    orderData = orderData.Where(u => u.OrderStatus == SD.StatusApproved); ;
+                    orderData = orderData.Where(u => u.OrderStatus == SD.StatusApproved); 
                     break;
                 default:
                     break;

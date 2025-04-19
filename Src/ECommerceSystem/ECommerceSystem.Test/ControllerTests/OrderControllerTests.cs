@@ -128,16 +128,16 @@ namespace ECommerceSystem.Test.ControllerTests
         }
 
         [Fact]
-        public void Index_WithStatusFilter_ReturnsFilteredOrders()
+        public void Index_WithPendingStatusFilter_ReturnsFilteredOrders()
         {
             // Arrange
             SetupUserIdentity(isAdmin: true);
             var allOrders = new List<OrderHeader>
-            {
-                new OrderHeader { Id = 1, OrderStatus = "Pending" },
-                new OrderHeader { Id = 2, OrderStatus = "Shipped" },
-                new OrderHeader { Id = 3, OrderStatus = "Pending" }
-            };
+    {
+        new OrderHeader { Id = 1, PaymentStatus = SD.PaymentStatusPending, OrderStatus = "Any" },
+        new OrderHeader { Id = 2, PaymentStatus = "NotPending", OrderStatus = "Any" },
+        new OrderHeader { Id = 3, PaymentStatus = SD.PaymentStatusPending, OrderStatus = "Any" }
+    };
             _mockOrderHeaderService.Setup(s => s.GetAllOrderHeaders("ApplicationUser")).Returns(allOrders);
 
             // Act
@@ -146,8 +146,177 @@ namespace ECommerceSystem.Test.ControllerTests
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsAssignableFrom<IEnumerable<OrderHeader>>(viewResult.Model);
-            Assert.Equal(2, model.Count()); // Should only have the "Pending" orders
-            Assert.All(model, item => Assert.Equal("Pending", item.OrderStatus));
+            Assert.Equal(2, model.Count()); // Should only have orders with PaymentStatus == SD.PaymentStatusPending
+            Assert.All(model, item => Assert.Equal(SD.PaymentStatusPending, item.PaymentStatus));
+        }
+
+        [Fact]
+        public void Index_WithInProcessStatusFilter_ReturnsFilteredOrders()
+        {
+            // Arrange
+            SetupUserIdentity(isAdmin: true);
+            var allOrders = new List<OrderHeader>
+    {
+        new OrderHeader { Id = 1, PaymentStatus = "Any", OrderStatus = SD.StatusInProcess },
+        new OrderHeader { Id = 2, PaymentStatus = "Any", OrderStatus = "NotInProcess" },
+        new OrderHeader { Id = 3, PaymentStatus = "Any", OrderStatus = SD.StatusInProcess }
+    };
+            _mockOrderHeaderService.Setup(s => s.GetAllOrderHeaders("ApplicationUser")).Returns(allOrders);
+
+            // Act
+            var result = _controller.Index("inprocess");
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsAssignableFrom<IEnumerable<OrderHeader>>(viewResult.Model);
+            Assert.Equal(2, model.Count()); // Should only have orders with OrderStatus == SD.StatusInProcess
+            Assert.All(model, item => Assert.Equal(SD.StatusInProcess, item.OrderStatus));
+        }
+
+        [Fact]
+        public void Index_WithCompletedStatusFilter_ReturnsFilteredOrders()
+        {
+            // Arrange
+            SetupUserIdentity(isAdmin: true);
+            var allOrders = new List<OrderHeader>
+    {
+        new OrderHeader { Id = 1, PaymentStatus = "Any", OrderStatus = SD.StatusShipped },
+        new OrderHeader { Id = 2, PaymentStatus = "Any", OrderStatus = "NotShipped" },
+        new OrderHeader { Id = 3, PaymentStatus = "Any", OrderStatus = SD.StatusShipped }
+    };
+            _mockOrderHeaderService.Setup(s => s.GetAllOrderHeaders("ApplicationUser")).Returns(allOrders);
+
+            // Act
+            var result = _controller.Index("completed");
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsAssignableFrom<IEnumerable<OrderHeader>>(viewResult.Model);
+            Assert.Equal(2, model.Count()); // Should only have orders with OrderStatus == SD.StatusShipped
+            Assert.All(model, item => Assert.Equal(SD.StatusShipped, item.OrderStatus));
+        }
+
+        [Fact]
+        public void Index_WithApprovedStatusFilter_ReturnsFilteredOrders()
+        {
+            // Arrange
+            SetupUserIdentity(isAdmin: true);
+            var allOrders = new List<OrderHeader>
+    {
+        new OrderHeader { Id = 1, PaymentStatus = "Any", OrderStatus = SD.StatusApproved },
+        new OrderHeader { Id = 2, PaymentStatus = "Any", OrderStatus = "NotApproved" },
+        new OrderHeader { Id = 3, PaymentStatus = "Any", OrderStatus = SD.StatusApproved }
+    };
+            _mockOrderHeaderService.Setup(s => s.GetAllOrderHeaders("ApplicationUser")).Returns(allOrders);
+
+            // Act
+            var result = _controller.Index("approved");
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsAssignableFrom<IEnumerable<OrderHeader>>(viewResult.Model);
+            Assert.Equal(2, model.Count()); // Should only have orders with OrderStatus == SD.StatusApproved
+            Assert.All(model, item => Assert.Equal(SD.StatusApproved, item.OrderStatus));
+        }
+
+        public void Index_WithDifferentStatusFilters_ReturnsCorrectlyFilteredOrders(
+     string statusFilter,
+     string userId,
+     bool includePending,
+     bool includeInProcess,
+     bool includeCompleted,
+     bool includeApproved,
+     int expectedCount)
+        {
+            // Arrange
+            bool isAdmin = true;
+            SetupUserIdentity(isAdmin: isAdmin, userId: userId ?? "testUser123");
+            var allOrders = new List<OrderHeader>();
+            int id = 1;
+            if (includePending)
+            {
+                allOrders.Add(new OrderHeader { Id = id++, PaymentStatus = SD.PaymentStatusPending, OrderStatus = "Any" });
+                allOrders.Add(new OrderHeader { Id = id++, PaymentStatus = SD.PaymentStatusPending, OrderStatus = "Any" });
+            }
+            if (includeInProcess)
+            {
+                allOrders.Add(new OrderHeader { Id = id++, OrderStatus = SD.StatusInProcess, PaymentStatus = "Any" });
+                allOrders.Add(new OrderHeader { Id = id++, OrderStatus = SD.StatusInProcess, PaymentStatus = "Any" });
+            }
+            if (includeCompleted)
+            {
+                allOrders.Add(new OrderHeader { Id = id++, OrderStatus = SD.StatusShipped, PaymentStatus = "Any" });
+                allOrders.Add(new OrderHeader { Id = id++, OrderStatus = SD.StatusShipped, PaymentStatus = "Any" });
+            }
+            if (includeApproved)
+            {
+                allOrders.Add(new OrderHeader { Id = id++, OrderStatus = SD.StatusApproved, PaymentStatus = "Any" });
+                allOrders.Add(new OrderHeader { Id = id++, OrderStatus = SD.StatusApproved, PaymentStatus = "Any" });
+            }
+            if (userId == null)
+            {
+                _mockOrderHeaderService.Setup(s => s.GetAllOrderHeaders("ApplicationUser")).Returns(allOrders);
+            }
+            else
+            {
+                _mockOrderHeaderService.Setup(s => s.GetAllOrderHeadersById(userId, "ApplicationUser")).Returns(allOrders);
+            }
+
+            // Act
+            var result = _controller.Index(statusFilter);
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsAssignableFrom<IEnumerable<OrderHeader>>(viewResult.Model);
+
+            // Calculate expected count based on applied filters
+            int correctExpectedCount;
+            if (statusFilter == null)
+            {
+                // When no filter is applied, all orders should be returned
+                correctExpectedCount = allOrders.Count;
+            }
+            else if (statusFilter == "pending")
+            {
+                correctExpectedCount = includePending ? 2 : 0;
+            }
+            else if (statusFilter == "inprocess")
+            {
+                correctExpectedCount = includeInProcess ? 2 : 0;
+            }
+            else if (statusFilter == "completed")
+            {
+                correctExpectedCount = includeCompleted ? 2 : 0;
+            }
+            else if (statusFilter == "approved")
+            {
+                correctExpectedCount = includeApproved ? 2 : 0;
+            }
+            else
+            {
+                correctExpectedCount = allOrders.Count;
+            }
+
+            // Verify correct number of items
+            Assert.Equal(correctExpectedCount, model.Count());
+
+            // Verify correct filtering applied
+            if (statusFilter == "pending")
+            {
+                Assert.All(model, item => Assert.Equal(SD.PaymentStatusPending, item.PaymentStatus));
+            }
+            else if (statusFilter == "inprocess")
+            {
+                Assert.All(model, item => Assert.Equal(SD.StatusInProcess, item.OrderStatus));
+            }
+            else if (statusFilter == "completed")
+            {
+                Assert.All(model, item => Assert.Equal(SD.StatusShipped, item.OrderStatus));
+            }
+            else if (statusFilter == "approved")
+            {
+                Assert.All(model, item => Assert.Equal(SD.StatusApproved, item.OrderStatus));
+            }
         }
 
         [Fact]
