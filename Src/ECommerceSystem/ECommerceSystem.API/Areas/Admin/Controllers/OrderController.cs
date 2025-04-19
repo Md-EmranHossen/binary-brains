@@ -280,6 +280,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             }
 
             var orderHeader = _orderHeaderService.GetOrderHeaderById(orderHeaderId);
+            if (orderHeader == null)
+            {
+                return NotFound(); // or handle accordingly (e.g., show error page)
+            }
             if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
             {
                 //this is an order by company
