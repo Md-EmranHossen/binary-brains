@@ -65,14 +65,20 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
         public IActionResult RoleManagement(string? userId)
         {
-            if (userId == null)
+            if (string.IsNullOrEmpty(userId))
             {
                 return NotFound();
             }
 
+            var user = _applicationUserService.GetUserByIdAndIncludeprop(userId, "Company");
+            if (user == null)
+            {
+                return NotFound(); // or show a user-friendly error page
+            }
+
             RoleManagemantVM RoleVM = new RoleManagemantVM()
             {
-                User = _applicationUserService.GetUserByIdAndIncludeprop(userId, "Company"),
+                User = user,
                 RoleList = _applicationUserService.GetAllRoles(),
                 CompanyList = _companyService.GetAllCompanies().Select(i => new SelectListItem
                 {
@@ -80,12 +86,12 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                     Value = i.Id.ToString()
                 }),
             };
-            RoleVM.User.Role=_applicationUserService.GetUserrole(userId);
+
+            RoleVM.User.Role = _applicationUserService.GetUserrole(userId);
 
             return View(RoleVM);
-
-
         }
+
 
         [HttpPost]
         public IActionResult RoleManagement(RoleManagemantVM roleManagmentVM)
@@ -105,11 +111,10 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             string oldRole = _userManager.GetRolesAsync(applicationUser)
                 .GetAwaiter().GetResult().FirstOrDefault() ?? string.Empty;
 
-            if (roleManagmentVM.User.Role != oldRole)
+            if (roleManagmentVM.User.Role != oldRole && (applicationUser != null))
             {
                 // A role was updated
-                if (applicationUser != null) 
-                {
+                
                     if (roleManagmentVM.User.Role == SD.Role_Company)
                     {
                         applicationUser.CompanyId = roleManagmentVM.User.CompanyId;
@@ -125,7 +130,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                         _userManager.RemoveFromRoleAsync(applicationUser, oldRole).GetAwaiter().GetResult();
                     }
                     _userManager.AddToRoleAsync(applicationUser, roleManagmentVM.User.Role).GetAwaiter().GetResult();
-                }
+                
             }
 
             return RedirectToAction("Index");
