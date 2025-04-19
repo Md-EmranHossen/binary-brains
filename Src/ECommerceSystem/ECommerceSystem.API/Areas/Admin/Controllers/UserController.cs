@@ -96,7 +96,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult RoleManagement(RoleManagemantVM roleManagmentVM)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid)//need 
             {
                 return View(roleManagmentVM);
             }
@@ -108,14 +108,16 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 return View(roleManagmentVM);
             }
 
-            string oldRole = _userManager.GetRolesAsync(applicationUser)
+            var oldRole = _userManager.GetRolesAsync(applicationUser)
                 .GetAwaiter().GetResult().FirstOrDefault() ?? string.Empty;
 
-            if (roleManagmentVM.User.Role != oldRole && (applicationUser != null))
+            if (applicationUser != null &&
+     !string.IsNullOrEmpty(roleManagmentVM.User.Role) &&
+     !string.Equals(roleManagmentVM.User.Role, oldRole, StringComparison.OrdinalIgnoreCase))
             {
                 // A role was updated
-                
-                    if (roleManagmentVM.User.Role == SD.Role_Company)
+
+                if (roleManagmentVM.User.Role == SD.Role_Company)
                     {
                         applicationUser.CompanyId = roleManagmentVM.User.CompanyId;
                     }

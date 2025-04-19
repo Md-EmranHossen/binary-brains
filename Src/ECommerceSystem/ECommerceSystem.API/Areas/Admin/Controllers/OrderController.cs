@@ -133,7 +133,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         public IActionResult StartProcessing(OrderVM orderVM)
         {
 
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid)//need
             {
                 return View(orderVM);
             }
@@ -148,9 +148,9 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         public IActionResult ShipOrder(OrderVM orderVM)
         {
 
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid)//need
             {
-                return View(orderVM);
+                return BadRequest();
             }
 
             var orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id);
@@ -177,20 +177,19 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public IActionResult CancelOrder(OrderVM orderVM)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid)//need
             {
-                return View(orderVM);
+                return BadRequest();
             }
 
             var orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id);
 
             if (orderHeader == null)
             {
-                return NotFound(); // or return an appropriate error view
+                return NotFound(); 
             }
 
-
-            if (orderHeader.PaymentStatus == SD.PaymentStatusApproved && orderHeader.PaymentIntentId!=null)
+            if (orderHeader.PaymentStatus == SD.PaymentStatusApproved && orderHeader.PaymentIntentId != null)
             {
                 var options = new RefundCreateOptions
                 {
@@ -199,6 +198,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 };
 
                 var service = new RefundService();
+                service.Create(options); 
 
                 _orderHeaderService.UpdateStatus(orderHeader.Id, SD.StatusCancelled, SD.StatusRefunded);
             }
@@ -206,14 +206,14 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             {
                 _orderHeaderService.UpdateStatus(orderHeader.Id, SD.StatusCancelled, SD.StatusCancelled);
             }
-          
-            return RedirectToAction(nameof(Details), new { id = orderVM.orderHeader.Id });
 
+            return RedirectToAction(nameof(Details), new { id = orderVM.orderHeader.Id });
         }
+
         [HttpPost]
         public IActionResult PayDetails(OrderVM orderVM)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid)//need
             {
                 return View(orderVM);
             }
@@ -250,7 +250,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
                 {
                     PriceData = new SessionLineItemPriceDataOptions
                     {
-                        UnitAmount = (long)(item.Price * 100),
+                        UnitAmount = (long)item.Price*100,
                         Currency = "usd",
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
@@ -268,13 +268,13 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
             _orderHeaderService.UpdateStripePaymentID(orderHeader.Id, session.Id, session.PaymentIntentId);
 
-            Response.Headers.Add("Location", session.Url);
+            Response.Headers["Location"] = session.Url;
             return new StatusCodeResult(303);
         }
 
         public IActionResult PaymentConfirmation(int orderHeaderId)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid)//need 
             {
                 return View(orderHeaderId);
             }
@@ -282,19 +282,19 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
             var orderHeader = _orderHeaderService.GetOrderHeaderById(orderHeaderId);
             if (orderHeader == null)
             {
-                return NotFound(); // or handle accordingly (e.g., show error page)
+                return NotFound(); 
             }
             if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
             {
-                //this is an order by company
+              
 
                 var service = new SessionService();
                 Session session = service.Get(orderHeader.SessionId);
 
-                if (session.PaymentStatus.ToLower() == "paid")
+                if (string.Equals(session.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
                 {
                     _orderHeaderService.UpdateStripePaymentID(orderHeaderId, session.Id, session.PaymentIntentId);
-                    _orderHeaderService.UpdateStatus(orderHeaderId, orderHeader.OrderStatus, SD.PaymentStatusApproved);
+                    _orderHeaderService.UpdateStatus(orderHeaderId, orderHeader.OrderStatus??SD.StatusShipped, SD.PaymentStatusApproved);
                 }
 
 
