@@ -8,5 +8,8 @@ namespace ECommerceSystem.Models
 {
     public class DashboardIndexModel
     {
+
+        public int TotalOrder { get; set; }
+
     }
 }

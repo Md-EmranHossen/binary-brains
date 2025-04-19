@@ -32,9 +32,9 @@ namespace ECommerceSystem.DataAccess.Repository
 
             return role;
         }
-        public void Update(ApplicationUser obj)
+        public void Update(ApplicationUser applicationUser)
         {
-            _db.ApplicationUsers.Update(obj);
+            _db.ApplicationUsers.Update(applicationUser);
         }
 
         public IEnumerable<SelectListItem> GetAllRoles()

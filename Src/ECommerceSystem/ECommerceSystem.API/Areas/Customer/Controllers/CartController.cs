@@ -31,12 +31,9 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var shoppingCartVM = _shoppingCartService.GetShoppingCartVM(userId);
-
-
             return View(shoppingCartVM);
         }
 
