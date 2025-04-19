@@ -140,7 +140,7 @@ namespace ECommerceWebApp.Areas.Admin.Controllers
 
             var orderHeader = _orderHeaderService.GetOrderHeaderById(orderVM.orderHeader.Id);
 
-            if (orderHeader.PaymentStatus == SD.PaymentStatusApproved)
+            if (orderHeader.PaymentStatus == SD.PaymentStatusApproved && orderHeader.PaymentIntentId!=null)
             {
                 var options = new RefundCreateOptions
                 {

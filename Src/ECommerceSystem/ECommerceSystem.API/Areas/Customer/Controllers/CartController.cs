@@ -128,7 +128,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                 {
                     ProductId = cart.ProductId,
                     OrderHeaderId = shoppingCartVM.OrderHeader.Id,
-                    Price = cart.Price,
+                    Price = (double)cart.Product.Price,
                     Count = cart.Count
                 };
                 _orderDetailService.AddOrderDetail(orderDetail);
@@ -146,14 +146,14 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
                     LineItems = new List<SessionLineItemOptions>(),
                     Mode = "payment",
                 };
-             //   var val = 0;
+
                 foreach (var item in shoppingCartVM.ShoppingCartList)
                 {
                     var sessionLineItem = new SessionLineItemOptions
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            UnitAmount = (long)item.Price*100, // cents 
+                            UnitAmount = (long)0, // cents item.Price * 100
                             Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {

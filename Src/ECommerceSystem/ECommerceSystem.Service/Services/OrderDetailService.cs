@@ -46,7 +46,7 @@ namespace ECommerceSystem.Service.Services
 
         public IEnumerable<OrderDetail> GetAllOrders(int? id, string? includeProperties = null)
         {
-            return orderDetailRepository.GetAll(u=>u.Id == id, includeProperties);
+            return orderDetailRepository.GetAll(u=>u.OrderHeaderId == id, includeProperties);
         }
 
         public OrderDetail? GetOrderDetailById(int? id)

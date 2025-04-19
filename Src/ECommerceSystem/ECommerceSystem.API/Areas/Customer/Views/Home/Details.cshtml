@@ -17,7 +17,10 @@
                     <p class="text-secondary">@Model.Product.Description</p>
 
                     <h6 class="text-dark text-opacity-50">
-                        Stock: <b>@Model.Product.StockQuantity</b>
+                        @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+                        {
+                            <p>Stock: <b>@Model.Product.StockQuantity</b></p>
+                        }
                     </h6>
 
                     <h6 class="text-dark text-opacity-50">
