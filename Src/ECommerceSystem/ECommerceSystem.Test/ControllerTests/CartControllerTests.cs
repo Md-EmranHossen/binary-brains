@@ -277,7 +277,7 @@ namespace ECommerceSystem.Test.ControllerTests
             // Assert
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("OrderConfirmation", redirectResult.ActionName);
-            Assert.Equal(123, redirectResult.RouteValues["id"]);
+            Assert.Equal(123, redirectResult.RouteValues?["id"]);
         }
 
 
