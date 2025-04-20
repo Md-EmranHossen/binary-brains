@@ -3,7 +3,8 @@
 <form method="post">
     <input type="hidden" asp-for="ProductId" />
     <div class="card shadow border-0 mt-4">
-        <div class="card-header bg-secondary bg-gradient text-light py-4 text-center">
+        <div class="card-header bg-secondary bg-gradient ml-0 py-2 col-12" style="width: 1100px; text-align: center; margin: 7px auto;">
+
             <h3 class="text-white text-uppercase">@Model.Product.Title</h3>
             <p class="text-white-50 fw-semibold mb-0">Category: <b>@Model.Product.Category.Name</b></p>
         </div>
