@@ -387,7 +387,7 @@ namespace ECommerceSystem.Test.ControllerTests
 
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Details", redirectResult.ActionName);
-            Assert.Equal(orderId, redirectResult.RouteValues["id"]);
+            Assert.Equal(orderId, redirectResult.RouteValues?["id"]);
         }
 
 
@@ -434,7 +434,7 @@ namespace ECommerceSystem.Test.ControllerTests
 
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Details", redirectResult.ActionName);
-            Assert.Equal(orderId, redirectResult.RouteValues["id"]);
+            Assert.Equal(orderId, redirectResult.RouteValues?["id"]);
         }
 
         [Fact]

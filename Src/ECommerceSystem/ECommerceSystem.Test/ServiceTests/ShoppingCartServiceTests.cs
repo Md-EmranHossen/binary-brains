@@ -36,7 +36,7 @@ namespace ECommerceSystem.Test.ServiceTests
 
             mockSession.Setup(s => s.Set(It.IsAny<string>(), It.IsAny<byte[]>()))
                 .Callback<string, byte[]>((key, value) => sessionDict[key] = value);
-            mockSession.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny))
+              mockSession.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny))
                 .Returns<string, byte[]>((key, value) =>
                 {
                     if (sessionDict.TryGetValue(key, out byte[] result))
@@ -44,7 +44,7 @@ namespace ECommerceSystem.Test.ServiceTests
                         value = result;
                         return true;
                     }
-                    value = null;
+                    value = null!;
                     return false;
                 });
 
@@ -101,7 +101,7 @@ namespace ECommerceSystem.Test.ServiceTests
                 It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
                 It.IsAny<string>(),
                 It.IsAny<bool>()))
-                .Returns((ShoppingCart)null);
+                .Returns((ShoppingCart?)null);
 
             // Act
             _shoppingCartService.DeleteShoppingCart(cartId);
@@ -183,7 +183,7 @@ namespace ECommerceSystem.Test.ServiceTests
                 It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
                 It.IsAny<string>(),
                 It.IsAny<bool>()))
-                .Returns((ShoppingCart)null);
+                .Returns((ShoppingCart?)null);
 
             // Act
             _shoppingCartService.UpdateShoppingCart(cart);
@@ -259,12 +259,12 @@ namespace ECommerceSystem.Test.ServiceTests
         {
             // Arrange - Invalid inputs
             string emptyUserId = "";
-            var nullCart = (ShoppingCart)null;
+            var nullCart = (ShoppingCart?)null;
             var invalidProductCart = new ShoppingCart { ProductId = 0 };
 
             // Act & Assert
             Assert.False(_shoppingCartService.AddOrUpdateShoppingCart(invalidProductCart, _testUserId));
-            Assert.False(_shoppingCartService.AddOrUpdateShoppingCart(nullCart, _testUserId));
+            Assert.False(_shoppingCartService.AddOrUpdateShoppingCart(nullCart!, _testUserId));
             Assert.False(_shoppingCartService.AddOrUpdateShoppingCart(new ShoppingCart { ProductId = 1 }, emptyUserId));
         }
 
@@ -303,7 +303,7 @@ namespace ECommerceSystem.Test.ServiceTests
         public void RemoveShoppingCarts_WithNullOrder_ShouldNotRemoveAnything()
         {
             // Arrange
-            OrderHeader nullOrder = null;
+            OrderHeader nullOrder = null!;
 
             // Act
             _shoppingCartService.RemoveShoppingCarts(nullOrder);

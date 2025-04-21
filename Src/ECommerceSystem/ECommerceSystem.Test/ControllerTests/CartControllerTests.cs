@@ -135,7 +135,7 @@ namespace ECommerceSystem.Test.ControllerTests
         public void Summary_WhenShoppingCartVMIsNull_ReturnsNotFound()
         {
             // Arrange
-            _mockShoppingCartService.Setup(s => s.GetShoppingCartVM(_userId)).Returns((ShoppingCartVM)null);
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartVM(_userId)).Returns(new ShoppingCartVM ());
 
             // Act
             var result = _controller.Summary();

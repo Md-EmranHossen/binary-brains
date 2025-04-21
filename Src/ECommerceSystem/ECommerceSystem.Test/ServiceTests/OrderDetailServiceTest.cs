@@ -108,7 +108,7 @@ namespace ECommerceSystem.Test.ServiceTests
             int? orderDetailId = null;
 
             _mockOrderDetailRepository.Setup(r => r.Get(It.IsAny<Expression<Func<OrderDetail, bool>>>(), null, false))
-                .Returns((OrderDetail)null);
+                .Returns((OrderDetail?)null);
 
             // Act
             var result = _service.GetOrderDetailById(orderDetailId);
@@ -125,7 +125,7 @@ namespace ECommerceSystem.Test.ServiceTests
             int orderDetailId = 999;
 
             _mockOrderDetailRepository.Setup(r => r.Get(It.IsAny<Expression<Func<OrderDetail, bool>>>(), null, false))
-                .Returns((OrderDetail)null);
+                .Returns((OrderDetail?)null);
 
             // Act
             var result = _service.GetOrderDetailById(orderDetailId);
@@ -191,7 +191,7 @@ namespace ECommerceSystem.Test.ServiceTests
             int orderDetailId = 1;
 
             _mockOrderDetailRepository.Setup(r => r.Get(It.IsAny<Expression<Func<OrderDetail, bool>>>(), null, false))
-                .Returns((OrderDetail)null);
+                .Returns((OrderDetail?)null);
 
             // Act
             _service.DeleteOrderDetail(orderDetailId);
@@ -274,7 +274,7 @@ namespace ECommerceSystem.Test.ServiceTests
                 {
                     ProductId = 1,
                     Count = 2,
-                    Product = null // Invalid item
+                    Product = null! // Invalid item
                 },
                 new ShoppingCart
                 {

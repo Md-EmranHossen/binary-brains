@@ -49,7 +49,7 @@ namespace ECommerceSystem.Test.ControllerTests
         {
             // Act & Assert
             var exception = Assert.Throws<ArgumentNullException>(() => new HomeController(
-                null,
+                null!,
                 _mockProductService.Object,
                 _mockShoppingCartService.Object));
 
@@ -62,7 +62,7 @@ namespace ECommerceSystem.Test.ControllerTests
             // Act & Assert
             var exception = Assert.Throws<ArgumentNullException>(() => new HomeController(
                 _mockLogger.Object,
-                null,
+                null!,
                 _mockShoppingCartService.Object));
 
             Assert.Equal("productService", exception.ParamName);
@@ -75,7 +75,7 @@ namespace ECommerceSystem.Test.ControllerTests
             var exception = Assert.Throws<ArgumentNullException>(() => new HomeController(
                 _mockLogger.Object,
                 _mockProductService.Object,
-                null));
+                null!));
 
             Assert.Equal("shoppingCartService", exception.ParamName);
         }
@@ -105,12 +105,19 @@ namespace ECommerceSystem.Test.ControllerTests
             _mockShoppingCartService.Setup(s => s.GetShoppingCartByUserId(It.IsAny<string>())).Returns(shoppingCartList);
 
             // Act
-            var result = _controller.Index();
+            var result = _controller.Index(1);
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsAssignableFrom<IEnumerable<Product>>(viewResult.Model);
-            Assert.Same(productList, model);
+
+            // Compare contents instead of reference
+            Assert.Equal(productList.Count, model.Count());
+            foreach (var (expected, actual) in productList.Zip(model))
+            {
+                Assert.Equal(expected.Id, actual.Id); // Adjust properties as needed
+                                                      // Add other property comparisons
+            }
 
             // Check that session was updated
             Assert.Equal(2, _controller.HttpContext.Session.GetInt32(SD.SessionCart));
@@ -133,7 +140,7 @@ namespace ECommerceSystem.Test.ControllerTests
             _mockShoppingCartService.Setup(s => s.GetShoppingCartByUserId(_userId)).Returns(shoppingCartList);
 
             // Act
-            var result = _controller.Index();
+            var result = _controller.Index(1);
 
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
@@ -172,7 +179,7 @@ namespace ECommerceSystem.Test.ControllerTests
         public void Details_ProductNotFound_ReturnsNotFound()
         {
             // Arrange
-            _mockProductService.Setup(s => s.GetProductByIdwithCategory(1)).Returns((Product)null);
+            _mockProductService.Setup(s => s.GetProductByIdwithCategory(1)).Returns((Product?)null);
 
             // Act
             var result = _controller.Details(1);
@@ -221,7 +228,7 @@ namespace ECommerceSystem.Test.ControllerTests
             // Arrange - No setup needed
 
             // Act
-            var result = _controller.Details(null);
+            var result = _controller.Details(null!);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -401,7 +408,7 @@ namespace ECommerceSystem.Test.ControllerTests
                 return true;
             }
 
-            value = null;
+            value = null!;
             return false;
         }
     }

@@ -70,7 +70,7 @@ namespace ECommerceSystem.Test.ServiceTests
             int? companyId = null;
 
             _mockCompanyRepository.Setup(r => r.Get(It.IsAny<Expression<Func<Company, bool>>>(), null, false))
-                .Returns((Company)null);
+                .Returns((Company?)null);
 
             // Act
             var result = _service.GetCompanyById(companyId);
@@ -87,7 +87,7 @@ namespace ECommerceSystem.Test.ServiceTests
             int companyId = 999;
 
             _mockCompanyRepository.Setup(r => r.Get(It.IsAny<Expression<Func<Company, bool>>>(), null, false))
-                .Returns((Company)null);
+                .Returns((Company?)null);
 
             // Act
             var result = _service.GetCompanyById(companyId);
@@ -153,7 +153,7 @@ namespace ECommerceSystem.Test.ServiceTests
             int companyId = 1;
 
             _mockCompanyRepository.Setup(r => r.Get(It.IsAny<Expression<Func<Company, bool>>>(), null, false))
-                .Returns((Company)null);
+                .Returns((Company?)null);
 
             // Act
             _service.DeleteCompany(companyId);

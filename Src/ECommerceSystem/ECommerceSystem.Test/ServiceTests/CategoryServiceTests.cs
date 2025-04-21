@@ -70,7 +70,7 @@ namespace ECommerceSystem.Test.ServiceTests
             int? categoryId = null;
 
             _mockCategoryRepository.Setup(r => r.Get(It.IsAny<Expression<Func<Category, bool>>>(), null, false))
-                .Returns((Category)null);
+                .Returns((Category?)null);
 
             // Act
             var result = _service.GetCategoryById(categoryId);
@@ -135,7 +135,7 @@ namespace ECommerceSystem.Test.ServiceTests
             int categoryId = 1;
 
             _mockCategoryRepository.Setup(r => r.Get(It.IsAny<Expression<Func<Category, bool>>>(), null, false))
-                .Returns((Category)null);
+                .Returns((Category?)null);
 
             // Act
             _service.DeleteCategory(categoryId);
