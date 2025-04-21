@@ -1,60 +1,118 @@
 ﻿@model IEnumerable<Product>
+<div class="container-fluid p-0">
+    <!-- First Row -->
+    <div class="row g-0 mx-0 w-100 mb-3">
+        @{
+            var productsArray = Model.ToArray();
+            var itemsPerRow = 6;
+            var maxProductsToShow = 12; // 2 rows of 6 products
 
-<div class="container-fluid p-0 d-flex">
-    <div class="row g-0 mx-0 w-100">
-        @foreach (var product in Model.Select((p, index) => new { Product = p, Index = index }))
-        {
-            if (product.Index % 5 == 0 && product.Index > 0)
+            // Display first row (first 6 products or fewer)
+            for (int i = 0; i < Math.Min(itemsPerRow, productsArray.Length); i++)
             {
-                @Html.Raw("</div><div class='row g-0 mx-0 w-100'>")
-            }
-            <div class="col-lg-1/5 col-md-4 col-sm-6 col-12 d-flex justify-content-center p-2">
-                <div class="card card-primary card-outline shadow rounded" style="width: 100%; max-width: 220px;">
-                    <img src="@(product.Product.ImageUrl ?? "https://placehold.co/600x400")"
-                         class="card-img-top rounded"
-                         alt="@product.Product.Title"
-                         style="height: 120px; object-fit: cover; margin-bottom: 0;" />
-
-                    <div class="card-body d-flex flex-column align-items-center p-1 pb-2">
-                        <h6 class="card-title text-dark mb-1 text-center"
-                            style="font-size: 0.9rem; text-transform: capitalize; margin-top: 0; line-height: 1.1rem; height: 2.2rem; overflow: hidden;">
-                            @product.Product.Title
-                        </h6>
-
-                        <p class="text-muted mb-0" style="font-size: 0.75rem;">
-                            by <b>@product.Product.Category?.Name</b>
-                        </p>
-
-                        <p class="text-dark font-weight-bold mb-0" style="font-size: 0.85rem;">
-                            @product.Product.Price.ToString("C", new System.Globalization.CultureInfo("bn-BD"))
-                        </p>
-
-                        <p class="text-info font-italic mb-1 text-center" style="font-size: 0.75rem; height: 1.5rem; overflow: hidden;">
-                            @{
-                                var des = product.Product.Description;
-                                if (des.Length > 22)
-                                {
-                                    des = product.Product.Description.Substring(0, 21) + "...";
+                var product = productsArray[i];
+                <div class="col-lg-2 col-md-4 col-sm-6 col-12 d-flex justify-content-center p-2">
+                    <div class="card card-primary card-outline shadow rounded" style="width: 100%; max-width: 220px;">
+                        <img src="@(product.ImageUrl ?? "https://placehold.co/600x400")"
+                             class="card-img-top rounded"
+                             alt="@product.Title"
+                             style="height: 120px; object-fit: cover; margin-bottom: 0;" />
+                        <div class="card-body d-flex flex-column align-items-center p-1 pb-2">
+                            <h6 class="card-title text-dark mb-1 text-center"
+                                style="font-size: 0.9rem; text-transform: capitalize; margin-top: 0; line-height: 1.1rem; height: 2.2rem; overflow: hidden;">
+                                @product.Title
+                            </h6>
+                            <p class="text-muted mb-0" style="font-size: 0.75rem;">
+                                by <b>@product.Category?.Name</b>
+                            </p>
+                            <p class="text-dark font-weight-bold mb-0" style="font-size: 0.85rem;">
+                                @product.Price.ToString("C", new System.Globalization.CultureInfo("bn-BD"))
+                            </p>
+                            <p class="text-info font-italic mb-1 text-center" style="font-size: 0.75rem; height: 1.5rem; overflow: hidden;">
+                                @{
+                                    var des = product.Description;
+                                    if (des.Length > 22)
+                                    {
+                                        des = product.Description.Substring(0, 21) + "...";
+                                    }
                                 }
-                            }
-                            @des
-                        </p>
-
-                        <a asp-action="Details" asp-route-productId="@product.Product.Id"
-                           class="btn btn-sm btn-primary mt-auto"
-                           style="font-size: 0.8rem; max-width: 100px; padding: 0.4rem 0.8rem;">
-                            Details
-                        </a>
+                                @des
+                            </p>
+                            <a asp-action="Details" asp-route-productId="@product.Id"
+                               class="btn btn-sm btn-primary mt-auto"
+                               style="font-size: 0.8rem; max-width: 100px; padding: 0.4rem 0.8rem;">
+                                Details
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
+            }
+        }
+    </div>
+
+    <!-- Second Row -->
+    <div class="row g-0 mx-0 w-100">
+        @{
+            // Display second row (next 6 products or fewer)
+            for (int i = itemsPerRow; i < Math.Min(maxProductsToShow, productsArray.Length); i++)
+            {
+                var product = productsArray[i];
+                <div class="col-lg-2 col-md-4 col-sm-6 col-12 d-flex justify-content-center p-2">
+                    <div class="card card-primary card-outline shadow rounded" style="width: 100%; max-width: 220px;">
+                        <img src="@(product.ImageUrl ?? "https://placehold.co/600x400")"
+                             class="card-img-top rounded"
+                             alt="@product.Title"
+                             style="height: 120px; object-fit: cover; margin-bottom: 0;" />
+                        <div class="card-body d-flex flex-column align-items-center p-1 pb-2">
+                            <h6 class="card-title text-dark mb-1 text-center"
+                                style="font-size: 0.9rem; text-transform: capitalize; margin-top: 0; line-height: 1.1rem; height: 2.2rem; overflow: hidden;">
+                                @product.Title
+                            </h6>
+                            <p class="text-muted mb-0" style="font-size: 0.75rem;">
+                                by <b>@product.Category?.Name</b>
+                            </p>
+                            <p class="text-dark font-weight-bold mb-0" style="font-size: 0.85rem;">
+                                @product.Price.ToString("C", new System.Globalization.CultureInfo("bn-BD"))
+                            </p>
+                            <p class="text-info font-italic mb-1 text-center" style="font-size: 0.75rem; height: 1.5rem; overflow: hidden;">
+                                @{
+                                    var des = product.Description;
+                                    if (des.Length > 22)
+                                    {
+                                        des = product.Description.Substring(0, 21) + "...";
+                                    }
+                                }
+                                @des
+                            </p>
+                            <a asp-action="Details" asp-route-productId="@product.Id"
+                               class="btn btn-sm btn-primary mt-auto"
+                               style="font-size: 0.8rem; max-width: 100px; padding: 0.4rem 0.8rem;">
+                                Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
         }
     </div>
 </div>
 
-<style>
-    .col-lg-1\/5 {
-        flex: 0 0 auto;
-        width: 20%;
+<!-- Pagination -->
+<div class="d-flex justify-content-center mt-4">
+    @{
+        // Calculate total pages based on products count and products per page (12)
+        var productsPerPage = 12;
+        var totalProducts = Model.Count();
+        var calculatedTotalPages = (int)Math.Ceiling((double)totalProducts / productsPerPage);
+
+        // Use calculated pages or ViewBag value if available
+        var totalPages = ViewBag.TotalPages != null ? (int)ViewBag.TotalPages : calculatedTotalPages;
+        var currentPage = ViewBag.CurrentPage != null ? (int)ViewBag.CurrentPage : 1;
     }
-</style>
+
+    @for (int i = 1; i <= totalPages; i++)
+    {
+        <a asp-action="Index" asp-route-page="@i"
+           class="btn @(i == currentPage ? "btn-primary" : "btn-outline-primary") mx-1">@i</a>
+    }
+</div>
