@@ -33,18 +33,18 @@
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
         <!-- Header -->
-        <nav class="app-header navbar navbar-expand bg-body shadow-sm">
+        <nav class="app-header navbar navbar-expand bg-dark shadow-sm">
             <div class="container-fluid">
-               
+
                 <!-- Start Navbar Links -->
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
+                        <a class="nav-link text-light" data-lte-toggle="sidebar" href="#" role="button">
                             <i class="bi bi-list"></i>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark hover-primary" asp-area="Customer" asp-controller="Home" asp-action="Index">
+                        <a class="nav-link text-light hover-light" asp-area="Customer" asp-controller="Home" asp-action="Index">
                             <i class="bi bi-house me-1"></i> Home
                         </a>
                     </li>
@@ -52,18 +52,18 @@
                         if (User.IsInRole(SD.Role_Admin))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark hover-primary" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                <a class="nav-link text-light hover-light" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
                                     <i class="bi bi-speedometer me-1"></i> Dashboard
                                 </a>
                             </li>
                         }
                     }
                     <li class="nav-item">
-                        <a class="nav-link text-dark hover-primary" asp-area="Customer" asp-controller="Cart" asp-action="Index">
+                        <a class="nav-link text-light hover-light" asp-area="Customer" asp-controller="Cart" asp-action="Index">
                             <i class="bi bi-cart me-1"></i> Cart
                         </a>
                     </li>
-                   
+
                 </ul>
                 <!-- End Navbar Links -->
                 <!-- Right Navbar Links -->
@@ -72,21 +72,21 @@
                     <li class="nav-item">
                         <form class="d-flex" role="search">
                             <input class="form-control me-2" type="search" placeholder="Search products..." aria-label="Search" style="max-width: 200px;" />
-                            <button class="btn btn-outline-primary" type="submit">
+                            <button class="btn btn-outline-light" type="submit">
                                 <i class="bi bi-search"></i>
                             </button>
                         </form>
                     </li>
                     <!-- Fullscreen Toggle -->
                     <li class="nav-item">
-                        <a class="nav-link text-dark hover-primary" href="#" data-lte-toggle="fullscreen">
+                        <a class="nav-link text-light hover-light" href="#" data-lte-toggle="fullscreen">
                             <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
                             <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none;"></i>
                         </a>
                     </li>
                     <!-- User Profile/Login -->
                     <li class="nav-item dropdown user-footer">
-                        <a class="nav-link dropdown-toggle text-dark hover-primary" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle text-light hover-light" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="bi bi-person-circle me-1"></i>
                             <span>@(User.Identity?.Name ?? "Guest")</span>
                         </a>
@@ -175,14 +175,36 @@
         </main>
         <!-- End App Main -->
         <!-- Footer -->
-        <footer class="app-footer">
-            <div class="float-end d-none d-sm-inline"></div>
-            <strong>
-                Copyright © 2025
-                <a href="https://adminlte.io" class="text-decoration-none">Binary-Brains</a>.
-            </strong>
-            All rights reserved.
+        <footer class="app-footer bg-dark text-light py-3">
+            <div class="container-fluid">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <strong>
+                            Copyright © 2025
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="text-decoration-none text-light">Binary-Brains</a>
+                        </strong>
+                        <span class="d-block d-md-inline ms-md-1">All rights reserved.</span>
+                    </div>
+                    <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                        <ul class="list-inline mb-0">
+                            <li class="list-inline-item">
+                                <a asp-area="Customer" asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-light">Privacy Policy</a>
+                            </li>
+                            <li class="list-inline-item">•</li>
+                            <li class="list-inline-item">
+                                <a asp-area="Customer" asp-controller="Home" asp-action="" class="text-decoration-none text-light">Terms of Service</a>
+                            </li>
+                            <li class="list-inline-item">•</li>
+                            <li class="list-inline-item">
+                                <a asp-area="Customer" asp-controller="Home" asp-action="" class="text-decoration-none text-light">Contact Us</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </footer>
+        <!-- End Footer -->
+        <!-- End Footer -->
     </div>
 
     <!-- Scripts -->
