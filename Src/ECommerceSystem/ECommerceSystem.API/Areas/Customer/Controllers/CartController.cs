@@ -173,6 +173,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+
         public IActionResult Remove(int cartId)
         {
             if (!ModelState.IsValid)

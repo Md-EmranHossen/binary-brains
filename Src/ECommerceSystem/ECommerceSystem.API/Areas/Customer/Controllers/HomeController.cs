@@ -27,17 +27,15 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         public IActionResult Index(int? page)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var productsPerPage = 12; // Match this to your view (6 products × 2 rows)
-            int pageNumber = page ?? 1;
-
-            // Adjust skip/take to use the correct page number (subtract 1 because pages are 1-based)
+            var productsPerPage = 12; 
+            var pageNumber = page ?? 1;
             var productList = _productService.GetAllProducts()
                                              .Skip((pageNumber - 1) * productsPerPage)
                                              .Take(productsPerPage);
 
             // Calculate total pages for pagination
-            int totalProducts = _productService.GetAllProducts().Count();
-            int totalPages = (int)Math.Ceiling(totalProducts / (double)productsPerPage);
+            var totalProducts = _productService.GetAllProducts().Count();
+            var totalPages = (int)Math.Ceiling(totalProducts / (double)productsPerPage);
 
             // Pass the pagination info to the view
             ViewBag.CurrentPage = pageNumber;
