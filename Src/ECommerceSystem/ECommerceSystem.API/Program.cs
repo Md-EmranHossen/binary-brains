@@ -11,6 +11,7 @@ using ECommerceSystem.Service.Services;
 using Stripe;
 using ECommerceSystem.Models;
 using ECommerceSystem.DataAccess.DbInitializer;
+using ECommerceSystem.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

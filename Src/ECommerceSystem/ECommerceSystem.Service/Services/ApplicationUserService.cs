@@ -3,7 +3,7 @@ using ECommerceSystem.Models;
 using ECommerceSystem.Service.Services.IServices;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace ECommerceWebApp.Services
+namespace ECommerceSystem.Services
 {
     public class ApplicationUserService : IApplicationUserService
     {
@@ -27,6 +27,16 @@ namespace ECommerceWebApp.Services
             return obj;
         }
 
+        public ApplicationUser? GetUserById(string? id)
+        {
+            return _applicationUserRepositroy.Get(u => u.Id == id);
+        }
+
+        public ApplicationUser? GetUserByIdAndIncludeprop(string? id, string includeprop)
+        {
+            return _applicationUserRepositroy.Get(u => u.Id == id, includeProperties: includeprop);
+        }
+
         public string GetUserrole(string userId)
         {
            return _applicationUserRepositroy.GetUserRole(userId);
@@ -39,15 +49,8 @@ namespace ECommerceWebApp.Services
 
         }
 
-        ApplicationUser? IApplicationUserService.GetUserById(string? id)
-        {
-            return _applicationUserRepositroy.Get(u => u.Id == id);
-        }
 
-        ApplicationUser? IApplicationUserService.GetUserByIdAndIncludeprop(string? id,string includeprop)
-        {
-            return _applicationUserRepositroy.Get(u => u.Id == id,includeProperties:includeprop);
-        }
+
 
     }
 }

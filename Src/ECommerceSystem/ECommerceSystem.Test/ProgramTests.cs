@@ -23,6 +23,7 @@ using ECommerceSystem.Models;
 using ECommerceSystem.DataAccess.DbInitializer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using ECommerceWebApp;
+using ECommerceSystem.Services;
 
 namespace ECommerceSystem.Test
 {
