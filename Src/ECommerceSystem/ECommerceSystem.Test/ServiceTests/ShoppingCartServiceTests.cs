@@ -36,10 +36,10 @@ namespace ECommerceSystem.Test.ServiceTests
 
             mockSession.Setup(s => s.Set(It.IsAny<string>(), It.IsAny<byte[]>()))
                 .Callback<string, byte[]>((key, value) => sessionDict[key] = value);
-              mockSession.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny))
+              mockSession.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny!))
                 .Returns<string, byte[]>((key, value) =>
                 {
-                    if (sessionDict.TryGetValue(key, out byte[] result))
+                    if (sessionDict.TryGetValue(key, out byte[] ?result))
                     {
                         value = result;
                         return true;

@@ -146,7 +146,7 @@ namespace ECommerceSystem.Test.ControllerTests
             var result = _controller.Details(orderId) as ViewResult;
 
             // Assert
-            var model = Assert.IsType<OrderVM>(result.Model);
+            var model = Assert.IsType<OrderVM>(result?.Model);
             Assert.Equal(orderHeader, model.orderHeader);
             Assert.Equal(orderDetails, model.orderDetails);
         }
@@ -338,7 +338,7 @@ namespace ECommerceSystem.Test.ControllerTests
             // Arrange
             SetupUser();
             var orderVM = new OrderVM { orderHeader = new OrderHeader { Id = 1 } };
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(1, "ApplicationUser")).Returns((OrderHeader)null);
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(1, "ApplicationUser")).Returns((OrderHeader?)null);
 
             // Act
             var result = _controller.PayDetails(orderVM);

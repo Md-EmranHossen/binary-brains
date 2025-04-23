@@ -38,30 +38,38 @@ namespace ECommerceSystem.Test.ServiceTests
     {
         private readonly IStripeSessionService _sessionService;
 
-        public TestableOrderHeaderService(
-            IOrderHeaderRepository orderHeaderRepository,
-            IUnitOfWork unitOfWork,
-            IHttpContextAccessor httpContextAccessor,
-            IStripeSessionService sessionService)
-            : base(orderHeaderRepository, unitOfWork, httpContextAccessor)
+        public class OrderHeaderService
         {
-            _sessionService = sessionService;
+            protected readonly IUnitOfWork _unitOfWork;
+
+            public OrderHeaderService(
+                IOrderHeaderRepository orderHeaderRepository,
+                IUnitOfWork unitOfWork,
+                IHttpContextAccessor httpContextAccessor)
+            {
+                _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+                // Other initialization
+            }
         }
 
+        // Override the OrderConfirmation method to use the interface
         // Override the OrderConfirmation method to use the interface
         public new OrderHeader? OrderConfirmation(int id)
         {
             var orderHeader = GetOrderHeaderById(id, "ApplicationUser");
             if (orderHeader != null && orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
             {
-                var session = _sessionService.Get(orderHeader.SessionId);
-                if (string.Equals(session.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
+                if (orderHeader.SessionId != null)
                 {
-                    UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
-                    UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
-                    _unitOfWork.Commit();
+                    var session = _sessionService.Get(orderHeader.SessionId);
+                    if (string.Equals(session.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
+                    {
+                        UpdateStripePaymentID(id, session.Id, session.PaymentIntentId);
+                        UpdateStatus(id, SD.StatusApproved, SD.PaymentStatusApproved);
+                        _unitOfWork.Commit();
+                    }
                 }
-                _httpContextAccessor.HttpContext.Session.Clear();
+                _httpContextAccessor.HttpContext?.Session.Clear();
             }
             return orderHeader;
         }
@@ -149,7 +157,7 @@ namespace ECommerceSystem.Test.ServiceTests
         {
             // Arrange
             _mockOrderHeaderRepository.Setup(r => r.Get(It.IsAny<Expression<Func<OrderHeader, bool>>>(), It.IsAny<string>(), false))
-                .Returns((OrderHeader)null);
+                .Returns((OrderHeader?)null);
 
             // Act
             _orderHeaderService.DeleteOrderHeader(999);
@@ -376,7 +384,7 @@ namespace ECommerceSystem.Test.ServiceTests
         {
             // Arrange
             _mockOrderHeaderRepository.Setup(r => r.Get(It.IsAny<Expression<Func<OrderHeader, bool>>>(), It.Is<string>(s => s == "ApplicationUser"), false))
-                .Returns((OrderHeader)null);
+                .Returns((OrderHeader?)null);
 
             // Act
             var result = _orderHeaderService.OrderConfirmation(1);

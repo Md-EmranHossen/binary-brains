@@ -67,12 +67,10 @@ namespace ECommerceSystem.Test
             result.Id.Should().Be(1);
             result.Title.Should().Be("Test Product");
         }
-
         [Fact]
-        public async Task Get_ReturnsNull_WhenProductDoesNotExist()
+        public void Get_ReturnsNull_WhenProductDoesNotExist()  // Removed async keyword
         {
             var result = _repository.Get(p => p.Id == 999);
-
             result.Should().BeNull();
         }
 
@@ -120,10 +118,10 @@ namespace ECommerceSystem.Test
             await _context.SaveChangesAsync();
 
             var result = _repository.Get(p => p.Id == 1, tracked: false);
-            result.Title = "Modified";
+            result!.Title = "Modified";
 
             var original = await _context.Products.FindAsync(1);
-            original.Title.Should().Be("Test Product");
+            original!.Title.Should().Be("Test Product");
         }
 
         [Fact]
@@ -287,6 +285,7 @@ namespace ECommerceSystem.Test
         {
             _context.Database.EnsureDeleted();
             _context.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

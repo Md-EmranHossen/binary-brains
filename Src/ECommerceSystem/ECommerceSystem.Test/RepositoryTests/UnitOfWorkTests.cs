@@ -56,7 +56,7 @@ namespace ECommerceSystem.Test.RepositoryTests
         }
 
         [Fact]
-        public void Commit_PersistsMultipleChanges()
+        public async Task Commit_PersistsMultipleChanges()
         {
             // Arrange
             var product1 = new Product
@@ -83,7 +83,7 @@ namespace ECommerceSystem.Test.RepositoryTests
             _unitOfWork.Commit();
 
             // Assert
-            var products = _context.Products.ToListAsync().Result;
+            var products = await _context.Products.ToListAsync();
             products.Should().HaveCount(2);
             products.Should().Contain(p => p.Id == 1);
             products.Should().Contain(p => p.Id == 2);
@@ -147,6 +147,7 @@ namespace ECommerceSystem.Test.RepositoryTests
         {
             _context.Database.EnsureDeleted();
             _context.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

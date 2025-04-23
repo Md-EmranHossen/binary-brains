@@ -94,8 +94,8 @@ namespace ECommerceSystem.Test.RepositoryTests
             var updatedCompany1 = await _context.Companies.FindAsync(1);
             var unchangedCompany2 = await _context.Companies.FindAsync(2);
 
-            updatedCompany1.Name.Should().Be("Updated Company One");
-            unchangedCompany2.Name.Should().Be("Company Two"); // Should remain unchanged
+            updatedCompany1?.Name.Should().Be("Updated Company One");
+            unchangedCompany2?.Name.Should().Be("Company Two"); // Should remain unchanged
         }
 
         [Fact]
@@ -141,6 +141,7 @@ namespace ECommerceSystem.Test.RepositoryTests
         {
             _context.Database.EnsureDeleted();
             _context.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

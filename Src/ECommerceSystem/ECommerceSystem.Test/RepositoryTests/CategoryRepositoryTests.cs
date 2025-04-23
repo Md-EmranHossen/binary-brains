@@ -75,11 +75,10 @@ namespace ECommerceSystem.Test
         }
 
         [Fact]
-        public async Task Get_ReturnsNull_WhenCategoryDoesNotExist()
+        public void Get_ReturnsNull_WhenCategoryDoesNotExist()  // Removed async keyword
         {
             // Act
             var result = _repository.Get(c => c.Id == 999);
-
             // Assert
             result.Should().BeNull();
         }
@@ -100,12 +99,12 @@ namespace ECommerceSystem.Test
 
             // Act
             var result = _repository.Get(c => c.Id == 1);
-            result.Name = "Modified Electronics";
+            result!.Name = "Modified Electronics";
             await _context.SaveChangesAsync();
 
             // Assert - Original entity should not be modified
             var original = await _context.Categories.FindAsync(1);
-            original.Name.Should().Be("Electronics");
+            original?.Name.Should().Be("Electronics");
         }
 
         [Fact]
@@ -195,7 +194,7 @@ namespace ECommerceSystem.Test
 
             // Assert - Original entity should not be modified
             var original = await _context.Categories.FindAsync(1);
-            original.Name.Should().Be("Electronics");
+            original?.Name.Should().Be("Electronics");
         }
 
 
@@ -339,6 +338,7 @@ namespace ECommerceSystem.Test
         {
             _context.Database.EnsureDeleted();
             _context.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

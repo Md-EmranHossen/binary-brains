@@ -103,7 +103,7 @@ namespace ECommerceSystem.Test.ServiceTests
         public void AddProduct_WithNullProduct_ShouldNotAddProduct()
         {
             // Act
-            _productService.AddProduct(null);
+            _productService.AddProduct(null!);
 
             // Assert
             _mockProductRepository.Verify(r => r.Add(It.IsAny<Product>()), Times.Never);
@@ -128,7 +128,7 @@ namespace ECommerceSystem.Test.ServiceTests
         public void UpdateProduct_WithNullProduct_ShouldNotUpdateProduct()
         {
             // Act
-            _productService.UpdateProduct(null);
+            _productService.UpdateProduct(null!);
 
             // Assert
             _mockProductRepository.Verify(r => r.Update(It.IsAny<Product>()), Times.Never);
@@ -167,7 +167,7 @@ namespace ECommerceSystem.Test.ServiceTests
         {
             // Arrange
             _mockProductRepository.Setup(r => r.Get(It.IsAny<Expression<Func<Product, bool>>>(), It.IsAny<string>(),false))
-                .Returns((Product)null);
+                .Returns((Product?)null);
 
             // Act
             _productService.DeleteProduct(999);
@@ -224,7 +224,8 @@ namespace ECommerceSystem.Test.ServiceTests
                 File.Create(oldImagePath).Dispose();
 
                 mockFile.Setup(f => f.CopyTo(It.IsAny<Stream>()))
-                    .Callback<Stream>(stream => {
+                    .Callback<Stream>(stream =>
+                    {
                         var writer = new StreamWriter(stream);
                         writer.WriteLine("test content");
                         writer.Flush();
@@ -235,10 +236,11 @@ namespace ECommerceSystem.Test.ServiceTests
 
                 // Assert
                 Assert.StartsWith("/images/product/", product.ImageUrl);
-                Assert.True(product.ImageUrl.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase));
+                Assert.EndsWith(".jpg", product.ImageUrl, StringComparison.OrdinalIgnoreCase);
                 Assert.DoesNotContain("oldimage.jpg", product.ImageUrl); // Ensure it's updated
                 Assert.NotEqual("/images/product/oldimage.jpg", product.ImageUrl); // Ensure it's not the same
             }
+
             finally
             {
                 if (Directory.Exists(wwwRootPath))
@@ -257,7 +259,7 @@ namespace ECommerceSystem.Test.ServiceTests
             var wwwRootPath = "C:\\fakepath";
 
             // Act
-            _productService.EditPathOfProduct(null, mockFile.Object, wwwRootPath);
+            _productService.EditPathOfProduct(null!, mockFile.Object, wwwRootPath);
 
             // Assert - no exception and no change
             mockFile.Verify(f => f.CopyTo(It.IsAny<Stream>()), Times.Never);
@@ -333,7 +335,7 @@ namespace ECommerceSystem.Test.ServiceTests
             var wwwRootPath = "C:\\fakepath";
 
             // Act
-            _productService.CreatePathOfProduct(null, mockFile.Object, wwwRootPath);
+            _productService.CreatePathOfProduct(null!, mockFile.Object, wwwRootPath);
 
             // Assert - no exception and no change
             mockFile.Verify(f => f.CopyTo(It.IsAny<Stream>()), Times.Never);
@@ -360,7 +362,7 @@ namespace ECommerceSystem.Test.ServiceTests
 
             // Assert
             Assert.Equal(expectedProduct, result);
-            Assert.NotNull(result.Category);
+            Assert.NotNull(result?.Category);
             Assert.Equal("Category 1", result.Category.Name);
             _mockProductRepository.Verify(r => r.Get(
                 It.IsAny<Expression<Func<Product, bool>>>(),

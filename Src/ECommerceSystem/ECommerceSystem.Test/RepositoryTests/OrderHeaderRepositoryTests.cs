@@ -87,8 +87,8 @@ namespace ECommerceSystem.Test
         {
             // Arrange
             var order = _context.OrderHeaders.Find(1);
-            order.TrackingNumber = "TRK999999";
-            order.Carrier = "DHL";
+            order!.TrackingNumber = "TRK999999";
+            order!.Carrier = "DHL";
 
             // Act
             _repository.Update(order);
@@ -96,8 +96,8 @@ namespace ECommerceSystem.Test
 
             // Assert
             var updatedOrder = _context.OrderHeaders.Find(1);
-            updatedOrder.TrackingNumber.Should().Be("TRK999999");
-            updatedOrder.Carrier.Should().Be("DHL");
+            updatedOrder!.TrackingNumber.Should().Be("TRK999999");
+            updatedOrder!.Carrier.Should().Be("DHL");
         }
 
         [Fact]
@@ -109,8 +109,8 @@ namespace ECommerceSystem.Test
 
             // Assert
             var updatedOrder = _context.OrderHeaders.Find(1);
-            updatedOrder.OrderStatus.Should().Be("Shipped");
-            updatedOrder.PaymentStatus.Should().Be("Pending"); // Unchanged
+            updatedOrder!.OrderStatus.Should().Be("Shipped");
+            updatedOrder!.PaymentStatus.Should().Be("Pending"); // Unchanged
         }
 
         [Fact]
@@ -122,8 +122,8 @@ namespace ECommerceSystem.Test
 
             // Assert
             var updatedOrder = _context.OrderHeaders.Find(1);
-            updatedOrder.OrderStatus.Should().Be("Shipped");
-            updatedOrder.PaymentStatus.Should().Be("Paid");
+            updatedOrder!.OrderStatus.Should().Be("Shipped");
+            updatedOrder!.PaymentStatus.Should().Be("Paid");
         }
 
         [Fact]
@@ -143,9 +143,9 @@ namespace ECommerceSystem.Test
 
             // Assert
             var updatedOrder = _context.OrderHeaders.Find(1);
-            updatedOrder.SessionId.Should().Be("cs_new_session_id");
-            updatedOrder.PaymentIntentId.Should().BeNull(); // Unchanged
-            updatedOrder.PaymentDate.Should().Be(default(DateTime)); // Unchanged since PaymentIntentId wasn't provided
+            updatedOrder!.SessionId.Should().Be("cs_new_session_id");
+            updatedOrder!.PaymentIntentId.Should().BeNull(); // Unchanged
+            updatedOrder!.PaymentDate.Should().Be(default(DateTime)); // Unchanged since PaymentIntentId wasn't provided
         }
 
         [Fact]
@@ -155,14 +155,14 @@ namespace ECommerceSystem.Test
             var beforeUpdate = DateTime.Now;
 
             // Act
-            _repository.UpdateStripePaymentID(1, null, "pi_new_payment_intent");
+            _repository.UpdateStripePaymentID(1, null!, "pi_new_payment_intent");
             _context.SaveChanges();
 
             // Assert
             var updatedOrder = _context.OrderHeaders.Find(1);
-            updatedOrder.PaymentIntentId.Should().Be("pi_new_payment_intent");
-            updatedOrder.SessionId.Should().BeNull(); // Unchanged
-            updatedOrder.PaymentDate.Should().BeAfter(beforeUpdate);
+            updatedOrder!.PaymentIntentId.Should().Be("pi_new_payment_intent");
+            updatedOrder!.SessionId.Should().BeNull(); // Unchanged
+            updatedOrder!.PaymentDate.Should().BeAfter(beforeUpdate);
         }
 
         [Fact]
@@ -177,9 +177,9 @@ namespace ECommerceSystem.Test
 
             // Assert
             var updatedOrder = _context.OrderHeaders.Find(1);
-            updatedOrder.SessionId.Should().Be("cs_new_session");
-            updatedOrder.PaymentIntentId.Should().Be("pi_new_intent");
-            updatedOrder.PaymentDate.Should().BeAfter(beforeUpdate);
+            updatedOrder!.SessionId.Should().Be("cs_new_session");
+            updatedOrder!.PaymentIntentId.Should().Be("pi_new_intent");
+            updatedOrder!.PaymentDate.Should().BeAfter(beforeUpdate);
         }
 
         [Fact]
@@ -273,7 +273,7 @@ namespace ECommerceSystem.Test
             var order = _context.OrderHeaders.Find(1);
 
             // Act
-            _repository.Remove(order);
+            _repository.Remove(order!);
             _context.SaveChanges();
 
             // Assert
@@ -286,6 +286,7 @@ namespace ECommerceSystem.Test
         {
             _context.Database.EnsureDeleted();
             _context.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

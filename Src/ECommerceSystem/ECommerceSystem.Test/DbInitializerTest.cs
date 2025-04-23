@@ -14,7 +14,7 @@ namespace ECommerceSystem.Tests
     public class DbInitializerTest
     {
         // Helper method to create a new in-memory database for each test
-        private ApplicationDbContext GetInMemoryDbContext()
+        private static ApplicationDbContext GetInMemoryDbContext()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // Unique DB per test
@@ -23,17 +23,17 @@ namespace ECommerceSystem.Tests
         }
 
         // Helper method to create a mock UserManager
-        private Mock<UserManager<IdentityUser>> GetMockUserManager()
+        private static Mock<UserManager<IdentityUser>> GetMockUserManager()
         {
             var store = new Mock<IUserStore<IdentityUser>>();
-            return new Mock<UserManager<IdentityUser>>(store.Object, null, null, null, null, null, null, null, null);
+            return new Mock<UserManager<IdentityUser>>(store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
         }
 
         // Helper method to create a mock RoleManager
-        private Mock<RoleManager<IdentityRole>> GetMockRoleManager()
+        private static Mock<RoleManager<IdentityRole>> GetMockRoleManager()
         {
             var store = new Mock<IRoleStore<IdentityRole>>();
-            return new Mock<RoleManager<IdentityRole>>(store.Object, null, null, null, null);
+            return new Mock<RoleManager<IdentityRole>>(store.Object, null!, null!, null!, null!);
         }
 
         [Fact]

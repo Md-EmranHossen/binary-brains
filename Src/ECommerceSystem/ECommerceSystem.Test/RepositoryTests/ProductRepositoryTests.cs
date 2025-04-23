@@ -43,13 +43,14 @@ namespace ECommerceSystem.Test.RepositoryTests
             await _context.SaveChangesAsync();
 
             var updatedProduct = await _context.Products.FindAsync(1);
-            updatedProduct.Title.Should().Be("Updated Product");
+            updatedProduct?.Title.Should().Be("Updated Product");
         }
 
         public void Dispose()
         {
             _context.Database.EnsureDeleted();
             _context.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

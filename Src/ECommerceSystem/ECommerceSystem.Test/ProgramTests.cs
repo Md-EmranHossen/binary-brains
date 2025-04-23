@@ -42,7 +42,7 @@ namespace ECommerceSystem.Test
     };
 
             var configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(configDictionary)
+                .AddInMemoryCollection(configDictionary!)
                 .Build();
 
             services.AddSingleton<IConfiguration>(configuration);
@@ -147,7 +147,7 @@ namespace ECommerceSystem.Test
             };
 
             var configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(configDictionary)
+                .AddInMemoryCollection(configDictionary!)
                 .Build();
 
             // Save the current StripeConfiguration.ApiKey
@@ -175,7 +175,7 @@ namespace ECommerceSystem.Test
             // let's test that a basic app can be created with minimal middleware
 
             // Arrange & Act
-            var builder = WebApplication.CreateBuilder(new string[] { });
+            var builder = WebApplication.CreateBuilder(Array.Empty<string>());
             var app = builder.Build();
 
             // Assert - Just verify the app was created without errors

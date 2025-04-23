@@ -86,11 +86,11 @@ namespace ECommerceSystem.Test.RepositoryTests
             var updatedOrderDetail1 = await _context.OrderDetails.FindAsync(1);
             var unchangedOrderDetail2 = await _context.OrderDetails.FindAsync(2);
 
-            updatedOrderDetail1.Count.Should().Be(5);
-            updatedOrderDetail1.Price.Should().Be(24.99);
+            updatedOrderDetail1?.Count.Should().Be(5);
+            updatedOrderDetail1?.Price.Should().Be(24.99);
 
-            unchangedOrderDetail2.Count.Should().Be(3); // Should remain unchanged
-            unchangedOrderDetail2.Price.Should().Be(29.99); // Should remain unchanged
+            unchangedOrderDetail2?.Count.Should().Be(3); // Should remain unchanged
+            unchangedOrderDetail2?.Price.Should().Be(29.99); // Should remain unchanged
         }
 
         [Fact]
@@ -127,6 +127,7 @@ namespace ECommerceSystem.Test.RepositoryTests
         {
             _context.Database.EnsureDeleted();
             _context.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

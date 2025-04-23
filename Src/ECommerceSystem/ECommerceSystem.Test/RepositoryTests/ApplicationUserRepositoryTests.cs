@@ -116,7 +116,7 @@ namespace ECommerceSystem.Test
         public void GetUserRole_ShouldReturnEmptyString_WhenUserIdIsNull()
         {
             // Act
-            var roleName = _repository.GetUserRole(null);
+            var roleName = _repository.GetUserRole(null!);
 
             // Assert
             roleName.Should().BeEmpty();
@@ -147,7 +147,8 @@ namespace ECommerceSystem.Test
         {
             // Arrange
             var user = _context.ApplicationUsers.Find("user1");
-            user.Name = "Updated Admin Name";
+
+            user!.Name = "Updated Admin Name";
 
             // Act
             _repository.Update(user);
@@ -155,7 +156,7 @@ namespace ECommerceSystem.Test
 
             // Assert
             var updatedUser = _context.ApplicationUsers.Find("user1");
-            updatedUser.Name.Should().Be("Updated Admin Name");
+            updatedUser!.Name.Should().Be("Updated Admin Name");
         }
 
         [Fact]
@@ -209,7 +210,7 @@ namespace ECommerceSystem.Test
         public void GetAll_ShouldReturnFilteredUsers_WhenFilterIsApplied()
         {
             // Act
-            var users = _repository.GetAll(u => u.Email.Contains("admin"));
+            var users = _repository.GetAll(u => u.Email!.Contains("admin"));
 
             // Assert
             users.Should().HaveCount(1);
@@ -245,7 +246,7 @@ namespace ECommerceSystem.Test
             var user = _context.ApplicationUsers.Find("user3");
 
             // Act
-            _repository.Remove(user);
+            _repository.Remove(user!);
             _context.SaveChanges();
 
             // Assert
@@ -274,6 +275,7 @@ namespace ECommerceSystem.Test
         {
             _context.Database.EnsureDeleted();
             _context.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }
