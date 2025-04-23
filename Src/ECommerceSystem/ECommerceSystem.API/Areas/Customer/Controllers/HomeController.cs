@@ -26,6 +26,11 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
 
         public IActionResult Index(int? page)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var productsPerPage = 12; 
             var pageNumber = page ?? 1;

@@ -28,7 +28,7 @@ namespace ECommerceSystem.Test.ControllerTests
         }
 
         #region Helper Methods
-        private void SetupUser(string role = null, string userId = null)
+        private void SetupUser(string role = null!, string userId = null!)
         {
             var claims = new List<Claim>();
             if (role != null) claims.Add(new Claim(ClaimTypes.Role, role));
@@ -123,7 +123,7 @@ namespace ECommerceSystem.Test.ControllerTests
             var result = _controller.Index(status) as ViewResult;
 
             // Assert
-            var model = Assert.IsAssignableFrom<IEnumerable<OrderHeader>>(result.Model);
+            var model = Assert.IsAssignableFrom<IEnumerable<OrderHeader>>(result?.Model);
             if (status == "pending")
                 Assert.Equal(expectedCount, model.Count(o => o.PaymentStatus == expectedStatus));
             else
@@ -156,7 +156,7 @@ namespace ECommerceSystem.Test.ControllerTests
         {
             // Arrange
             int orderId = 1;
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId, "ApplicationUser")).Returns((OrderHeader)null);
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId, "ApplicationUser")).Returns((OrderHeader?)null);
 
             // Act
             var result = _controller.Details(orderId);
@@ -183,8 +183,8 @@ namespace ECommerceSystem.Test.ControllerTests
 
             // Assert
             _mockOrderHeaderService.Verify(s => s.UpdateOrderHeader(It.Is<OrderHeader>(o => o.Name == "Updated")), Times.Once());
-            Assert.Equal("Details", result.ActionName);
-            Assert.Equal(1, result.RouteValues["id"]);
+            Assert.Equal("Details", result?.ActionName);
+            Assert.Equal(1, result?.RouteValues?["id"]);
         }
 
         [Fact]
@@ -199,7 +199,7 @@ namespace ECommerceSystem.Test.ControllerTests
             var result = _controller.Details(orderVM) as ViewResult;
 
             // Assert
-            Assert.Equal(orderVM, result.Model);
+            Assert.Equal(orderVM, result!.Model);
         }
 
         [Fact]
@@ -231,8 +231,8 @@ namespace ECommerceSystem.Test.ControllerTests
 
             // Assert
             _mockOrderHeaderService.Verify(s => s.UpdateStatus(1, SD.StatusInProcess, null), Times.Once());
-            Assert.Equal("Details", result.ActionName);
-            Assert.Equal(1, result.RouteValues["id"]);
+            Assert.Equal("Details", result!.ActionName);
+            Assert.Equal(1, result!.RouteValues?["id"]);
         }
 
         [Fact]
@@ -247,7 +247,7 @@ namespace ECommerceSystem.Test.ControllerTests
             var result = _controller.StartProcessing(orderVM) as ViewResult;
 
             // Assert
-            Assert.Equal(orderVM, result.Model);
+            Assert.Equal(orderVM, result?.Model);
         }
         #endregion
 
@@ -270,8 +270,8 @@ namespace ECommerceSystem.Test.ControllerTests
                 o.TrackingNumber == "TRACK123" &&
                 o.Carrier == "UPS" &&
                 o.ShippingDate != default)), Times.Once());
-            Assert.Equal("Details", result.ActionName);
-            Assert.Equal(1, result.RouteValues["id"]);
+            Assert.Equal("Details", result?.ActionName);
+            Assert.Equal(1, result!.RouteValues?["id"]);
         }
 
         [Fact]
@@ -307,7 +307,7 @@ namespace ECommerceSystem.Test.ControllerTests
 
             // Assert
             _mockOrderHeaderService.Verify(s => s.UpdateStatus(1, SD.StatusCancelled, SD.StatusCancelled), Times.Once());
-            Assert.Equal("Details", result.ActionName);
+            Assert.Equal("Details", result?.ActionName);
         }
 
         [Fact]
@@ -324,8 +324,8 @@ namespace ECommerceSystem.Test.ControllerTests
 
             // Assert
             _mockOrderHeaderService.Verify(s => s.UpdateStatus(1, SD.StatusCancelled, SD.StatusCancelled), Times.Once()); // Non-refunded path
-            Assert.Equal("Details", result.ActionName);
-            Assert.Equal(1, result.RouteValues["id"]);
+            Assert.Equal("Details", result?.ActionName);
+            Assert.Equal(1, result!.RouteValues?["id"]);
         }
         #endregion
 
@@ -386,7 +386,7 @@ namespace ECommerceSystem.Test.ControllerTests
         {
             // Arrange
             int orderId = 1;
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId, null)).Returns((OrderHeader)null);
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId, null)).Returns((OrderHeader?)null);
 
             // Act
             var result = _controller.PaymentConfirmation(orderId);
