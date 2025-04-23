@@ -93,10 +93,7 @@ namespace ECommerceWebApp.Areas.Customer.Controllers
         [ActionName("Summary")]
         public IActionResult SummaryPost(ShoppingCartVM shoppingCartVM)
         {
-            if (!ModelState.IsValid)//need
-            {
-                return BadRequest(ModelState);
-            }
+           
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
