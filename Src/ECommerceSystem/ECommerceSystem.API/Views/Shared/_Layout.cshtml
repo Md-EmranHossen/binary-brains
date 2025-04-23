@@ -6,12 +6,12 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>@ViewData["Title"] - AdminLTE Dashboard</title>
+    <title>@ViewData["Title"]Amar Tech</title>
     <!-- Primary Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="title" content="Amar Tech | Dashboard" />
     <meta name="author" content="ColorlibHQ" />
-    <meta name="description" content="AdminLTE is a Free Bootstrap 5 Admin Dashboard, 30 example pages using Vanilla JS." />
+    <meta name="description" content="Amar Tech - Powering Your Tech Shopping Experience!" />
     <meta name="keywords" content="bootstrap 5, bootstrap, bootstrap 5 admin dashboard, bootstrap 5 dashboard, bootstrap 5 charts, bootstrap 5 calendar, bootstrap 5 datepicker, bootstrap 5 tables, bootstrap 5 datatable, vanilla js datatable, colorlibhq, colorlibhq dashboard, colorlibhq admin dashboard" />
 
     <!-- Fonts -->
@@ -37,12 +37,24 @@
             <div class="container-fluid">
 
                 <!-- Start Navbar Links -->
+               
+
+
+
+
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link text-light" data-lte-toggle="sidebar" href="#" role="button">
-                            <i class="bi bi-list"></i>
-                        </a>
-                    </li>
+                    @{
+                        if (User.IsInRole(SD.Role_Admin))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-light" data-lte-toggle="sidebar" href="#" role="button">
+                                    <i class="bi bi-list"></i>
+                                </a>
+                            </li>
+                        }
+                    }
+
+
                     <li class="nav-item">
                         <a class="nav-link text-light hover-light" asp-area="Customer" asp-controller="Home" asp-action="Index">
                             <i class="bi bi-house me-1"></i> Home
@@ -104,7 +116,7 @@
             <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
                 <div class="sidebar-brand">
                     <a href="/" class="brand-link">
-                        <img src="https://adminlte.io/themes/v3/dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow" />
+                        <img src="~/images/AmarTech.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow" />
                         <span class="brand-text fw-light">Amar Tech</span>
                     </a>
                 </div>
