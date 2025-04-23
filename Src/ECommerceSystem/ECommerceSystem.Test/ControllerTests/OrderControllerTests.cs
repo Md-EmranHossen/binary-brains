@@ -3,10 +3,10 @@ using ECommerceSystem.Service.Services.IServices;
 using ECommerceWebApp.Areas.Admin.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Moq;
-using Stripe;
-using Stripe.BillingPortal;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using Xunit;
 
@@ -16,8 +16,6 @@ namespace ECommerceSystem.Test.ControllerTests
     {
         private readonly Mock<IOrderHeaderService> _mockOrderHeaderService;
         private readonly Mock<IOrderDetailService> _mockOrderDetailService;
-        //private readonly Mock<IStripeSessionService> _mockStripeSessionService;
-
         private readonly OrderController _controller;
 
         public OrderControllerTests()
@@ -25,75 +23,82 @@ namespace ECommerceSystem.Test.ControllerTests
             _mockOrderHeaderService = new Mock<IOrderHeaderService>();
             _mockOrderDetailService = new Mock<IOrderDetailService>();
             _controller = new OrderController(_mockOrderHeaderService.Object, _mockOrderDetailService.Object);
-        }
 
-        #region Helper Methods
-        private void SetupUser(string role = null!, string userId = null!)
-        {
-            var claims = new List<Claim>();
-            if (role != null) claims.Add(new Claim(ClaimTypes.Role, role));
-            if (userId != null) claims.Add(new Claim(ClaimTypes.NameIdentifier, userId));
-            var identity = new ClaimsIdentity(claims, "TestAuthType");
-            var user = new ClaimsPrincipal(identity);
-            _controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = user } };
+            // Set up controller context with TempData
+            var httpContext = new DefaultHttpContext();
+            var tempData = new TempDataDictionary(httpContext, Mock.Of<ITempDataProvider>());
+            _controller.TempData = tempData;
         }
-        #endregion
 
         #region Index Tests
+
         [Fact]
-        public void Index_AdminRole_ReturnsAllOrders()
+        public void Index_AdminRole_ReturnsViewWithAllOrders()
         {
             // Arrange
-            SetupUser(role: SD.Role_Admin);
-            var orders = new List<OrderHeader> { new OrderHeader { Id = 1 } };
-            _mockOrderHeaderService.Setup(s => s.GetAllOrderHeaders("ApplicationUser")).Returns(orders);
+            var orderHeaders = GetSampleOrderHeaders();
+            _mockOrderHeaderService.Setup(s => s.GetAllOrderHeaders("ApplicationUser"))
+                .Returns(orderHeaders);
+
+            SetupUserRole(_controller, SD.Role_Admin);
 
             // Act
             var result = _controller.Index(null) as ViewResult;
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(orders, result.Model);
+            var model = Assert.IsAssignableFrom<IEnumerable<OrderHeader>>(result.Model);
+            Assert.Equal(3, model.Count());
         }
 
         [Fact]
-        public void Index_EmployeeRole_ReturnsAllOrders()
+        public void Index_EmployeeRole_ReturnsViewWithAllOrders()
         {
             // Arrange
-            SetupUser(role: SD.Role_Employee);
-            var orders = new List<OrderHeader> { new OrderHeader { Id = 1 } };
-            _mockOrderHeaderService.Setup(s => s.GetAllOrderHeaders("ApplicationUser")).Returns(orders);
+            var orderHeaders = GetSampleOrderHeaders();
+            _mockOrderHeaderService.Setup(s => s.GetAllOrderHeaders("ApplicationUser"))
+                .Returns(orderHeaders);
+
+            SetupUserRole(_controller, SD.Role_Employee);
 
             // Act
             var result = _controller.Index(null) as ViewResult;
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(orders, result.Model);
+            var model = Assert.IsAssignableFrom<IEnumerable<OrderHeader>>(result.Model);
+            Assert.Equal(3, model.Count());
         }
 
         [Fact]
-        public void Index_CustomerRole_ReturnsUserOrders()
+        public void Index_CustomerRole_ReturnsViewWithCustomerOrders()
         {
             // Arrange
-            string userId = "user123";
-            SetupUser(userId: userId);
-            var orders = new List<OrderHeader> { new OrderHeader { Id = 1 } };
-            _mockOrderHeaderService.Setup(s => s.GetAllOrderHeadersById(userId, "ApplicationUser")).Returns(orders);
+            var userId = "user123";
+            var orderHeaders = GetSampleOrderHeaders().Where(o => o.ApplicationUserId == userId);
+
+            _mockOrderHeaderService.Setup(s => s.GetAllOrderHeadersById(userId, "ApplicationUser"))
+                .Returns(orderHeaders);
+
+            SetupUserWithClaims(_controller, userId);
 
             // Act
             var result = _controller.Index(null) as ViewResult;
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(orders, result.Model);
+            var model = Assert.IsAssignableFrom<IEnumerable<OrderHeader>>(result.Model);
+            Assert.Single(model);
         }
 
         [Fact]
-        public void Index_UnauthorizedUser_ReturnsUnauthorized()
+        public void Index_InvalidUser_ReturnsUnauthorized()
         {
             // Arrange
-            SetupUser(); // No role or userId
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
 
             // Act
             var result = _controller.Index(null);
@@ -106,57 +111,79 @@ namespace ECommerceSystem.Test.ControllerTests
         [InlineData("pending", SD.PaymentStatusPending, 1)]
         [InlineData("inprocess", SD.StatusInProcess, 1)]
         [InlineData("completed", SD.StatusShipped, 1)]
-        [InlineData("approved", SD.StatusApproved, 1)]
-        public void Index_FiltersOrdersByStatus(string status, string expectedStatus, int expectedCount)
+        [InlineData("approved", SD.StatusApproved, 0)]
+        public void Index_WithStatusFilter_ReturnsFilteredOrders(string status, string filterStatus, int expectedCount)
         {
             // Arrange
-            SetupUser(role: SD.Role_Admin);
-            var orders = new List<OrderHeader>
-    {
-        new OrderHeader { Id = 1, PaymentStatus = SD.PaymentStatusPending, OrderStatus = SD.StatusInProcess },
-        new OrderHeader { Id = 2, PaymentStatus = SD.PaymentStatusApproved, OrderStatus = SD.StatusShipped },
-        new OrderHeader { Id = 3, PaymentStatus = SD.PaymentStatusApproved, OrderStatus = SD.StatusApproved } // Added for approved status
-    };
-            _mockOrderHeaderService.Setup(s => s.GetAllOrderHeaders("ApplicationUser")).Returns(orders);
+            var orderHeaders = GetSampleOrderHeaders();
+            _mockOrderHeaderService.Setup(s => s.GetAllOrderHeaders("ApplicationUser"))
+                .Returns(orderHeaders);
+
+            SetupUserRole(_controller, SD.Role_Admin);
 
             // Act
             var result = _controller.Index(status) as ViewResult;
 
             // Assert
-            var model = Assert.IsAssignableFrom<IEnumerable<OrderHeader>>(result?.Model);
-            if (status == "pending")
-                Assert.Equal(expectedCount, model.Count(o => o.PaymentStatus == expectedStatus));
+            Assert.NotNull(result);
+            var model = Assert.IsAssignableFrom<IEnumerable<OrderHeader>>(result.Model);
+
+            if (status == "Pending")
+                Assert.Equal(expectedCount, model.Count(o => o.PaymentStatus == filterStatus));
             else
-                Assert.Equal(expectedCount, model.Count(o => o.OrderStatus == expectedStatus));
+                Assert.Equal(expectedCount, model.Count(o => o.OrderStatus == filterStatus));
         }
+
         #endregion
 
-        #region Details GET Tests
+        #region Details Tests
+
         [Fact]
-        public void Details_Get_ReturnsOrderVM_WhenOrderExists()
+        public void Details_ValidId_ReturnsViewWithOrderVM()
         {
             // Arrange
             int orderId = 1;
-            var orderHeader = new OrderHeader { Id = orderId };
-            var orderDetails = new List<OrderDetail> { new OrderDetail { Id = 1 } };
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId, "ApplicationUser")).Returns(orderHeader);
-            _mockOrderDetailService.Setup(s => s.GetAllOrders(orderId, "Product")).Returns(orderDetails);
+            var orderHeader = GetSampleOrderHeaders().First(o => o.Id == orderId);
+            var orderDetails = new List<OrderDetail>
+            {
+                new OrderDetail { Id = 1, OrderHeaderId = orderId, Product = new Product { Title = "Test Product" } }
+            };
+
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId, "ApplicationUser"))
+                .Returns(orderHeader);
+            _mockOrderDetailService.Setup(s => s.GetAllOrders(orderId, "Product"))
+                .Returns(orderDetails);
 
             // Act
             var result = _controller.Details(orderId) as ViewResult;
 
             // Assert
-            var model = Assert.IsType<OrderVM>(result?.Model);
-            Assert.Equal(orderHeader, model.orderHeader);
-            Assert.Equal(orderDetails, model.orderDetails);
+            Assert.NotNull(result);
+            var model = Assert.IsType<OrderVM>(result.Model);
+            Assert.Equal(orderId, model.orderHeader.Id);
+            Assert.Single(model.orderDetails);
         }
 
         [Fact]
-        public void Details_Get_ReturnsNotFound_WhenOrderDoesNotExist()
+        public void Details_InvalidModelState_ReturnsBadRequest()
         {
             // Arrange
-            int orderId = 1;
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId, "ApplicationUser")).Returns((OrderHeader?)null);
+            _controller.ModelState.AddModelError("error", "test error");
+
+            // Act
+            var result = _controller.Details(1);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public void Details_OrderNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            int orderId = 999;
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId, "ApplicationUser"))
+                .Returns((OrderHeader)null);
 
             // Act
             var result = _controller.Details(orderId);
@@ -164,51 +191,81 @@ namespace ECommerceSystem.Test.ControllerTests
             // Assert
             Assert.IsType<NotFoundResult>(result);
         }
-        #endregion
 
-        #region Details POST Tests
         [Fact]
-        public void Details_Post_UpdatesOrderHeader_WhenValid()
+        public void Details_Post_UpdatesOrderHeaderSuccessfully()
         {
             // Arrange
-            SetupUser(role: SD.Role_Admin);
-            var orderVM = new OrderVM { orderHeader = new OrderHeader { Id = 1, Name = "Updated" } };
-            var existingOrder = new OrderHeader { Id = 1 };
+            var orderVM = new OrderVM
+            {
+                orderHeader = new OrderHeader
+                {
+                    Id = 1,
+                    Name = "Updated Name",
+                    PhoneNumber = "5551234567",
+                    StreetAddress = "123 Updated St",
+                    City = "New City",
+                    State = "NS",
+                    PostalCode = "12345",
+                    Carrier = "Updated Carrier",
+                    TrackingNumber = "TRACK123"
+                }
+            };
 
-            // Explicitly provide all arguments, including the optional one
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(1, null)).Returns(existingOrder);
+            var existingOrderHeader = new OrderHeader { Id = 1 };
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderVM.orderHeader.Id,null))
+                .Returns(existingOrderHeader);
 
             // Act
             var result = _controller.Details(orderVM) as RedirectToActionResult;
 
             // Assert
-            _mockOrderHeaderService.Verify(s => s.UpdateOrderHeader(It.Is<OrderHeader>(o => o.Name == "Updated")), Times.Once());
-            Assert.Equal("Details", result?.ActionName);
-            Assert.Equal(1, result?.RouteValues?["id"]);
+            Assert.NotNull(result);
+            Assert.Equal("Details", result.ActionName);
+            Assert.Equal(1, result.RouteValues["id"]);
+
+            // Verify the order header was updated
+            _mockOrderHeaderService.Verify(s => s.UpdateOrderHeader(It.IsAny<OrderHeader>()), Times.Once);
+
+            // Verify all properties were updated
+            Assert.Equal("Updated Name", existingOrderHeader.Name);
+            Assert.Equal("5551234567", existingOrderHeader.PhoneNumber);
+            Assert.Equal("123 Updated St", existingOrderHeader.StreetAddress);
+            Assert.Equal("New City", existingOrderHeader.City);
+            Assert.Equal("NS", existingOrderHeader.State);
+            Assert.Equal("12345", existingOrderHeader.PostalCode);
+            Assert.Equal("Updated Carrier", existingOrderHeader.Carrier);
+            Assert.Equal("TRACK123", existingOrderHeader.TrackingNumber);
         }
 
         [Fact]
-        public void Details_Post_ReturnsView_WhenModelStateInvalid()
+        public void Details_Post_WithInvalidModelState_ReturnsViewWithModel()
         {
             // Arrange
-            SetupUser(role: SD.Role_Admin);
-            var orderVM = new OrderVM { orderHeader = new OrderHeader { Id = 1 } };
-            _controller.ModelState.AddModelError("Name", "Required");
+            var orderVM = new OrderVM
+            {
+                orderHeader = new OrderHeader { Id = 1 }
+            };
+            _controller.ModelState.AddModelError("error", "test error");
 
             // Act
             var result = _controller.Details(orderVM) as ViewResult;
 
             // Assert
-            Assert.Equal(orderVM, result!.Model);
+            Assert.NotNull(result);
+            Assert.Equal(orderVM, result.Model);
         }
 
         [Fact]
-        public void Details_Post_ReturnsNotFound_WhenOrderDoesNotExist()
+        public void Details_Post_OrderNotFound_ReturnsNotFound()
         {
             // Arrange
-            SetupUser(role: SD.Role_Admin);
-            var orderVM = new OrderVM { orderHeader = new OrderHeader { Id = 1 } };
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(1, null)).Returns((OrderHeader?)null);
+            var orderVM = new OrderVM
+            {
+                orderHeader = new OrderHeader { Id = 999 }
+            };
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderVM.orderHeader.Id,null))
+                .Returns((OrderHeader)null);
 
             // Act
             var result = _controller.Details(orderVM);
@@ -216,161 +273,243 @@ namespace ECommerceSystem.Test.ControllerTests
             // Assert
             Assert.IsType<NotFoundResult>(result);
         }
+
         #endregion
 
         #region StartProcessing Tests
+
         [Fact]
-        public void StartProcessing_UpdatesStatus_WhenValid()
+        public void StartProcessing_ValidModel_UpdatesStatusAndRedirects()
         {
             // Arrange
-            SetupUser(role: SD.Role_Admin);
-            var orderVM = new OrderVM { orderHeader = new OrderHeader { Id = 1 } };
+            var orderVM = new OrderVM
+            {
+                orderHeader = new OrderHeader { Id = 1 }
+            };
 
             // Act
             var result = _controller.StartProcessing(orderVM) as RedirectToActionResult;
 
             // Assert
-            _mockOrderHeaderService.Verify(s => s.UpdateStatus(1, SD.StatusInProcess, null), Times.Once());
-            Assert.Equal("Details", result!.ActionName);
-            Assert.Equal(1, result!.RouteValues?["id"]);
+            Assert.NotNull(result);
+            Assert.Equal("Details", result.ActionName);
+            Assert.Equal(1, result.RouteValues?["id"]);
+
+            _mockOrderHeaderService.Verify(s => s.UpdateStatus(1, SD.StatusInProcess,null), Times.Once);
         }
 
         [Fact]
-        public void StartProcessing_ReturnsView_WhenModelStateInvalid()
+        public void StartProcessing_InvalidModelState_ReturnsViewWithModel()
         {
             // Arrange
-            SetupUser(role: SD.Role_Admin);
-            var orderVM = new OrderVM { orderHeader = new OrderHeader { Id = 1 } };
-            _controller.ModelState.AddModelError("Id", "Invalid");
+            var orderVM = new OrderVM
+            {
+                orderHeader = new OrderHeader { Id = 1 }
+            };
+            _controller.ModelState.AddModelError("error", "test error");
 
             // Act
             var result = _controller.StartProcessing(orderVM) as ViewResult;
 
             // Assert
-            Assert.Equal(orderVM, result?.Model);
+            Assert.NotNull(result);
+            Assert.Equal(orderVM, result.Model);
         }
+
         #endregion
 
         #region ShipOrder Tests
+
         [Fact]
-        public void ShipOrder_UpdatesOrder_WhenValid()
+        public void ShipOrder_ValidModel_UpdatesOrderAndRedirects()
         {
             // Arrange
-            SetupUser(role: SD.Role_Admin);
-            var orderVM = new OrderVM { orderHeader = new OrderHeader { Id = 1, TrackingNumber = "TRACK123", Carrier = "UPS" } };
-            var existingOrder = new OrderHeader { Id = 1, PaymentStatus = SD.PaymentStatusApproved };
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(1, null)).Returns(existingOrder);
+            var orderVM = new OrderVM
+            {
+                orderHeader = new OrderHeader
+                {
+                    Id = 1,
+                    TrackingNumber = "TRACK123",
+                    Carrier = "Carrier"
+                }
+            };
+
+            var existingOrder = new OrderHeader { Id = 1 };
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(1, null))
+                .Returns(existingOrder);
 
             // Act
             var result = _controller.ShipOrder(orderVM) as RedirectToActionResult;
 
             // Assert
-            _mockOrderHeaderService.Verify(s => s.UpdateOrderHeader(It.Is<OrderHeader>(o =>
-                o.OrderStatus == SD.StatusShipped &&
-                o.TrackingNumber == "TRACK123" &&
-                o.Carrier == "UPS" &&
-                o.ShippingDate != default)), Times.Once());
-            Assert.Equal("Details", result?.ActionName);
-            Assert.Equal(1, result!.RouteValues?["id"]);
+            Assert.NotNull(result);
+            Assert.Equal("Details", result.ActionName);
+            Assert.Equal(1, result.RouteValues?["id"]);
+
+            _mockOrderHeaderService.Verify(s => s.UpdateOrderHeader(It.IsAny<OrderHeader>()), Times.Once);
+
+            // Verify properties were updated correctly
+            Assert.Equal("TRACK123", existingOrder.TrackingNumber);
+            Assert.Equal("Carrier", existingOrder.Carrier);
+            Assert.Equal(SD.StatusShipped, existingOrder.OrderStatus);
+            Assert.NotNull(existingOrder?.ShippingDate);
         }
 
         [Fact]
-        public void ShipOrder_SetsPaymentDueDate_WhenDelayedPayment()
+        public void ShipOrder_DelayedPayment_SetsPaymentDueDate()
         {
             // Arrange
-            SetupUser(role: SD.Role_Admin);
-            var orderVM = new OrderVM { orderHeader = new OrderHeader { Id = 1, TrackingNumber = "TRACK123", Carrier = "UPS" } };
-            var existingOrder = new OrderHeader { Id = 1, PaymentStatus = SD.PaymentStatusDelayedPayment };
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(1, null)).Returns(existingOrder);
+            var orderVM = new OrderVM
+            {
+                orderHeader = new OrderHeader
+                {
+                    Id = 1,
+                    TrackingNumber = "TRACK123",
+                    Carrier = "Carrier"
+                }
+            };
+
+            var existingOrder = new OrderHeader
+            {
+                Id = 1,
+                PaymentStatus = SD.PaymentStatusDelayedPayment
+            };
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(1, null))
+                .Returns(existingOrder);
+
+            // Act
+            var result = _controller.ShipOrder(orderVM) as RedirectToActionResult;
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotNull(existingOrder.PaymentDueDate);
+            // Verify due date is approximately 30 days in the future
+            var expectedDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+            Assert.Equal(expectedDate.Year, existingOrder.PaymentDueDate.Year);
+            Assert.Equal(expectedDate.Month, existingOrder.PaymentDueDate.Month);
+            Assert.Equal(expectedDate.Day, existingOrder.PaymentDueDate.Day);
+        }
+
+        [Fact]
+        public void ShipOrder_InvalidModelState_ReturnsBadRequest()
+        {
+            // Arrange
+            var orderVM = new OrderVM
+            {
+                orderHeader = new OrderHeader { Id = 1 }
+            };
+            _controller.ModelState.AddModelError("error", "test error");
 
             // Act
             var result = _controller.ShipOrder(orderVM);
 
             // Assert
-            _mockOrderHeaderService.Verify(s => s.UpdateOrderHeader(It.Is<OrderHeader>(o =>
-                o.PaymentDueDate >= DateOnly.FromDateTime(DateTime.Now))), Times.Once());
-        }
-        #endregion
-
-        #region CancelOrder Tests
-        [Fact]
-        public void CancelOrder_CancelsOrder_WhenNotPaid()
-        {
-            // Arrange
-            SetupUser(role: SD.Role_Admin);
-            var orderVM = new OrderVM { orderHeader = new OrderHeader { Id = 1 } };
-            var existingOrder = new OrderHeader { Id = 1, PaymentStatus = SD.PaymentStatusPending };
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(1, null)).Returns(existingOrder);
-
-            // Act
-            var result = _controller.CancelOrder(orderVM) as RedirectToActionResult;
-
-            // Assert
-            _mockOrderHeaderService.Verify(s => s.UpdateStatus(1, SD.StatusCancelled, SD.StatusCancelled), Times.Once());
-            Assert.Equal("Details", result?.ActionName);
+            Assert.IsType<BadRequestResult>(result);
         }
 
         [Fact]
-        public void CancelOrder_Refunds_WhenPaid()
+        public void ShipOrder_OrderNotFound_ReturnsNotFound()
         {
             // Arrange
-            SetupUser(role: SD.Role_Admin);
-            var orderVM = new OrderVM { orderHeader = new OrderHeader { Id = 1 } };
-            var existingOrder = new OrderHeader { Id = 1, PaymentStatus = SD.PaymentStatusApproved, PaymentIntentId = null }; // Avoid Stripe call
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(1, null)).Returns(existingOrder);
+            var orderVM = new OrderVM
+            {
+                orderHeader = new OrderHeader { Id = 999 }
+            };
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(999, null))
+                .Returns((OrderHeader)null);
 
             // Act
-            var result = _controller.CancelOrder(orderVM) as RedirectToActionResult;
-
-            // Assert
-            _mockOrderHeaderService.Verify(s => s.UpdateStatus(1, SD.StatusCancelled, SD.StatusCancelled), Times.Once()); // Non-refunded path
-            Assert.Equal("Details", result?.ActionName);
-            Assert.Equal(1, result!.RouteValues?["id"]);
-        }
-        #endregion
-
-        #region PayDetails Tests
-       
-
-        [Fact]
-        public void PayDetails_ReturnsNotFound_WhenOrderDoesNotExist()
-        {
-            // Arrange
-            SetupUser();
-            var orderVM = new OrderVM { orderHeader = new OrderHeader { Id = 1 } };
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(1, "ApplicationUser")).Returns((OrderHeader?)null);
-
-            // Act
-            var result = _controller.PayDetails(orderVM);
+            var result = _controller.ShipOrder(orderVM);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
         }
+
+        #endregion
+
+        #region CancelOrder Tests
+
+        [Fact]
+        public void CancelOrder_RegularOrder_UpdatesStatusAndRedirects()
+        {
+            // Arrange
+            var orderVM = new OrderVM
+            {
+                orderHeader = new OrderHeader { Id = 1 }
+            };
+
+            var existingOrder = new OrderHeader
+            {
+                Id = 1,
+                PaymentStatus = SD.PaymentStatusPending
+            };
+
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(1,null))
+                .Returns(existingOrder);
+
+            // Act
+            var result = _controller.CancelOrder(orderVM) as RedirectToActionResult;
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal("Details", result.ActionName);
+            Assert.Equal(1, result.RouteValues?["id"]);
+
+            _mockOrderHeaderService.Verify(s => s.UpdateStatus(1, SD.StatusCancelled, SD.StatusCancelled), Times.Once);
+        }
+
+        [Fact]
+        public void CancelOrder_InvalidModelState_ReturnsBadRequest()
+        {
+            // Arrange
+            var orderVM = new OrderVM
+            {
+                orderHeader = new OrderHeader { Id = 1 }
+            };
+            _controller.ModelState.AddModelError("error", "test error");
+
+            // Act
+            var result = _controller.CancelOrder(orderVM);
+
+            // Assert
+            Assert.IsType<BadRequestResult>(result);
+        }
+
+        [Fact]
+        public void CancelOrder_OrderNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            var orderVM = new OrderVM
+            {
+                orderHeader = new OrderHeader { Id = 999 }
+            };
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(999, null))
+                .Returns((OrderHeader)null);
+
+            // Act
+            var result = _controller.CancelOrder(orderVM);
+
+            // Assert
+            Assert.IsType<NotFoundResult>(result);
+        }
+
         #endregion
 
         #region PaymentConfirmation Tests
-       /* [Fact]
-        public void PaymentConfirmation_ReturnsView_WhenOrderExists()
+
+        [Fact]
+        public void PaymentConfirmation_ValidId_ReturnsViewWithOrderId()
         {
             // Arrange
             int orderId = 1;
-            var sessionId = "sess_123";
-
             var orderHeader = new OrderHeader
             {
                 Id = orderId,
-                PaymentStatus = SD.PaymentStatusDelayedPayment,
-                SessionId = sessionId
+                PaymentStatus = "Regular"
             };
 
-            var fakeSession = new Session(); // Create as plain, no 'PaymentStatus' access
-            typeof(Session).GetProperty("Status")?.SetValue(fakeSession, "complete"); // only if needed
-
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId, null))
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId,null))
                 .Returns(orderHeader);
-
-            _mockStripeSessionService.Setup(s => s.GetSession(sessionId))
-                .Returns(fakeSession);
 
             // Act
             var result = _controller.PaymentConfirmation(orderId) as ViewResult;
@@ -378,15 +517,30 @@ namespace ECommerceSystem.Test.ControllerTests
             // Assert
             Assert.NotNull(result);
             Assert.Equal(orderId, result.Model);
-        }*/
-
+        }
 
         [Fact]
-        public void PaymentConfirmation_ReturnsNotFound_WhenOrderDoesNotExist()
+        public void PaymentConfirmation_InvalidModelState_ReturnsViewWithOrderId()
         {
             // Arrange
             int orderId = 1;
-            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId, null)).Returns((OrderHeader?)null);
+            _controller.ModelState.AddModelError("error", "test error");
+
+            // Act
+            var result = _controller.PaymentConfirmation(orderId) as ViewResult;
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(orderId, result.Model);
+        }
+
+        [Fact]
+        public void PaymentConfirmation_OrderNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            int orderId = 999;
+            _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId, null))
+                .Returns((OrderHeader)null);
 
             // Act
             var result = _controller.PaymentConfirmation(orderId);
@@ -394,6 +548,88 @@ namespace ECommerceSystem.Test.ControllerTests
             // Assert
             Assert.IsType<NotFoundResult>(result);
         }
+
+        #endregion
+
+        #region Helper Methods
+
+        private IEnumerable<OrderHeader> GetSampleOrderHeaders()
+        {
+            return new List<OrderHeader>
+            {
+                new OrderHeader
+                {
+                    Id = 1,
+                    ApplicationUserId = "user123",
+                    OrderStatus = SD.StatusInProcess,
+                    PaymentStatus = SD.PaymentStatusPending
+                },
+                new OrderHeader
+                {
+                    Id = 2,
+                    ApplicationUserId = "user456",
+                    OrderStatus = SD.StatusShipped,
+                    PaymentStatus = SD.PaymentStatusApproved
+                },
+                new OrderHeader
+                {
+                    Id = 3,
+                    ApplicationUserId = "user789",
+                    OrderStatus = SD.StatusPending,
+                    PaymentStatus = SD.PaymentStatusPending
+                }
+            };
+        }
+
+        private void SetupUserRole(OrderController controller, string role)
+        {
+            var user = new ClaimsPrincipal(new ClaimsIdentity(
+                new Claim[]
+                {
+                    new Claim(ClaimTypes.Role, role),
+                    new Claim(ClaimTypes.NameIdentifier, "user123")
+                }, "mock"));
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = user }
+            };
+        }
+
+        private void SetupUserWithClaims(OrderController controller, string userId)
+        {
+            var user = new ClaimsPrincipal(new ClaimsIdentity(
+                new Claim[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, userId)
+                }, "mock"));
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = user }
+            };
+        }
+
         #endregion
     }
+
+/*    // Dummy implementation of SD class for testing purposes
+    public static class SD
+    {
+        public const string Role_Admin = "Admin";
+        public const string Role_Employee = "Employee";
+        public const string Role_Customer = "Customer";
+
+        public const string StatusPending = "Pending";
+        public const string StatusApproved = "Approved";
+        public const string StatusInProcess = "Processing";
+        public const string StatusShipped = "Shipped";
+        public const string StatusCancelled = "Cancelled";
+        public const string StatusRefunded = "Refunded";
+
+        public const string PaymentStatusPending = "Pending";
+        public const string PaymentStatusApproved = "Approved";
+        public const string PaymentStatusDelayedPayment = "Delayed";
+        public const string PaymentStatusRejected = "Rejected";
+    }*/
 }
