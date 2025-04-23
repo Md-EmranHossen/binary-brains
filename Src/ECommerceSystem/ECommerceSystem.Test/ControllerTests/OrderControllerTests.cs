@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using Xunit;
 
-namespace ECommerceWebApp.Tests.Areas.Admin.Controllers
+namespace ECommerceSystem.Test.ControllerTests
 {
     public class OrderControllerTests
     {
