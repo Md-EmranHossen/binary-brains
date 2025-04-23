@@ -138,7 +138,7 @@ namespace ECommerceSystem.Test
         public void UpdateStripePaymentID_ShouldUpdateSessionId_WhenProvided()
         {
             // Act
-            _repository.UpdateStripePaymentID(1, "cs_new_session_id", null);
+            _repository.UpdateStripePaymentID(1, "cs_new_session_id", null!);
             _context.SaveChanges();
 
             // Assert

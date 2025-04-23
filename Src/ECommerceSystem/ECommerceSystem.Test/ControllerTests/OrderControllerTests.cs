@@ -183,7 +183,7 @@ namespace ECommerceSystem.Test.ControllerTests
             // Arrange
             int orderId = 999;
             _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId, "ApplicationUser"))
-                .Returns((OrderHeader)null);
+                .Returns((OrderHeader?)null);
 
             // Act
             var result = _controller.Details(orderId);
@@ -222,7 +222,7 @@ namespace ECommerceSystem.Test.ControllerTests
             // Assert
             Assert.NotNull(result);
             Assert.Equal("Details", result.ActionName);
-            Assert.Equal(1, result.RouteValues["id"]);
+            Assert.Equal(1, result.RouteValues?["id"]);
 
             // Verify the order header was updated
             _mockOrderHeaderService.Verify(s => s.UpdateOrderHeader(It.IsAny<OrderHeader>()), Times.Once);
@@ -265,7 +265,7 @@ namespace ECommerceSystem.Test.ControllerTests
                 orderHeader = new OrderHeader { Id = 999 }
             };
             _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderVM.orderHeader.Id,null))
-                .Returns((OrderHeader)null);
+                .Returns((OrderHeader?)null);
 
             // Act
             var result = _controller.Details(orderVM);
@@ -382,7 +382,7 @@ namespace ECommerceSystem.Test.ControllerTests
 
             // Assert
             Assert.NotNull(result);
-            Assert.NotNull(existingOrder.PaymentDueDate);
+            Assert.NotNull(existingOrder?.PaymentDueDate);
             // Verify due date is approximately 30 days in the future
             var expectedDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
             Assert.Equal(expectedDate.Year, existingOrder.PaymentDueDate.Year);
@@ -416,7 +416,7 @@ namespace ECommerceSystem.Test.ControllerTests
                 orderHeader = new OrderHeader { Id = 999 }
             };
             _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(999, null))
-                .Returns((OrderHeader)null);
+                .Returns((OrderHeader?)null);
 
             // Act
             var result = _controller.ShipOrder(orderVM);
@@ -484,7 +484,7 @@ namespace ECommerceSystem.Test.ControllerTests
                 orderHeader = new OrderHeader { Id = 999 }
             };
             _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(999, null))
-                .Returns((OrderHeader)null);
+                .Returns((OrderHeader?)null);
 
             // Act
             var result = _controller.CancelOrder(orderVM);
@@ -540,7 +540,7 @@ namespace ECommerceSystem.Test.ControllerTests
             // Arrange
             int orderId = 999;
             _mockOrderHeaderService.Setup(s => s.GetOrderHeaderById(orderId, null))
-                .Returns((OrderHeader)null);
+                .Returns((OrderHeader?)null);
 
             // Act
             var result = _controller.PaymentConfirmation(orderId);
@@ -553,7 +553,7 @@ namespace ECommerceSystem.Test.ControllerTests
 
         #region Helper Methods
 
-        private IEnumerable<OrderHeader> GetSampleOrderHeaders()
+        private static  List<OrderHeader> GetSampleOrderHeaders()
         {
             return new List<OrderHeader>
             {
@@ -581,7 +581,7 @@ namespace ECommerceSystem.Test.ControllerTests
             };
         }
 
-        private void SetupUserRole(OrderController controller, string role)
+        private static void SetupUserRole(OrderController controller, string role)
         {
             var user = new ClaimsPrincipal(new ClaimsIdentity(
                 new Claim[]
@@ -596,7 +596,7 @@ namespace ECommerceSystem.Test.ControllerTests
             };
         }
 
-        private void SetupUserWithClaims(OrderController controller, string userId)
+        private static void SetupUserWithClaims(OrderController controller, string userId)
         {
             var user = new ClaimsPrincipal(new ClaimsIdentity(
                 new Claim[]
@@ -613,23 +613,5 @@ namespace ECommerceSystem.Test.ControllerTests
         #endregion
     }
 
-/*    // Dummy implementation of SD class for testing purposes
-    public static class SD
-    {
-        public const string Role_Admin = "Admin";
-        public const string Role_Employee = "Employee";
-        public const string Role_Customer = "Customer";
 
-        public const string StatusPending = "Pending";
-        public const string StatusApproved = "Approved";
-        public const string StatusInProcess = "Processing";
-        public const string StatusShipped = "Shipped";
-        public const string StatusCancelled = "Cancelled";
-        public const string StatusRefunded = "Refunded";
-
-        public const string PaymentStatusPending = "Pending";
-        public const string PaymentStatusApproved = "Approved";
-        public const string PaymentStatusDelayedPayment = "Delayed";
-        public const string PaymentStatusRejected = "Rejected";
-    }*/
 }

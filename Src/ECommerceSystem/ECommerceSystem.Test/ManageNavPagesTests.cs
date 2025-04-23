@@ -206,7 +206,7 @@ namespace ECommerceSystem.Test
 
         #region Helper Methods
 
-        private ViewContext CreateViewContext(string activePage)
+        private static ViewContext CreateViewContext(string activePage)
         {
             return new ViewContext
             {
