@@ -1,0 +1,71 @@
+﻿
+@model List<Product>
+
+@{
+    ViewData["Title"] = "Product";
+   
+}
+
+
+
+
+<div class="card shadow border-0 my-4">
+     <div class="card-header bg-secondary bg-gradient ml-0 py-2 col-12" style="width: 400px; text-align: center; margin: 7px auto;">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white py-2">Product List</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="row pb-3">
+            <div class="col-6">
+            </div>
+            <div class="col-6 text-end">
+                <a asp-controller="Product" asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i>  Create New Product
+                </a>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>Discount Amount</th>
+                    <th>Stock Quantity</th>
+                    <th>Category</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var obj in Model)
+                {
+                    <tr>
+                        <td>
+                            <img src="@(obj.ImageUrl ?? "https://placehold.co/600x400")" alt="@obj.Title" style="width: 50px; height: 50px; object-fit: contain; border-radius: 5px; background-color: white;" />
+
+                        </td>
+                        <td>@obj.Title</td>
+                        <td>@obj.Price.ToString("C", new System.Globalization.CultureInfo("bn-BD"))</td>
+                        <td>@obj.DiscountAmount.ToString("C", new System.Globalization.CultureInfo("bn-BD"))</td>
+                        <td>@obj.StockQuantity</td>
+                        <td>@obj.Category.Name</td>
+                        <td>
+                            <div class="w-75 btn-group" role="group">
+                                <a asp-controller="Product" asp-action="Edit" asp-route-id="@obj.Id" class="btn btn-primary mx-2">
+                                    <i class="bi bi-pencil-square"></i> Edit
+                                </a>
+                                <a asp-controller="Product" asp-action="Delete" asp-route-id="@obj.Id" class="btn btn-danger mx-2">
+                                    <i class="bi bi-archive"></i> Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

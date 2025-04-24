@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ECommerceSystem.DataAccess.Repository.IRepository;
-using ECommerceSystem.Models;
+using AmarTech.Domain.Entities;
+using AmarTech.Infrastructure.Repository.IRepository;
 using ECommerceSystem.Service.Services.IServices;
 
 namespace ECommerceSystem.Service.Services

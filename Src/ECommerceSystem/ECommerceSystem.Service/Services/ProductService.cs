@@ -1,10 +1,10 @@
-﻿using ECommerceSystem.DataAccess.Repository.IRepository;
-using ECommerceSystem.Models;
+﻿using AmarTech.Domain.Entities;
+using AmarTech.Infrastructure.Repository.IRepository;
 using ECommerceSystem.Service.Services.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace ECommerceWebApp.Services
+namespace AmarTech.Web.Services
 {
     public class ProductService : IProductService
     {

@@ -1,10 +1,10 @@
-﻿using ECommerceWebApp.Areas.Admin.Controllers;
-using ECommerceSystem.Models;
+﻿using AmarTech.Web.Areas.Admin.Controllers;
 using ECommerceSystem.Service.Services.IServices;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Http;
 using Moq;
+using AmarTech.Domain.Entities;
 
 
 namespace ECommerceSystem.Test.ControllerTests

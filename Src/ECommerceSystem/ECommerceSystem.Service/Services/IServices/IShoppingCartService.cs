@@ -1,4 +1,4 @@
-﻿using ECommerceSystem.Models;
+﻿using AmarTech.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Stripe.Checkout;
 using System.Security.Claims;

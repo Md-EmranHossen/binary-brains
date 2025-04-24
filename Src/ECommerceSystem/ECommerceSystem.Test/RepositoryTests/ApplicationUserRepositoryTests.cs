@@ -1,6 +1,6 @@
-﻿using ECommerceSystem.DataAccess;
-using ECommerceSystem.DataAccess.Repository;
-using ECommerceSystem.Models;
+﻿using AmarTech.Infrastructure;
+using AmarTech.Infrastructure.Repository;
+using AmarTech.Domain.Entities;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;

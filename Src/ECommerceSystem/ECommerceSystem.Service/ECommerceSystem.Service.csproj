@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ECommerceSystem.DataAccess\ECommerceSystem.DataAccess.csproj" />
-    <ProjectReference Include="..\ECommerceSystem.Models\ECommerceSystem.Models.csproj" />
+    <ProjectReference Include="..\AmarTech.Infrastructure\AmarTech.Infrastructure.csproj" />
+    <ProjectReference Include="..\AmarTech.Domain\AmarTech.Domain.csproj" />
   </ItemGroup>
 
 </Project>

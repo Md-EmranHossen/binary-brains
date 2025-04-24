@@ -1,6 +1,6 @@
-﻿using ECommerceSystem.Models;
+﻿using AmarTech.Domain.Entities;
 using ECommerceSystem.Service.Services.IServices;
-using ECommerceWebApp.Areas.Customer.Controllers;
+using AmarTech.Web.Areas.Customer.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

@@ -1,5 +1,5 @@
-﻿using ECommerceSystem.DataAccess.Repository.IRepository;
-using ECommerceSystem.Models;
+﻿using AmarTech.Domain.Entities;
+using AmarTech.Infrastructure.Repository.IRepository;
 using ECommerceSystem.Service.Services;
 using Moq;
 using System;

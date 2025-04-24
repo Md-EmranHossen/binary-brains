@@ -28,9 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ECommerceSystem.API\ECommerceWebApp.csproj" />
-    <ProjectReference Include="..\ECommerceSystem.DataAccess\ECommerceSystem.DataAccess.csproj" />
-    <ProjectReference Include="..\ECommerceSystem.Models\ECommerceSystem.Models.csproj" />
+    <ProjectReference Include="..\AmarTech.Web\AmarTech.Web.csproj" />
+    <ProjectReference Include="..\AmarTech.Infrastructure\AmarTech.Infrastructure.csproj" />
+    <ProjectReference Include="..\AmarTech.Domain\AmarTech.Domain.csproj" />
     <ProjectReference Include="..\ECommerceSystem.Service\ECommerceSystem.Service.csproj" />
   </ItemGroup>
 

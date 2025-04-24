@@ -1,9 +1,9 @@
-﻿using ECommerceSystem.DataAccess.Repository;
-using ECommerceSystem.DataAccess.Repository.IRepository;
-using ECommerceSystem.Models;
+﻿using AmarTech.Domain.Entities;
+using AmarTech.Infrastructure.Repository;
+using AmarTech.Infrastructure.Repository.IRepository;
 using ECommerceSystem.Service.Services.IServices;
 
-namespace ECommerceWebApp.Services
+namespace AmarTech.Web.Services
 {
     public class CompanyService : ICompanyService
     {

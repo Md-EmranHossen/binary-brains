@@ -1,6 +1,6 @@
-﻿using ECommerceSystem.DataAccess;
-using ECommerceSystem.DataAccess.DbInitializer;
-using ECommerceSystem.Models;
+﻿using AmarTech.Domain.Entities;
+using AmarTech.Infrastructure;
+using AmarTech.Infrastructure.DbInitializer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Moq;

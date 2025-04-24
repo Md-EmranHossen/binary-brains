@@ -1,7 +1,7 @@
-﻿using ECommerceSystem.DataAccess.Repository.IRepository;
-using ECommerceSystem.Models;
+﻿using AmarTech.Domain.Entities;
+using AmarTech.Infrastructure.Repository.IRepository;
 using ECommerceSystem.Services;
-using ECommerceWebApp.Services;
+using AmarTech.Web.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Moq;
 using System.Collections.Generic;

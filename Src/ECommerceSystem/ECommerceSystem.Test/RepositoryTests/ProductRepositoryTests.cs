@@ -1,7 +1,7 @@
-﻿using ECommerceSystem.DataAccess;
-using ECommerceSystem.DataAccess.Repository;
-using ECommerceSystem.DataAccess.Repository.IRepository;
-using ECommerceSystem.Models;
+﻿using AmarTech.Infrastructure;
+using AmarTech.Infrastructure.Repository;
+using AmarTech.Infrastructure.Repository.IRepository;
+using AmarTech.Domain.Entities;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using System;

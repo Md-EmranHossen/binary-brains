@@ -1,4 +1,4 @@
-﻿using ECommerceSystem.Models;
+﻿using AmarTech.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using ECommerceWebApp.Areas.Identity.Pages.Account.Manage;
+using AmarTech.Web.Areas.Identity.Pages.Account.Manage;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;

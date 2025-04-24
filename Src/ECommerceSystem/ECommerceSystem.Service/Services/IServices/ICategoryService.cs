@@ -1,4 +1,4 @@
-﻿using ECommerceSystem.Models;
+﻿using AmarTech.Domain.Entities;
 
 namespace ECommerceSystem.Service.Services.IServices
 {
