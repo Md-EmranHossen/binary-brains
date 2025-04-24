@@ -37,7 +37,7 @@
             <div class="container-fluid">
 
                 <!-- Start Navbar Links -->
-               
+
 
 
 
@@ -73,6 +73,18 @@
                     <li class="nav-item">
                         <a class="nav-link text-light hover-light" asp-area="Customer" asp-controller="Cart" asp-action="Index">
                             <i class="bi bi-cart me-1"></i> Cart
+                            @if (HttpContextAccessor.HttpContext.Session.GetInt32(SD.SessionCart) != null)
+                            {
+                                <span>
+                                    (@HttpContextAccessor.HttpContext.Session.GetInt32(SD.SessionCart))
+                                </span>
+                            }
+                            else
+                            {
+                                <span>
+                                    (0)
+                                </span>
+                            }
                         </a>
                     </li>
 

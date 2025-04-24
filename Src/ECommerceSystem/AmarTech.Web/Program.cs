@@ -43,6 +43,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddAuthentication().AddFacebook(options =>
 {
+    options.AppId = "";
+    options.AppSecret = "";
 
 });
 
