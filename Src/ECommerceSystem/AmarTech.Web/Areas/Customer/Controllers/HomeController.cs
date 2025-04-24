@@ -3,8 +3,8 @@ using System.Security.Claims;
 using AmarTech.Domain.Entities;
 using AmarTech.Infrastructure.Repository;
 using AmarTech.Infrastructure.Repository.IRepository;
-using ECommerceSystem.Service.Services;
-using ECommerceSystem.Service.Services.IServices;
+using AmarTech.Application.Services;
+using AmarTech.Application.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

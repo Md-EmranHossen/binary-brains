@@ -1,13 +1,15 @@
 ﻿using AmarTech.Infrastructure.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using ECommerceSystem.Service.Services.IServices;
+using AmarTech.Application.Services.IServices;
 using AmarTech.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using AmarTech.Infrastructure.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using AmarTech.Domain.Entities;
+using AmarTech.Applications.Services.IServices;
+
 
 namespace AmarTech.Web.Areas.Admin.Controllers
 {

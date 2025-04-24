@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 
 namespace AmarTech.Domain.Entities
 {
+    [ValidateNever]
     public class RoleManagemantVM
     {
         public ApplicationUser? User { get; set; }

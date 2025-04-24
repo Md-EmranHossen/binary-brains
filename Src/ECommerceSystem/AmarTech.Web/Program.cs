@@ -6,12 +6,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using AmarTech.Web;
 using Microsoft.AspNetCore.Identity.UI.Services;
-using ECommerceSystem.Service.Services.IServices;
-using ECommerceSystem.Service.Services;
+using AmarTech.Application.Services.IServices;
+using AmarTech.Application.Services;
 using Stripe;
 using AmarTech.Infrastructure.DbInitializer;
-using ECommerceSystem.Services;
+using AmarTech.Applications;
 using AmarTech.Domain.Entities;
+using AmarTech.Applications.Services.IServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,8 +42,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddAuthentication().AddFacebook(options =>
 {
-    options.AppId = "";
-    options.AppSecret = "";
+    options.AppId = "979605807612339";
+    options.AppSecret = "d9022fcc94c664820e180d962b250e59";
 });
 
 // Register IHttpContextAccessor for session access in services

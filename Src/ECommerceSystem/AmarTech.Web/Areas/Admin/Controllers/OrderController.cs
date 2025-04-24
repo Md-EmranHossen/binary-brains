@@ -1,5 +1,5 @@
 ﻿using AmarTech.Domain.Entities;
-using ECommerceSystem.Service.Services.IServices;
+using AmarTech.Application.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;

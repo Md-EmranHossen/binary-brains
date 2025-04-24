@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ECommerceSystem.Service.Services.IServices;
+using AmarTech.Application.Services.IServices;
 using Microsoft.AspNetCore.Authorization;
 using AmarTech.Domain.Entities;
 

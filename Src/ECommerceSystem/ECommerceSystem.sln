@@ -9,9 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmarTech.Infrastructure", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmarTech.Domain", "AmarTech.Domain\AmarTech.Domain.csproj", "{5F309C24-4750-4C7A-AB06-BF8DA6FECA50}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECommerceSystem.Service", "ECommerceSystem.Service\ECommerceSystem.Service.csproj", "{F8DB651B-079C-4C30-9DD5-DB283444FE2A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmarTech.Application", "AmarTech.Application\AmarTech.Application.csproj", "{F8DB651B-079C-4C30-9DD5-DB283444FE2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECommerceSystem.Test", "ECommerceSystem.Test\ECommerceSystem.Test.csproj", "{6A9DA1D1-2240-4043-BC69-5D456FC77FC7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmarTech.Test", "AmarTech.Test\AmarTech.Test.csproj", "{6A9DA1D1-2240-4043-BC69-5D456FC77FC7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -30,7 +30,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\AmarTech.Infrastructure\AmarTech.Infrastructure.csproj" />
 		<ProjectReference Include="..\AmarTech.Domain\AmarTech.Domain.csproj" />
-		<ProjectReference Include="..\ECommerceSystem.Service\ECommerceSystem.Service.csproj" />
+		<ProjectReference Include="..\AmarTech.Application\AmarTech.Application.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
