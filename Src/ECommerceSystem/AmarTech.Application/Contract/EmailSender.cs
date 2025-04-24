@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.UI.Services;
 
-namespace AmarTech.Web
+namespace AmarTech.Application.Contract
 {
     public class EmailSender : IEmailSender
     {

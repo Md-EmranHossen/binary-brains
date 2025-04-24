@@ -13,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
-using AmarTech.Web.Services;
+using AmarTech.Application.Services;
 using AmarTech.Infrastructure;
 using AmarTech.Infrastructure.Repository;
 using AmarTech.Infrastructure.Repository.IRepository;
@@ -22,9 +22,10 @@ using AmarTech.Application.Services.IServices;
 using AmarTech.Infrastructure.DbInitializer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using AmarTech.Web;
-using AmarTech.Applications;
+using AmarTech.Application;
 using AmarTech.Domain.Entities;
-using AmarTech.Applications.Services.IServices;
+using AmarTech.Application.Services.IServices;
+using AmarTech.Application.Contract;
 
 namespace AmarTech.Test
 {
@@ -94,7 +95,7 @@ namespace AmarTech.Test
 
             // Services
             services.AddScoped<ICategoryService, CategoryService>();
-            services.AddScoped<IProductService, AmarTech.Web.Services.ProductService>();
+            services.AddScoped<IProductService, AmarTech.Application.Services.ProductService>();
             services.AddScoped<ICompanyService, CompanyService>();
             services.AddScoped<IShoppingCartService, ShoppingCartService>();
             services.AddScoped<IApplicationUserService, ApplicationUserService>();

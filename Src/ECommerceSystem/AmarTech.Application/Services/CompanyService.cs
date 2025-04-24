@@ -3,7 +3,7 @@ using AmarTech.Infrastructure.Repository;
 using AmarTech.Infrastructure.Repository.IRepository;
 using AmarTech.Application.Services.IServices;
 
-namespace AmarTech.Web.Services
+namespace AmarTech.Application.Services
 {
     public class CompanyService : ICompanyService
     {
