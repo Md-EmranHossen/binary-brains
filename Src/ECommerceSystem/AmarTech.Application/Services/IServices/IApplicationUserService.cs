@@ -1,7 +1,7 @@
 ﻿using AmarTech.Domain.Entities;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace AmarTech.Applications.Services.IServices
+namespace AmarTech.Application.Services.IServices
 {
     public interface IApplicationUserService
     {

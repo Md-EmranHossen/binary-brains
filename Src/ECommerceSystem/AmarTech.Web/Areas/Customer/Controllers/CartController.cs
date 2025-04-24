@@ -2,12 +2,11 @@
 using AmarTech.Infrastructure.Repository.IRepository;
 using AmarTech.Application.Services;
 using AmarTech.Application.Services.IServices;
-using AmarTech.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe.Checkout;
 using System.Security.Claims;
-using AmarTech.Applications.Services.IServices;
+using AmarTech.Application.Services.IServices;
 
 namespace AmarTech.Web.Areas.Customer.Controllers
 {

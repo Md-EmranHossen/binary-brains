@@ -12,7 +12,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Xunit;
-using AmarTech.Applications.Services.IServices;
+using AmarTech.Application.Services.IServices;
 
 namespace AmarTech.Test.ControllerTests
 {

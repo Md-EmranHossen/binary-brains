@@ -2,9 +2,9 @@
 using AmarTech.Infrastructure.Repository.IRepository;
 using AmarTech.Application.Services.IServices;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using AmarTech.Applications.Services.IServices;
+using AmarTech.Application.Services.IServices;
 
-namespace AmarTech.Applications
+namespace AmarTech.Application.Services
 {
     public class ApplicationUserService : IApplicationUserService
     {

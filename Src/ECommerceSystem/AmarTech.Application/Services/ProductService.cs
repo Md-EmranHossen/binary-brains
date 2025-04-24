@@ -4,7 +4,7 @@ using AmarTech.Application.Services.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace AmarTech.Web.Services
+namespace AmarTech.Application.Services
 {
     public class ProductService : IProductService
     {

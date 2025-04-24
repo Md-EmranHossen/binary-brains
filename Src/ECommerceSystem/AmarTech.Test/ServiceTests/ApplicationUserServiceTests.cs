@@ -1,7 +1,7 @@
 ﻿using AmarTech.Domain.Entities;
 using AmarTech.Infrastructure.Repository.IRepository;
-using AmarTech.Applications;
-using AmarTech.Web.Services;
+using AmarTech.Application;
+using AmarTech.Application.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Moq;
 using System.Collections.Generic;

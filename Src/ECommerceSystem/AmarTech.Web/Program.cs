@@ -1,4 +1,4 @@
-using AmarTech.Web.Services;
+
 using AmarTech.Infrastructure;
 using AmarTech.Infrastructure.Repository;
 using AmarTech.Infrastructure.Repository.IRepository;
@@ -10,9 +10,10 @@ using AmarTech.Application.Services.IServices;
 using AmarTech.Application.Services;
 using Stripe;
 using AmarTech.Infrastructure.DbInitializer;
-using AmarTech.Applications;
+using AmarTech.Application;
 using AmarTech.Domain.Entities;
-using AmarTech.Applications.Services.IServices;
+using AmarTech.Application.Services.IServices;
+using AmarTech.Application.Contract;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,8 +43,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddAuthentication().AddFacebook(options =>
 {
-    options.AppId = "979605807612339";
-    options.AppSecret = "d9022fcc94c664820e180d962b250e59";
+
 });
 
 // Register IHttpContextAccessor for session access in services
@@ -76,7 +76,7 @@ builder.Services.AddScoped<IOrderDetailRepository, OrderDetailRepositroy>();
 
 // Services
 builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IProductService, AmarTech.Web.Services.ProductService>();
+builder.Services.AddScoped<IProductService, AmarTech.Application.Services.ProductService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IShoppingCartService, ShoppingCartService>();
 builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
