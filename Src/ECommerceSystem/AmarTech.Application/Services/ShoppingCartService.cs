@@ -178,7 +178,7 @@ namespace AmarTech.Application.Services
             if (cartFromDb.Count <= 1)
             {
                 DeleteShoppingCart(cartId);
-                _httpContextAccessor.HttpContext.Session.SetInt32(SD.SessionCart,
+                _httpContextAccessor.HttpContext?.Session.SetInt32(SD.SessionCart,
 GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
 
             }
@@ -199,7 +199,7 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
                 return;
             }
             DeleteShoppingCart(cartId);
-            _httpContextAccessor.HttpContext.Session.SetInt32(SD.SessionCart,
+            _httpContextAccessor.HttpContext?.Session.SetInt32(SD.SessionCart,
             GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
             _unitOfWork.Commit();
         }

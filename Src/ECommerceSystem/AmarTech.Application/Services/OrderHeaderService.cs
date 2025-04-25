@@ -97,7 +97,7 @@ namespace AmarTech.Application.Services
                     _unitOfWork.Commit();
 
                 }
-                _httpContextAccessor.HttpContext.Session.Clear();
+                _httpContextAccessor.HttpContext?.Session.Clear();
 
             }
 
