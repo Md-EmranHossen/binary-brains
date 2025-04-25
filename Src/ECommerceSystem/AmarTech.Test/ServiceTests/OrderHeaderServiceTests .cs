@@ -38,7 +38,7 @@ namespace AmarTech.Test.ServiceTests
     {
         private readonly IStripeSessionService _sessionService;
 
-        public TestableOrderHeaderService(
+        public  TestableOrderHeaderService (
             IOrderHeaderRepository orderHeaderRepository,
             IUnitOfWork unitOfWork,
             IHttpContextAccessor httpContextAccessor,

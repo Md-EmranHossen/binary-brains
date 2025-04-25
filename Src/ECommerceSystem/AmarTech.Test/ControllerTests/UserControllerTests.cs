@@ -1,5 +1,4 @@
 ﻿using AmarTech.Domain.Entities;
-using AmarTech.Infrastructure.Repository.IRepository;
 using AmarTech.Application.Services.IServices;
 using AmarTech.Web.Areas.Admin.Controllers;
 using Microsoft.AspNetCore.Identity;
@@ -8,12 +7,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
-using AmarTech.Application.Services.IServices;
 
 namespace AmarTech.Test.ControllerTests
 {
