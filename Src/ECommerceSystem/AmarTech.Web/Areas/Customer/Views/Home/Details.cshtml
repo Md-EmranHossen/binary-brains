@@ -27,12 +27,12 @@
                     <h6 class="text-dark text-opacity-50">
                         Price:
                         <span class="text-danger fw-bold">
-                            @((Model.Product.Price - Model.Product.DiscountAmount).ToString("C", new System.Globalization.CultureInfo("bn-BD")))
+                            @((Model.Product.Price - Model.Product.DiscountAmount).ToString("C"))
                         </span>
                         @if (Model.Product.DiscountAmount > 0)
                         {
                             <span class="text-decoration-line-through text-muted">
-                                @Model.Product.Price.ToString("C", new System.Globalization.CultureInfo("bn-BD"))
+                                @Model.Product.Price.ToString("C")
                             </span>
                         }
                     </h6>

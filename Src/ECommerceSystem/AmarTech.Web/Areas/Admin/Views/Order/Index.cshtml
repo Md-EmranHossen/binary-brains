@@ -89,7 +89,7 @@
                         <td>@obj.PhoneNumber</td>
                         <td>@obj.ApplicationUser.Email</td>
                         <td>@obj.OrderStatus</td>
-                        <td>@obj.OrderTotal.ToString("C", new System.Globalization.CultureInfo("bn-BD"))</td>
+                        <td>@obj.OrderTotal.ToString("C")</td>
                         <td>
                             <div class="w-75 btn-group" role="group">
                                 <a asp-controller="Order" asp-action="Details" asp-route-id="@obj.Id" class="btn btn-primary mx-2">
