@@ -55,16 +55,7 @@
                             <i class="bi bi-house me-1"></i> Home
                         </a>
                     </li>
-                    @{
-                        if (User.IsInRole(SD.Role_Admin))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-light hover-light" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
-                                    <i class="bi bi-speedometer me-1"></i> Dashboard
-                                </a>
-                            </li>
-                        }
-                    }
+                   
                     <li class="nav-item">
                         <a class="nav-link text-light hover-light" asp-area="Customer" asp-controller="Cart" asp-action="Index">
                             <i class="bi bi-cart me-1"></i> Cart
@@ -136,13 +127,16 @@
                     <nav class="mt-2">
                         <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
                             <li class="nav-item menu-open">
-                                <a href="#" class="nav-link active">
-                                    <i class="nav-icon bi bi-speedometer"></i>
-                                    <p>
-                                        Dashboard
-                                        <i class="nav-arrow bi bi-chevron-right"></i>
-                                    </p>
-                                </a>
+                                @{
+                                    if (User.IsInRole(SD.Role_Admin))
+                                    {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-light hover-light" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                            <i class="bi bi-speedometer me-1"></i> Dashboard
+                                        </a>
+                                    </li>
+                                    }
+                                }
                             </li>
 
 
