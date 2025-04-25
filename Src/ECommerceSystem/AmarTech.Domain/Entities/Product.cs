@@ -40,8 +40,7 @@ namespace AmarTech.Domain.Entities
 
         public bool IsActive { get; set; } = true;
 
-        [Required]
-        public string CreatedBy { get; set; } = null!;
+        public string? CreatedBy { get; set; } 
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 

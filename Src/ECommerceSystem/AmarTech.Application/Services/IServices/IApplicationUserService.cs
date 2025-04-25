@@ -15,6 +15,7 @@ namespace AmarTech.Application.Services.IServices
         ApplicationUser? GetUserByIdAndIncludeprop(string? id, string includeprop);
         IEnumerable<SelectListItem> GetAllRoles();
         int GetAllUsersCount();
+        string GetUserName(string? userId);
 
 
     }

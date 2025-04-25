@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using AmarTech.Application.Services.IServices;
 using AmarTech.Domain.Entities;
+using System.Security.Claims;
 
 namespace AmarTech.Web.Areas.Admin.Controllers
 {
@@ -11,10 +12,12 @@ namespace AmarTech.Web.Areas.Admin.Controllers
     public class CategoryController : Controller
     {
         private readonly ICategoryService _categoryService;
+        private readonly IApplicationUserService _applicationUserService;
 
-        public CategoryController(ICategoryService categoryService)
+        public CategoryController(ICategoryService categoryService,IApplicationUserService applicationUserService)
         {
             _categoryService = categoryService;
+            _applicationUserService = applicationUserService;
         }
 
         public IActionResult Index()
@@ -36,6 +39,7 @@ namespace AmarTech.Web.Areas.Admin.Controllers
             {
                 return View(category);
             }
+            category.CreatedBy = GetCurrentUserName();
 
             _categoryService.AddCategory(category);
             TempData["success"] = "Category created successfully";
@@ -77,6 +81,8 @@ namespace AmarTech.Web.Areas.Admin.Controllers
                 return View(category);
             }
 
+            category.UpdatedBy = GetCurrentUserName();
+
             category.UpdatedDate = DateTime.Now;
             _categoryService.UpdateCategory(category);
             TempData["success"] = "Category updated successfully";
@@ -110,6 +116,14 @@ namespace AmarTech.Web.Areas.Admin.Controllers
             _categoryService.DeleteCategory(id);
             TempData["success"] = "Category deleted successfully";
             return RedirectToAction(nameof(Index));
+        }
+
+        public string GetCurrentUserName()
+        {
+            var claimsIdentity = User.Identity as ClaimsIdentity;
+            var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            return _applicationUserService.GetUserName(userId);
         }
     }
 }

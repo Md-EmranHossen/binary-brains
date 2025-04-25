@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe.Checkout;
 using System.Security.Claims;
-using AmarTech.Application.Services.IServices;
+
 
 namespace AmarTech.Web.Areas.Customer.Controllers
 {

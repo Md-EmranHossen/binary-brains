@@ -54,6 +54,12 @@ namespace AmarTech.Application.Services
 
         }
 
+        public string GetUserName(string? userId)
+        {
+            return GetUserById(userId)?.Name??"";
+
+        }
+
 
 
 
