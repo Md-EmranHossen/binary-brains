@@ -112,7 +112,12 @@
 
     @for (int i = 1; i <= totalPages; i++)
     {
-        <a asp-action="Index" asp-route-page="@i"
-           class="btn @(i == currentPage ? "btn-primary" : "btn-outline-primary") mx-1">@i</a>
+        <a asp-action="Index"
+           asp-route-page="@i"
+           asp-route-query="@ViewBag.SearchQuery"
+           class="btn @(i == currentPage ? "btn-primary" : "btn-outline-primary") mx-1">
+            @i
+        </a>
     }
+
 </div>

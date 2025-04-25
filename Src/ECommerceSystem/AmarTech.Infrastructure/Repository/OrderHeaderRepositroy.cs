@@ -17,7 +17,10 @@ namespace AmarTech.Infrastructure.Repository
             _db = db;
         }
 
-
+        public int GetAllOrderHeadersCount()
+        {
+            return _db.OrderHeaders.Count();
+        }
 
         public void Update(OrderHeader obj)
         {

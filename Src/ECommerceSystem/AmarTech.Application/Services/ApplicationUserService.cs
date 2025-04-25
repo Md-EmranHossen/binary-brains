@@ -27,6 +27,11 @@ namespace AmarTech.Application.Services
             return obj;
         }
 
+        public int GetAllUsersCount()
+        {
+            return _applicationUserRepositroy.GetAllUsersCount();
+        }
+
         public ApplicationUser? GetUserById(string? id)
         {
             return _applicationUserRepositroy.Get(u => u.Id == id);

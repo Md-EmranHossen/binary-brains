@@ -33,12 +33,14 @@ namespace AmarTech.Web.Areas.Customer.Controllers
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             
-            var productList = _productService.SkipAndTake(page);
+            var productList = _productService.SkipAndTake(page,query);
+            var totalProductCount = productList.Count();
 
-            var totalPages = _productService.CalculateTotalPage();
+            var totalPages = _productService.CalculateTotalPage(totalProductCount);
 
             ViewBag.CurrentPage = page??1;
             ViewBag.TotalPages = totalPages;
+            ViewBag.SearchQuery = query;
 
             var shoppingCartCount = _shoppingCartService.GetShoppingCartByUserId(userId ?? string.Empty)?.Count() ?? 0;
             HttpContext.Session.SetInt32(SD.SessionCart, shoppingCartCount);

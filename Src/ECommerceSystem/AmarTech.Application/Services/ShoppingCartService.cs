@@ -135,7 +135,7 @@ namespace AmarTech.Application.Services
                 OrderHeader = new OrderHeader
                 {
                     OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
-                                             .Sum(cart => cart.Product.Price * cart.Count)
+                                             .Sum(cart => (cart.Product.Price-cart.Product.DiscountAmount) * cart.Count)
                 }
                 
 
@@ -216,7 +216,7 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
         {
             double orderTotal = shoppingCartList
              .Where(cart => cart.Product != null)
-             .Sum(cart => (double)cart.Product.Price * cart.Count);
+             .Sum(cart => (double)(cart.Product.Price-cart.Product.DiscountAmount) * cart.Count);
 
 
             var shoppingCartVM= new ShoppingCartVM
@@ -239,7 +239,7 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
             {
                 if (item.Product != null)
                 {
-                    item.Price = (double)item.Product.Price;
+                    item.Price = (double)(item.Product.Price-item.Product.DiscountAmount);
                 }
             }
 
@@ -275,7 +275,7 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
                 {
                     PriceData = new SessionLineItemPriceDataOptions
                     {
-                        UnitAmount = (long)(0 * 100),
+                        UnitAmount = (long)(item.Price * 100),
                         Currency = "usd",
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {

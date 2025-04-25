@@ -109,5 +109,10 @@ namespace AmarTech.Application.Services
         {
             return orderHeaderRepository.GetAll(u => u.ApplicationUserId == id, includeProperties);
         }
+
+        public int GetAllOrderHeadersCount()
+        {
+            return orderHeaderRepository.GetAllOrderHeadersCount();
+        }
     }
 }
