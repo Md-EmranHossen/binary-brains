@@ -2,7 +2,6 @@
 using AmarTech.Infrastructure.Repository.IRepository;
 using AmarTech.Application.Services.IServices;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using AmarTech.Application.Services.IServices;
 
 namespace AmarTech.Application.Services
 {
