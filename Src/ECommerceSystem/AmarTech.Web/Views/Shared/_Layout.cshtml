@@ -37,11 +37,6 @@
             <div class="container-fluid">
 
                 <!-- Start Navbar Links -->
-
-
-
-
-
                 <ul class="navbar-nav me-auto">
                     @{
                         if (User.IsInRole(SD.Role_Admin))
@@ -60,16 +55,7 @@
                             <i class="bi bi-house me-1"></i> Home
                         </a>
                     </li>
-                    @{
-                        if (User.IsInRole(SD.Role_Admin))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-light hover-light" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
-                                    <i class="bi bi-speedometer me-1"></i> Dashboard
-                                </a>
-                            </li>
-                        }
-                    }
+                   
                     <li class="nav-item">
                         <a class="nav-link text-light hover-light" asp-area="Customer" asp-controller="Cart" asp-action="Index">
                             <i class="bi bi-cart me-1"></i> Cart
@@ -105,9 +91,6 @@
                             <i class="bi bi-search"></i>
                         </button>
                     </form>
-                </ul>
-
-
 
                     <!-- Fullscreen Toggle -->
                     <li class="nav-item">
@@ -144,13 +127,16 @@
                     <nav class="mt-2">
                         <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu" data-accordion="false">
                             <li class="nav-item menu-open">
-                                <a href="#" class="nav-link active">
-                                    <i class="nav-icon bi bi-speedometer"></i>
-                                    <p>
-                                        Dashboard
-                                        <i class="nav-arrow bi bi-chevron-right"></i>
-                                    </p>
-                                </a>
+                                @{
+                                    if (User.IsInRole(SD.Role_Admin))
+                                    {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-light hover-light" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                                            <i class="bi bi-speedometer me-1"></i> Dashboard
+                                        </a>
+                                    </li>
+                                    }
+                                }
                             </li>
 
 
@@ -207,35 +193,71 @@
         </main>
         <!-- End App Main -->
         <!-- Footer -->
-        <footer class="app-footer bg-dark text-light py-3">
+        <footer class="app-footer bg-dark text-light py-4">
             <div class="container-fluid">
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <h5 class="text-uppercase mb-3">About Amar Tech</h5>
+                        <p class="mb-3">Amar Tech is a leading provider of premium tech products and solutions. Our mission is to deliver exceptional quality and service to all our customers.</p>
+                        <div class="d-flex">
+                            <a href="#" class="me-3 text-light"><i class="bi bi-facebook fs-5"></i></a>
+                            <a href="#" class="me-3 text-light"><i class="bi bi-twitter-x fs-5"></i></a>
+                            <a href="#" class="me-3 text-light"><i class="bi bi-instagram fs-5"></i></a>
+                            <a href="#" class="me-3 text-light"><i class="bi bi-linkedin fs-5"></i></a>
+                            <a href="#" class="text-light"><i class="bi bi-youtube fs-5"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <h5 class="text-uppercase mb-3">Quick Links</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="Index" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>Home</a></li>
+                            <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>Privacy Policy</a></li>
+                            <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="Terms" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>Terms of Service</a></li>
+                            <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="About" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>About Us</a></li>
+                            <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="Contact" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>Contact Us</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="text-uppercase mb-3">Contact Information</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>123 Tech Street, Silicon Valley, CA 94041</li>
+                            <li class="mb-2"><i class="bi bi-telephone me-2"></i>+1 (555) 123-4567</li>
+                            <li class="mb-2"><i class="bi bi-envelope me-2"></i>info@amartech.com</li>
+                            <li class="mb-2"><i class="bi bi-clock me-2"></i>Monday - Friday: 9:00 AM - 6:00 PM</li>
+                        </ul>
+                        <div class="mt-3">
+                            <h6 class="mb-2">Subscribe to our newsletter</h6>
+                            <div class="input-group">
+                                <input type="email" class="form-control" placeholder="Your email" aria-label="Your email" aria-describedby="subscribe-btn">
+                                <button class="btn btn-primary" type="button" id="subscribe-btn">Subscribe</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-4 bg-secondary" />
                 <div class="row align-items-center">
                     <div class="col-md-6">
                         <strong>
-                            Copyright © 2025
+                            Copyright &copy; 2025
                             <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="text-decoration-none text-light">Binary-Brains</a>
                         </strong>
                         <span class="d-block d-md-inline ms-md-1">All rights reserved.</span>
                     </div>
-                    <div class="col-md-6 text-md-end mt-2 mt-md-0">
-                        <ul class="list-inline mb-0">
-                            <li class="list-inline-item">
-                                <a asp-area="Customer" asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-light">Privacy Policy</a>
-                            </li>
-                            <li class="list-inline-item">•</li>
-                            <li class="list-inline-item">
-                                <a asp-area="Customer" asp-controller="Home" asp-action="" class="text-decoration-none text-light">Terms of Service</a>
-                            </li>
-                            <li class="list-inline-item">•</li>
-                            <li class="list-inline-item">
-                                <a asp-area="Customer" asp-controller="Home" asp-action="" class="text-decoration-none text-light">Contact Us</a>
-                            </li>
-                        </ul>
+                    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                        <p class="mb-0">
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Faq" class="text-decoration-none text-light me-3">FAQ</a>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Support" class="text-decoration-none text-light me-3">Support</a>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Shipping" class="text-decoration-none text-light me-3">Shipping Policy</a>
+                            <a asp-area="Customer" asp-controller="Home" asp-action="Return" class="text-decoration-none text-light">Return Policy</a>
+                        </p>
+                        <p class="mb-0 mt-2 small">
+                            Powered by <a href="https://getbootstrap.com/" class="text-decoration-none text-light">Bootstrap</a> |
+                            Designed by <a href="#" class="text-decoration-none text-light">Binary-Brains Team</a>
+                        </p>
                     </div>
                 </div>
             </div>
         </footer>
-        <!-- End Footer -->
         <!-- End Footer -->
     </div>
 
