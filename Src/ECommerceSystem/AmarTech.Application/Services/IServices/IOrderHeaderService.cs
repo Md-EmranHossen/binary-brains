@@ -21,5 +21,7 @@ namespace AmarTech.Application.Services.IServices
         OrderHeader? OrderConfirmation(int id);
 
         IEnumerable<OrderHeader> GetAllOrderHeadersById(string id,string? includeProperties = null);
+
+        int GetAllOrderHeadersCount();
     }
 }

@@ -24,9 +24,15 @@ namespace AmarTech.Infrastructure.Repository
             _db.Products.Update(obj);
         }
 
-        public IEnumerable<Product> SkipAndTake(int productsPerPage,int pageNumber)
+        public IEnumerable<Product> SkipAndTake(int productsPerPage,int pageNumber,string ? searchQuery=null)
         {
             IQueryable<Product> query = _db.Products;
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                searchQuery=searchQuery.ToLower();
+                query=query.Where(u=>u.Title.ToLower().Contains(searchQuery)||u.Description.ToLower().Contains(searchQuery));
+
+            }
 
             query = query.Skip((pageNumber-1) * productsPerPage).Take(productsPerPage);
 
@@ -46,6 +52,9 @@ namespace AmarTech.Infrastructure.Repository
 
         }
 
-
+        public int GetAllProductsCount()
+        {
+            return _db.Products.Count();
+        }
     }
 }

@@ -70,7 +70,7 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             {
                 if (i.Product != null)
                 {
-                    i.Price = (double)i.Product.Price;
+                    i.Price = (double)(i.Product.Price - i.Product.DiscountAmount);
                 }
             }
 
