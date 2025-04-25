@@ -36,6 +36,10 @@ namespace AmarTech.Application.Services.IServices
 
         SessionCreateOptions CheckOutForUser(ShoppingCartVM shoppingCartVM);
 
+        void AddToCart(ShoppingCart shoppingCart);
+        List<ShoppingCart> GetCart();
+        void ClearCart();
+
 
 
     }

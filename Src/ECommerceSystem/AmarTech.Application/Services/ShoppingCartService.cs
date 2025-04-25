@@ -12,6 +12,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 
 
 namespace AmarTech.Application.Services
@@ -21,13 +22,15 @@ namespace AmarTech.Application.Services
         private readonly IShoppingCartRepository _shoppingCartRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IMemoryCache _memoryCache;
+        private readonly string _guestCartKey = "guest_cart";
 
-        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
+        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor,IMemoryCache memoryCache)
         {
             _shoppingCartRepository = shoppingCartRepository;
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
-
+            _memoryCache = memoryCache;
         }
 
         public void AddShoppingCart(ShoppingCart shoppingCart)
@@ -287,6 +290,23 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
                 options.LineItems.Add(sessionLineItem);
             }
             return options;
+        }
+
+        public void AddToCart(ShoppingCart shoppingCart)
+        {
+            var cart = GetCart();
+            cart.Add(shoppingCart);
+            _memoryCache.Set(_guestCartKey, cart);
+        }
+
+        public List<ShoppingCart> GetCart()
+        {
+            return _memoryCache.Get<List<ShoppingCart>>(_guestCartKey) ?? new List<ShoppingCart>();
+        }
+
+        public void ClearCart()
+        {
+            _memoryCache.Remove(_guestCartKey);
         }
     }
 }

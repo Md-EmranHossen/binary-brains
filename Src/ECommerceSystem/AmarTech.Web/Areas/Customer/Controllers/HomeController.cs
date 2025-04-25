@@ -72,7 +72,6 @@ namespace AmarTech.Web.Areas.Customer.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
         public IActionResult Details(ShoppingCart shoppingCart)
         {
@@ -89,20 +88,25 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
-                _logger.LogWarning("User ID not found in claims.");
-                return Unauthorized();
+                _shoppingCartService.AddToCart(shoppingCart);
             }
-
-            bool isSuccessful = _shoppingCartService.AddOrUpdateShoppingCart(shoppingCart, userId);
-
-            if (!isSuccessful)
+            else
             {
-                _logger.LogWarning("Failed to add/update shopping cart for user {UserId}", userId);
-                return StatusCode(500, "Failed to update shopping cart.");
-            }
 
-            HttpContext.Session.SetInt32(SD.SessionCart,
-   _shoppingCartService.GetShoppingCartByUserId(userId).Count());
+                bool isSuccessful = _shoppingCartService.AddOrUpdateShoppingCart(shoppingCart, userId);
+
+                if (!isSuccessful)
+                {
+                    _logger.LogWarning("Failed to add/update shopping cart for user {UserId}", userId);
+                    return StatusCode(500, "Failed to update shopping cart.");
+                }
+
+
+
+                HttpContext.Session.SetInt32(SD.SessionCart,
+       _shoppingCartService.GetShoppingCartByUserId(userId).Count());
+            }
+            
 
             return RedirectToAction(nameof(Index));
         }

@@ -11,7 +11,6 @@ using System.Security.Claims;
 namespace AmarTech.Web.Areas.Customer.Controllers
 {
     [Area("customer")]
-    [Authorize]
     public class CartController : Controller
     {
         private readonly IShoppingCartService _shoppingCartService;
@@ -34,10 +33,41 @@ namespace AmarTech.Web.Areas.Customer.Controllers
         {
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var shoppingCartVM = _shoppingCartService.GetShoppingCartVM(userId);
+            ShoppingCartVM shoppingCartVM;
+            if (userId == null)
+            {
+                var shoppingCartList = _shoppingCartService.GetCart();
+
+                foreach (var cart in shoppingCartList)
+                {
+                    if (cart == null)
+                        continue;
+
+                    var product = _productService.GetProductById(cart.ProductId);
+                    if (product != null)
+                    {
+                        cart.Product = product;
+                    }
+                }
+
+
+                shoppingCartVM = new ShoppingCartVM()
+                {
+                    ShoppingCartList = shoppingCartList,
+                    OrderHeader = new OrderHeader
+                    {
+                        OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
+                                             .Sum(cart => (cart.Product.Price - cart.Product.DiscountAmount) * cart.Count)
+                    }
+                };
+            }
+            else
+            {
+                shoppingCartVM = _shoppingCartService.GetShoppingCartVM(userId);
+            }
             return View(shoppingCartVM);
         }
-
+        [Authorize]
         public IActionResult Summary()
         {
             var claimsIdentity = User.Identity as ClaimsIdentity;
@@ -51,8 +81,17 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             {
                 return Unauthorized();
             }
+            ShoppingCartVM shoppingCartVM;
+/*            var cartList = _shoppingCartService.GetCart();
+            if (cartList.Count > 0)
+            {
 
-            var shoppingCartVM = _shoppingCartService.GetShoppingCartVM(userId);
+            }
+            else
+            {*/
+                shoppingCartVM = _shoppingCartService.GetShoppingCartVM(userId);
+            
+            
             if (shoppingCartVM == null)
             {
                 return NotFound();
