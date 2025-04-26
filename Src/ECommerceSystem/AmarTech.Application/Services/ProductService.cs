@@ -121,18 +121,18 @@ namespace AmarTech.Application.Services
         {
             return _productRepository.Get(u => u.Id == id, includeProperties: "Category");
         }
-        public IEnumerable<Product> SkipAndTake(int? page) { 
+        public IEnumerable<Product> SkipAndTake(int? page, string? searchQuery = null)
+        {
             var productsPerPage = 12;
             var pageNumber = page ?? 1;
-        
-            return _productRepository.SkipAndTake(productsPerPage, pageNumber);
+
+            // Add the includeProperties parameter to load the Category
+            return _productRepository.SkipAndTake(productsPerPage, pageNumber, searchQuery, includeProperties: "Category");
         }
 
-        public int CalculateTotalPage()
+        public int CalculateTotalPage(int totalProductCount)
         {
-            // Calculate total pages for pagination
-            var totalProducts = GetAllProducts().Count();
-            var totalPages = (int)Math.Ceiling(totalProducts / (double)12);
+            var totalPages = (int)Math.Ceiling(totalProductCount / (double)12);
 
             return totalPages;
         }
@@ -141,5 +141,12 @@ namespace AmarTech.Application.Services
            _productRepository.ReduceStockCount(cartList);
             _unitOfWork.Commit();
         }
+
+        public int GetAllProductsCount(string? searchQuery = null)
+        {
+            return _productRepository.GetAllProductsCount(searchQuery);
+        }
+
+
     }
 }

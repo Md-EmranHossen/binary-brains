@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace AmarTech.Domain.Entities
 {
-    public class DashboardIndexModel
+    public class DashboardVM
     {
-
-        public int TotalOrder { get; set; }
-
+        public int TotalUsers { get; set; }
+        public int TotalOrders { get; set; }
+        public int TotalProducts { get; set; }
     }
 }

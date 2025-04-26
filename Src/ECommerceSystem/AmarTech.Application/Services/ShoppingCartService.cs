@@ -12,6 +12,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
+using System.Globalization;
 
 
 namespace AmarTech.Application.Services
@@ -21,13 +23,15 @@ namespace AmarTech.Application.Services
         private readonly IShoppingCartRepository _shoppingCartRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IMemoryCache _memoryCache;
+        private readonly string _guestCartKey = "guest_cart";
 
-        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
+        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor,IMemoryCache memoryCache)
         {
             _shoppingCartRepository = shoppingCartRepository;
             _unitOfWork = unitOfWork;
             _httpContextAccessor = httpContextAccessor;
-
+            _memoryCache = memoryCache;
         }
 
         public void AddShoppingCart(ShoppingCart shoppingCart)
@@ -135,7 +139,7 @@ namespace AmarTech.Application.Services
                 OrderHeader = new OrderHeader
                 {
                     OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
-                                             .Sum(cart => cart.Product.Price * cart.Count)
+                                             .Sum(cart => (cart.Product.Price-cart.Product.DiscountAmount) * cart.Count)
                 }
                 
 
@@ -156,18 +160,42 @@ namespace AmarTech.Application.Services
             return new List<ShoppingCart>();
             
         }
-        public void Plus(int cartId)
+        public void Plus(ShoppingCart? cartFromDb,int cartId)
         {
-            var cartFromDb = GetShoppingCartById(cartId);
+            
             if (cartFromDb == null)
+            {
+                PlusMemoryCach(cartId);
+            }
+            else
+            {
+               PlusDB(cartFromDb);
+            }
+
+        }
+        void PlusMemoryCach(int cartId)
+        {
+            var cartList = GetCart();
+
+            var cart = cartList?.FirstOrDefault(c => c.Id == cartId);
+
+            if (cart != null && cart.Count <= cart.Product.StockQuantity)
+            {
+                cart.Count++;
+            }
+
+            SetInMemory(cartList);
+        }
+        void PlusDB(ShoppingCart cartFromDb)
+        {
+            cartFromDb.Count += 1;
+            if (cartFromDb.Count > cartFromDb.Product.StockQuantity)
             {
                 return;
             }
-
-            cartFromDb.Count += 1;
+           
             UpdateShoppingCart(cartFromDb);
             _unitOfWork.Commit();
-
         }
 
         public void Minus(int cartId)
@@ -175,9 +203,36 @@ namespace AmarTech.Application.Services
             var cartFromDb = GetShoppingCartById(cartId);
             if (cartFromDb == null)
             {
-                return;
+                MinusMemoryCach(cartId);
+            }
+            else
+            {
+               MinusDB(cartFromDb,cartId);
+            }
+        }
+        void MinusMemoryCach(int cartId)
+        {
+            var cartList = GetCart();
+
+            var cart = cartList?.FirstOrDefault(c => c.Id == cartId);
+            if (cart == null) return;
+            if (cart.Count <= 1)
+            {
+                cartList?.Remove(cart);
             }
 
+            else
+            {
+                cart.Count--;
+               
+            }
+
+            SetInMemory(cartList);
+           
+
+        }
+        void MinusDB(ShoppingCart cartFromDb,int cartId)
+        {
             if (cartFromDb.Count <= 1)
             {
                 DeleteShoppingCart(cartId);
@@ -199,8 +254,29 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
             var cartFromDb = GetShoppingCartById(cartId);
             if (cartFromDb == null)
             {
-                return;
+                RemoveCartFromMemory(cartId);
             }
+            else
+            {
+                RemoveCartFromDB(cartFromDb, cartId);
+            }
+
+        }
+
+        void RemoveCartFromMemory(int cartId)
+        {
+            var cartList = GetCart();
+
+            var cart = cartList?.FirstOrDefault(c => c.Id == cartId);
+            if (cart == null) return;
+
+            cartList?.Remove(cart);
+            
+
+            SetInMemory(cartList);
+        }
+        void RemoveCartFromDB(ShoppingCart cartFromDb,int cartId)
+        {
             DeleteShoppingCart(cartId);
             _httpContextAccessor.HttpContext?.Session.SetInt32(SD.SessionCart,
             GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
@@ -216,7 +292,7 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
         {
             double orderTotal = shoppingCartList
              .Where(cart => cart.Product != null)
-             .Sum(cart => (double)cart.Product.Price * cart.Count);
+             .Sum(cart => (double)(cart.Product.Price-cart.Product.DiscountAmount) * cart.Count);
 
 
             var shoppingCartVM= new ShoppingCartVM
@@ -239,7 +315,7 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
             {
                 if (item.Product != null)
                 {
-                    item.Price = (double)item.Product.Price;
+                    item.Price = (double)(item.Product.Price-item.Product.DiscountAmount);
                 }
             }
 
@@ -275,7 +351,7 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
                 {
                     PriceData = new SessionLineItemPriceDataOptions
                     {
-                        UnitAmount = (long)(0 * 100),
+                        UnitAmount = (long)(item.Price * 100),
                         Currency = "usd",
                         ProductData = new SessionLineItemPriceDataProductDataOptions
                         {
@@ -287,6 +363,63 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
                 options.LineItems.Add(sessionLineItem);
             }
             return options;
+        }
+
+        public void AddToCart(ShoppingCart shoppingCart)
+        {
+            var cart = GetCart();
+            cart.Add(shoppingCart);
+            SetInMemory(cart);
+        }
+
+        public List<ShoppingCart> GetCart()
+        {
+            return _memoryCache.Get<List<ShoppingCart>>(_guestCartKey) ?? new List<ShoppingCart>();
+        }
+
+        public void ClearCart()
+        {
+            _memoryCache.Remove(_guestCartKey);
+        }
+        public void SetInMemory(List<ShoppingCart>? cart)
+        {
+            if (cart != null)
+            {
+                _memoryCache.Set(_guestCartKey, cart);
+            }
+        }
+        public ShoppingCartVM MemoryCartVM(List<ShoppingCart> shoppingCartList)
+        {
+
+           return  new ShoppingCartVM()
+            {
+                ShoppingCartList = shoppingCartList,
+                OrderHeader = new OrderHeader
+                {
+                    OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
+                                         .Sum(cart => (cart.Product.Price - cart.Product.DiscountAmount) * cart.Count)
+                }
+            };
+        }
+
+        public ShoppingCartVM CombineToDB(List<ShoppingCart> cartFromDb, List<ShoppingCart> cartFromMemory,string userId)
+        {
+
+
+            _shoppingCartRepository.CombineToDB(cartFromDb,cartFromMemory,userId);
+            ClearCart();
+            var shoppingCartList = GetShoppingCartsByUserId(userId ?? "") ?? new List<ShoppingCart>();
+            return new ShoppingCartVM()
+            {
+                ShoppingCartList = shoppingCartList,
+                OrderHeader = new OrderHeader
+                {
+                    OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
+                                       .Sum(cart => (cart.Product.Price - cart.Product.DiscountAmount) * cart.Count)
+                }
+            };
+
+
         }
     }
 }

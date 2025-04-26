@@ -12,36 +12,41 @@
             {
                 var product = productsArray[i];
                 <div class="col-lg-2 col-md-4 col-sm-6 col-12 d-flex justify-content-center p-2">
-                    <div class="card card-primary card-outline shadow rounded" style="width: 100%; max-width: 220px;">
-                        <img src="@(product.ImageUrl ?? "https://placehold.co/600x400")"
-                             class="card-img-top rounded"
-                             alt="@product.Title"
-                             style="height: 120px; object-fit: cover; margin-bottom: 0;" />
-                        <div class="card-body d-flex flex-column align-items-center p-1 pb-2">
-                            <h6 class="card-title text-dark mb-1 text-center"
-                                style="font-size: 0.9rem; text-transform: capitalize; margin-top: 0; line-height: 1.1rem; height: 2.2rem; overflow: hidden;">
+                    <div class="card card-primary card-outline shadow rounded hover-shadow transition-all"
+                         style="width: 100%; max-width: 220px; transition: transform 0.3s ease;">
+                        <div class="position-relative overflow-hidden" style="border-radius: 0.5rem 0.5rem 0 0;">
+                            <img src="@(product.ImageUrl ?? "https://placehold.co/600x400")"
+                                 class="card-img-top"
+                                 alt="@product.Title"
+                                 style="height: 160px; object-fit: cover; transform: scale(1); transition: transform 0.5s ease;" />
+                        </div>
+                        <div class="card-body d-flex flex-column align-items-center p-3 pt-2 pb-2">
+                            <h6 class="card-title text-dark mb-0 text-center fw-bold"
+                                style="font-size: 1rem; text-transform: capitalize; line-height: 1.2rem; height: 2.4rem; overflow: hidden;">
                                 @product.Title
                             </h6>
-                            <p class="text-muted mb-0" style="font-size: 0.75rem;">
-                                by <b>@product.Category?.Name</b>
+                            <p class="text-muted mb-0" style="font-size: 0.8rem;">
+                                <i class="bi bi-tags-fill"></i> <span class="fw-semibold text-primary">@product.Category?.Name</span>
                             </p>
-                            <p class="text-dark font-weight-bold mb-0" style="font-size: 0.85rem;">
-                                @product.Price.ToString("C")
-                            </p>
-                            <p class="text-info font-italic mb-1 text-center" style="font-size: 0.75rem; height: 1.5rem; overflow: hidden;">
+                            <div class="price-tag my-1">
+                                <span class="fw-bold">@product.Price.ToString("C")</span>
+                            </div>
+                            <p class="text-secondary fst-italic mb-2 text-center" style="font-size: 0.8rem; height: 1.6rem; overflow: hidden;">
                                 @{
                                     var des = product.Description;
-                                    if (des.Length > 22)
+                                    if (des.Length > 30)
                                     {
-                                        des = product.Description.Substring(0, 21) + "...";
+                                        des = product.Description.Substring(0, 29) + "...";
                                     }
                                 }
                                 @des
                             </p>
                             <a asp-action="Details" asp-route-productId="@product.Id"
-                               class="btn btn-sm btn-primary mt-auto"
-                               style="font-size: 0.8rem; max-width: 100px; padding: 0.4rem 0.8rem;">
-                                Details
+                               class="btn btn-primary w-100 rounded-pill shadow-sm position-relative overflow-hidden"
+                               style="font-size: 0.9rem; font-weight: 600; padding: 0.5rem 1rem; transition: all 0.3s ease;">
+                                <span>Details</span>
+                                <i class="fas fa-arrow-right position-absolute opacity-0"
+                                   style="right: 1rem; transition: all 0.3s ease;"></i>
                             </a>
                         </div>
                     </div>
@@ -58,36 +63,42 @@
             {
                 var product = productsArray[i];
                 <div class="col-lg-2 col-md-4 col-sm-6 col-12 d-flex justify-content-center p-2">
-                    <div class="card card-primary card-outline shadow rounded" style="width: 100%; max-width: 220px;">
-                        <img src="@(product.ImageUrl ?? "https://placehold.co/600x400")"
-                             class="card-img-top rounded"
-                             alt="@product.Title"
-                             style="height: 120px; object-fit: cover; margin-bottom: 0;" />
-                        <div class="card-body d-flex flex-column align-items-center p-1 pb-2">
-                            <h6 class="card-title text-dark mb-1 text-center"
-                                style="font-size: 0.9rem; text-transform: capitalize; margin-top: 0; line-height: 1.1rem; height: 2.2rem; overflow: hidden;">
+                    <div class="card card-primary card-outline shadow rounded hover-shadow transition-all"
+                         style="width: 100%; max-width: 220px; transition: transform 0.3s ease;">
+                        <div class="position-relative overflow-hidden" style="border-radius: 0.5rem 0.5rem 0 0;">
+                            <img src="@(product.ImageUrl ?? "https://placehold.co/600x400")"
+                                 class="card-img-top"
+                                 alt="@product.Title"
+                                 style="height: 160px; object-fit: cover; transform: scale(1); transition: transform 0.5s ease;" />
+                        </div>
+                        <div class="card-body d-flex flex-column align-items-center p-3 pt-2 pb-2">
+                            <h6 class="card-title text-dark mb-0 text-center fw-bold"
+                                style="font-size: 1rem; text-transform: capitalize; line-height: 1.2rem; height: 2.4rem; overflow: hidden;">
                                 @product.Title
                             </h6>
-                            <p class="text-muted mb-0" style="font-size: 0.75rem;">
-                                by <b>@product.Category?.Name</b>
+                            <p class="text-muted mb-0" style="font-size: 0.8rem;">
+                                <i class="bi bi-tags-fill"></i>  <span class="fw-semibold text-primary">@product.Category?.Name</span>
                             </p>
-                            <p class="text-dark font-weight-bold mb-0" style="font-size: 0.85rem;">
-                                @product.Price.ToString("C")
-                            </p>
-                            <p class="text-info font-italic mb-1 text-center" style="font-size: 0.75rem; height: 1.5rem; overflow: hidden;">
+                            <div class="price-tag my-1">
+                                <span class="fw-bold">@product.Price.ToString("C")</span>
+                            </div>
+                            <p class="text-secondary fst-italic mb-2 text-center" style="font-size: 0.8rem; height: 1.6rem; overflow: hidden;">
                                 @{
                                     var des = product.Description;
-                                    if (des.Length > 22)
+                                    if (des.Length > 30)
                                     {
-                                        des = product.Description.Substring(0, 21) + "...";
+                                        des = product.Description.Substring(0, 29) + "...";
                                     }
+
                                 }
                                 @des
                             </p>
                             <a asp-action="Details" asp-route-productId="@product.Id"
-                               class="btn btn-sm btn-primary mt-auto"
-                               style="font-size: 0.8rem; max-width: 100px; padding: 0.4rem 0.8rem;">
-                                Details
+                               class="btn btn-primary w-100 rounded-pill shadow-sm position-relative overflow-hidden"
+                               style="font-size: 0.9rem; font-weight: 600; padding: 0.5rem 1rem; transition: all 0.3s ease;">
+                                <span>Details</span>
+                                <i class="fas fa-arrow-right position-absolute opacity-0"
+                                   style="right: 1rem; transition: all 0.3s ease;"></i>
                             </a>
                         </div>
                     </div>
@@ -97,7 +108,7 @@
     </div>
 </div>
 
-<!-- Pagination -->
+<!-- Pagination - Modernized -->
 <div class="d-flex justify-content-center mt-4">
     @{
         // Calculate total pages based on products count and products per page (12)
@@ -110,9 +121,126 @@
         var currentPage = ViewBag.CurrentPage != null ? (int)ViewBag.CurrentPage : 1;
     }
 
-    @for (int i = 1; i <= totalPages; i++)
-    {
-        <a asp-action="Index" asp-route-page="@i"
-           class="btn @(i == currentPage ? "btn-primary" : "btn-outline-primary") mx-1">@i</a>
-    }
+    <nav aria-label="Product pagination">
+        <ul class="pagination pagination-rounded">
+            <!-- Previous button -->
+            @if (currentPage > 1)
+            {
+                <li class="page-item">
+                    <a asp-action="Index"
+                       asp-route-page="@(currentPage - 1)"
+                       asp-route-query="@ViewBag.SearchQuery"
+                       class="page-link" aria-label="Previous">
+                        <span aria-hidden="true">«</span>
+                    </a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled">
+                    <span class="page-link" aria-label="Previous">
+                        <span aria-hidden="true">«</span>
+                    </span>
+                </li>
+            }
+
+            <!-- Page numbers -->
+            @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+            {
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-query="@ViewBag.SearchQuery"
+                       class="page-link">
+                        @i
+                    </a>
+                </li>
+            }
+
+            <!-- Next button -->
+            @if (currentPage < totalPages)
+            {
+                <li class="page-item">
+                    <a asp-action="Index"
+                       asp-route-page="@(currentPage + 1)"
+                       asp-route-query="@ViewBag.SearchQuery"
+                       class="page-link" aria-label="Next">
+                        <span aria-hidden="true">»</span>
+                    </a>
+                </li>
+            }
+            else
+            {
+                <li class="page-item disabled">
+                    <span class="page-link" aria-label="Next">
+                        <span aria-hidden="true">»</span>
+                    </span>
+                </li>
+            }
+        </ul>
+    </nav>
 </div>
+
+<!-- Add custom styles -->
+<style>
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12) !important;
+    }
+
+        .hover-shadow:hover img {
+            transform: scale(1.05);
+        }
+
+    .card-primary.card-outline {
+        border-top: 3px solid #4568dc;
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #4568dc, #3f5efb);
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #3f5efb, #4568dc);
+        }
+
+            .btn-primary:hover i {
+                opacity: 1 !important;
+                right: 0.75rem;
+            }
+
+            .btn-primary:hover span {
+                transform: translateX(-10px);
+                display: inline-block;
+            }
+
+    .pagination-rounded .page-link {
+        border-radius: 50% !important;
+        margin: 0 3px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .page-item.active .page-link {
+        background: linear-gradient(45deg, #4568dc, #3f5efb);
+        border-color: #3f5efb;
+    }
+
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+
+    /* Simplified Price Tag Styling */
+    .price-tag {
+        font-size: 0.95rem;
+    }
+</style>
+
+<!-- Add Font Awesome for icons (put this in layout or in the head section) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+

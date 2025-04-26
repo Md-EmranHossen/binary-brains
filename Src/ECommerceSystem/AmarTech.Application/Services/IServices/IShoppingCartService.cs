@@ -25,7 +25,7 @@ namespace AmarTech.Application.Services.IServices
 
         List<ShoppingCart> RemoveShoppingCarts(OrderHeader? orderHeader);
 
-        void Plus(int cartId);
+        void Plus(ShoppingCart? cartFromDb,int cartId);
 
         void Minus(int cartId);
 
@@ -35,6 +35,13 @@ namespace AmarTech.Application.Services.IServices
         ShoppingCartVM GetShoppingCartVMForSummaryPost(IEnumerable<ShoppingCart> shoppingCartList, ApplicationUser applicationUser, string userId);
 
         SessionCreateOptions CheckOutForUser(ShoppingCartVM shoppingCartVM);
+
+        void AddToCart(ShoppingCart shoppingCart);
+        List<ShoppingCart> GetCart();
+        void ClearCart();
+
+        ShoppingCartVM MemoryCartVM(List<ShoppingCart> shoppingCartList);
+        ShoppingCartVM CombineToDB(List<ShoppingCart> cartFromDb,List<ShoppingCart> cartFromMemory,string userId);
 
 
 

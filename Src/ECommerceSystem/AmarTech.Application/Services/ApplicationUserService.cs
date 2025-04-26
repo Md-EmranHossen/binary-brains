@@ -27,6 +27,11 @@ namespace AmarTech.Application.Services
             return obj;
         }
 
+        public int GetAllUsersCount()
+        {
+            return _applicationUserRepositroy.GetAllUsersCount();
+        }
+
         public ApplicationUser? GetUserById(string? id)
         {
             return _applicationUserRepositroy.Get(u => u.Id == id);
@@ -46,6 +51,12 @@ namespace AmarTech.Application.Services
         {
             _applicationUserRepositroy.Update(user);
             _unitOfWork.Commit();
+
+        }
+
+        public string GetUserName(string? userId)
+        {
+            return GetUserById(userId)?.Name??"";
 
         }
 

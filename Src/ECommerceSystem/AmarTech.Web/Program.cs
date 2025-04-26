@@ -86,6 +86,9 @@ builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
 builder.Services.AddScoped<IOrderHeaderService, OrderHeaderService>();
 
+//
+builder.Services.AddMemoryCache();
+
 
 var app = builder.Build();
 

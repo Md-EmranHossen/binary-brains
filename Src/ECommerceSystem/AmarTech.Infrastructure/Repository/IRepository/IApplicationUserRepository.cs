@@ -14,5 +14,6 @@ namespace AmarTech.Infrastructure.Repository.IRepository
        string GetUserRole(string userId);
         void Update(ApplicationUser applicationUser);
         IEnumerable<SelectListItem> GetAllRoles();
+        int GetAllUsersCount();
     }
 }

@@ -51,7 +51,9 @@ namespace AmarTech.Infrastructure.Repository
             });
         }
 
-
-
+        public int GetAllUsersCount()
+        {
+            return _db.ApplicationUsers.Count();
+        }
     }
 }

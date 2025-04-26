@@ -6,12 +6,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe.Checkout;
 using System.Security.Claims;
-using AmarTech.Application.Services.IServices;
+
 
 namespace AmarTech.Web.Areas.Customer.Controllers
 {
     [Area("customer")]
-    [Authorize]
     public class CartController : Controller
     {
         private readonly IShoppingCartService _shoppingCartService;
@@ -34,10 +33,21 @@ namespace AmarTech.Web.Areas.Customer.Controllers
         {
             var claimsIdentity = User.Identity as ClaimsIdentity;
             var userId = claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var shoppingCartVM = _shoppingCartService.GetShoppingCartVM(userId);
+            ShoppingCartVM shoppingCartVM;
+            if (userId == null)
+            {
+                var shoppingCartList = GetMemoryShoppingCartList();
+
+                shoppingCartVM =_shoppingCartService.MemoryCartVM(shoppingCartList);
+
+            }
+            else
+            {
+                shoppingCartVM = _shoppingCartService.GetShoppingCartVM(userId);
+            }
             return View(shoppingCartVM);
         }
-
+        [Authorize]
         public IActionResult Summary()
         {
             var claimsIdentity = User.Identity as ClaimsIdentity;
@@ -51,12 +61,24 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             {
                 return Unauthorized();
             }
-
-            var shoppingCartVM = _shoppingCartService.GetShoppingCartVM(userId);
+            ShoppingCartVM shoppingCartVM;
+            var cartList = _shoppingCartService.GetCart();
+            var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId ?? "").ToList() ?? new List<ShoppingCart>();
+            if (cartList.Count > 0)
+            {
+                    shoppingCartVM = _shoppingCartService.CombineToDB(shoppingCartList, cartList, userId);  
+            }
+            else { 
+                shoppingCartVM = _shoppingCartService.GetShoppingCartVM(userId);
+            }
+            
+            
             if (shoppingCartVM == null)
             {
                 return NotFound();
             }
+            var shoppingCartCount = _shoppingCartService.GetShoppingCartByUserId(userId ?? string.Empty)?.Count() ?? 0;
+            HttpContext.Session.SetInt32(SD.SessionCart, shoppingCartCount);
 
             var user = _applicationUserService.GetUserById(userId);
             if (user == null)
@@ -70,7 +92,7 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             {
                 if (i.Product != null)
                 {
-                    i.Price = (double)i.Product.Price;
+                    i.Price = (double)(i.Product.Price - i.Product.DiscountAmount);
                 }
             }
 
@@ -164,7 +186,12 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             {
                 return BadRequest(ModelState);
             }
-            _shoppingCartService.Plus(cartId);
+            var cartFromDb = _shoppingCartService.GetShoppingCartById(cartId);
+            if (cartFromDb != null)
+            {
+                cartFromDb.Product = _productService.GetProductById(cartFromDb.ProductId)??new Product();
+            }
+            _shoppingCartService.Plus(cartFromDb, cartId);
 
             return RedirectToAction(nameof(Index));
 
@@ -186,10 +213,29 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             {
                 return BadRequest(ModelState);
             }
+            
             _shoppingCartService.RemoveCartValue(cartId);
 
 
             return RedirectToAction(nameof(Index));
+        }
+
+        List<ShoppingCart> GetMemoryShoppingCartList()
+        {
+            var shoppingCartList = _shoppingCartService.GetCart();
+
+            foreach (var cart in shoppingCartList)
+            {
+                if (cart == null)
+                    continue;
+
+                var product = _productService.GetProductById(cart.ProductId);
+                if (product != null)
+                {
+                    cart.Product = product;
+                }
+            }
+            return shoppingCartList;
         }
 
     }

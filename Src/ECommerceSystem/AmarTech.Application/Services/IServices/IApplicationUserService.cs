@@ -14,6 +14,8 @@ namespace AmarTech.Application.Services.IServices
         void UpdateUser(ApplicationUser user);
         ApplicationUser? GetUserByIdAndIncludeprop(string? id, string includeprop);
         IEnumerable<SelectListItem> GetAllRoles();
+        int GetAllUsersCount();
+        string GetUserName(string? userId);
 
 
     }
