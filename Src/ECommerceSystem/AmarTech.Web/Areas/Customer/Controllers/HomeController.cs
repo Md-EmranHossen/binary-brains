@@ -34,7 +34,15 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             
             var productList = _productService.SkipAndTake(page,query);
-            var totalProductCount = productList.Count();
+            int totalProductCount;
+            if (string.IsNullOrEmpty(query))
+            {
+                totalProductCount = _productService.GetAllProductsCount();
+            }
+            else
+            {
+                totalProductCount = _productService.GetAllProductsCount(query);
+            }
 
             var totalPages = _productService.CalculateTotalPage(totalProductCount);
 

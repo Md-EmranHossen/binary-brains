@@ -140,9 +140,11 @@ namespace AmarTech.Application.Services
             _unitOfWork.Commit();
         }
 
-        public int GetAllProductsCount()
+        public int GetAllProductsCount(string? searchQuery = null)
         {
-            return _productRepository.GetAllProductsCount();
+            return _productRepository.GetAllProductsCount(searchQuery);
         }
+
+
     }
 }

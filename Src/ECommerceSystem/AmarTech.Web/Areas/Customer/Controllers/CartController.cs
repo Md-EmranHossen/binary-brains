@@ -36,30 +36,10 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             ShoppingCartVM shoppingCartVM;
             if (userId == null)
             {
-                var shoppingCartList = _shoppingCartService.GetCart();
+                var shoppingCartList = GetMemoryShoppingCartList();
 
-                foreach (var cart in shoppingCartList)
-                {
-                    if (cart == null)
-                        continue;
+                shoppingCartVM =_shoppingCartService.MemoryCartVM(shoppingCartList);
 
-                    var product = _productService.GetProductById(cart.ProductId);
-                    if (product != null)
-                    {
-                        cart.Product = product;
-                    }
-                }
-
-
-                shoppingCartVM = new ShoppingCartVM()
-                {
-                    ShoppingCartList = shoppingCartList,
-                    OrderHeader = new OrderHeader
-                    {
-                        OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
-                                             .Sum(cart => (cart.Product.Price - cart.Product.DiscountAmount) * cart.Count)
-                    }
-                };
             }
             else
             {
@@ -82,20 +62,23 @@ namespace AmarTech.Web.Areas.Customer.Controllers
                 return Unauthorized();
             }
             ShoppingCartVM shoppingCartVM;
-/*            var cartList = _shoppingCartService.GetCart();
+            var cartList = _shoppingCartService.GetCart();
+            var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId ?? "").ToList() ?? new List<ShoppingCart>();
             if (cartList.Count > 0)
             {
-
+                    shoppingCartVM = _shoppingCartService.CombineToDB(shoppingCartList, cartList, userId);  
             }
-            else
-            {*/
+            else { 
                 shoppingCartVM = _shoppingCartService.GetShoppingCartVM(userId);
+            }
             
             
             if (shoppingCartVM == null)
             {
                 return NotFound();
             }
+            var shoppingCartCount = _shoppingCartService.GetShoppingCartByUserId(userId ?? string.Empty)?.Count() ?? 0;
+            HttpContext.Session.SetInt32(SD.SessionCart, shoppingCartCount);
 
             var user = _applicationUserService.GetUserById(userId);
             if (user == null)
@@ -229,6 +212,24 @@ namespace AmarTech.Web.Areas.Customer.Controllers
 
 
             return RedirectToAction(nameof(Index));
+        }
+
+        List<ShoppingCart> GetMemoryShoppingCartList()
+        {
+            var shoppingCartList = _shoppingCartService.GetCart();
+
+            foreach (var cart in shoppingCartList)
+            {
+                if (cart == null)
+                    continue;
+
+                var product = _productService.GetProductById(cart.ProductId);
+                if (product != null)
+                {
+                    cart.Product = product;
+                }
+            }
+            return shoppingCartList;
         }
 
     }

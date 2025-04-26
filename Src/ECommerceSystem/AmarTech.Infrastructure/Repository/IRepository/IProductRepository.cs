@@ -13,6 +13,6 @@ namespace AmarTech.Infrastructure.Repository.IRepository
         void Update(Product obj);
         IEnumerable<Product> SkipAndTake(int productsPerPage, int pageNumber, string? searchQuery = null);
         void ReduceStockCount(List<ShoppingCart> cartList);
-        int GetAllProductsCount();
+        int GetAllProductsCount(string? searchQuery = null);
     }
 }

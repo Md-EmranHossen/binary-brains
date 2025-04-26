@@ -40,6 +40,9 @@ namespace AmarTech.Application.Services.IServices
         List<ShoppingCart> GetCart();
         void ClearCart();
 
+        ShoppingCartVM MemoryCartVM(List<ShoppingCart> shoppingCartList);
+        ShoppingCartVM CombineToDB(List<ShoppingCart> cartFromDb,List<ShoppingCart> cartFromMemory,string userId);
+
 
 
     }

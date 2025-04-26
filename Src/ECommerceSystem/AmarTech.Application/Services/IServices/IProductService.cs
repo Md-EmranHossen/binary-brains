@@ -22,6 +22,6 @@ namespace AmarTech.Application.Services.IServices
         int CalculateTotalPage(int totalProductCount);
         void ReduceStockCount(List<ShoppingCart> cartList);
 
-        int GetAllProductsCount();
+        int GetAllProductsCount(string? searchQuery = null);
     }
 }

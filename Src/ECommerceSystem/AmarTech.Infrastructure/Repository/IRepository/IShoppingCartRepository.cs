@@ -11,5 +11,6 @@ namespace AmarTech.Infrastructure.Repository.IRepository
     public interface IShoppingCartRepository : IRepository<ShoppingCart>
     {
         void Update(ShoppingCart obj);
+        void CombineToDB(List<ShoppingCart> cartFromDb, List<ShoppingCart> cartFromMemory,string userId);
     }
 }

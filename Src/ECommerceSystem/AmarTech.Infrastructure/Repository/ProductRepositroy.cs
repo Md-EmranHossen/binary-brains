@@ -52,9 +52,23 @@ namespace AmarTech.Infrastructure.Repository
 
         }
 
-        public int GetAllProductsCount()
+        public int GetAllProductsCount(string ? searchQuery=null)
         {
-            return _db.Products.Count();
+            if (searchQuery == null)
+            {
+                return _db.Products.Count();
+            }
+            else
+            {
+                IQueryable<Product> query = _db.Products;
+                if (!string.IsNullOrEmpty(searchQuery))
+                {
+                    searchQuery = searchQuery.ToLower();
+                    query = query.Where(u => u.Title.ToLower().Contains(searchQuery) || u.Description.ToLower().Contains(searchQuery));
+
+                }
+                return query.Count();
+            }
         }
     }
 }
