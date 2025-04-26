@@ -549,3 +549,8 @@ bg-success {
         background-color: #578553;
         border-color: #578553;
     }
+.app-sidebar .nav-link:hover,
+.app-header .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: background-color 0.3s ease;
+}
