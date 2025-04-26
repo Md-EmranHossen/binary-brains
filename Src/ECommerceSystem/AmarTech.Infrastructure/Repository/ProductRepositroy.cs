@@ -1,5 +1,6 @@
 ﻿using AmarTech.Domain.Entities;
 using AmarTech.Infrastructure.Repository.IRepository;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,20 +25,32 @@ namespace AmarTech.Infrastructure.Repository
             _db.Products.Update(obj);
         }
 
-        public IEnumerable<Product> SkipAndTake(int productsPerPage,int pageNumber,string ? searchQuery=null)
+        public IEnumerable<Product> SkipAndTake(int pageSize, int pageNumber, string? searchQuery = null, string? includeProperties = null)
         {
             IQueryable<Product> query = _db.Products;
+
+            // Apply search filter if needed
             if (!string.IsNullOrEmpty(searchQuery))
             {
-                searchQuery=searchQuery.ToLower();
-                query=query.Where(u=>u.Title.ToLower().Contains(searchQuery)||u.Description.ToLower().Contains(searchQuery));
-
+                query = query.Where(p =>
+                    p.Title.Contains(searchQuery) ||
+                    p.Description.Contains(searchQuery));
             }
 
-            query = query.Skip((pageNumber-1) * productsPerPage).Take(productsPerPage);
+            // Include related entities if specified
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includeProp in includeProperties
+                             .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProp);
+                }
+            }
 
-            return query.ToList();
-         
+            // Apply pagination
+            return query.Skip((pageNumber - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
         }
         public void ReduceStockCount(List<ShoppingCart> cartList)
         {

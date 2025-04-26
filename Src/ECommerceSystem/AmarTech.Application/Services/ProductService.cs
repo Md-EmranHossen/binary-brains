@@ -121,11 +121,13 @@ namespace AmarTech.Application.Services
         {
             return _productRepository.Get(u => u.Id == id, includeProperties: "Category");
         }
-        public IEnumerable<Product> SkipAndTake(int? page, string? searchQuery = null) { 
+        public IEnumerable<Product> SkipAndTake(int? page, string? searchQuery = null)
+        {
             var productsPerPage = 12;
             var pageNumber = page ?? 1;
-        
-            return _productRepository.SkipAndTake(productsPerPage, pageNumber,searchQuery);
+
+            // Add the includeProperties parameter to load the Category
+            return _productRepository.SkipAndTake(productsPerPage, pageNumber, searchQuery, includeProperties: "Category");
         }
 
         public int CalculateTotalPage(int totalProductCount)
