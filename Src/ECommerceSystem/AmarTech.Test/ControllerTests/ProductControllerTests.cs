@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Moq;
+using System.Security.Claims;
 
 namespace AmarTech.Test.ControllerTests
 {
@@ -14,6 +15,7 @@ namespace AmarTech.Test.ControllerTests
     {
         private readonly Mock<IProductService> _mockProductService;
         private readonly Mock<IWebHostEnvironment> _mockWebHostEnvironment;
+        private readonly Mock<IApplicationUserService> _mockApplicationUserService;
         private readonly ProductController _controller;
         private readonly string _testWebRootPath = "test/wwwroot/path";
 
@@ -21,9 +23,13 @@ namespace AmarTech.Test.ControllerTests
         {
             _mockProductService = new Mock<IProductService>();
             _mockWebHostEnvironment = new Mock<IWebHostEnvironment>();
+            _mockApplicationUserService = new Mock<IApplicationUserService>();
             _mockWebHostEnvironment.Setup(x => x.WebRootPath).Returns(_testWebRootPath);
 
-            _controller = new ProductController(_mockProductService.Object, _mockWebHostEnvironment.Object);
+            _controller = new ProductController(
+                _mockProductService.Object,
+                _mockWebHostEnvironment.Object,
+                _mockApplicationUserService.Object);
 
             // Setup TempData for the controller
             _controller.TempData = new TempDataDictionary(
@@ -57,21 +63,20 @@ namespace AmarTech.Test.ControllerTests
         {
             // Arrange
             var expectedCategoryList = new List<SelectListItem>
-    {
-        new SelectListItem { Value = "1", Text = "Electronics" },
-        new SelectListItem { Value = "2", Text = "Accessories" }
-    };
+            {
+                new SelectListItem { Value = "1", Text = "Electronics" },
+                new SelectListItem { Value = "2", Text = "Accessories" }
+            };
 
             _mockProductService.Setup(s => s.CategoryList()).Returns(expectedCategoryList);
 
             // Act
-             _controller.Create();
+            var result = _controller.Create();
 
             // Assert
-
+            var viewResult = Assert.IsType<ViewResult>(result);
             Assert.Equal(expectedCategoryList, _controller.ViewBag.CategoryList);
         }
-
 
         [Fact]
         public void Create_Post_InvalidModelState_ReturnsViewWithSameModel()
@@ -95,11 +100,16 @@ namespace AmarTech.Test.ControllerTests
             // Arrange
             var product = new Product { Title = "New Product" };
             var mockFile = new Mock<IFormFile>();
+            var userName = "testUser";
+
+            // Setup GetCurrentUserName mock
+            SetupUserIdentity("testUserId", userName);
 
             // Act
             var result = _controller.Create(product, mockFile.Object);
 
             // Assert
+            Assert.Equal(userName, product.CreatedBy);
             _mockProductService.Verify(s => s.CreatePathOfProduct(product, mockFile.Object, _testWebRootPath), Times.Once);
             _mockProductService.Verify(s => s.AddProduct(product), Times.Once);
 
@@ -150,9 +160,9 @@ namespace AmarTech.Test.ControllerTests
             var product = new Product { Id = productId, Title = "Test Product" };
 
             var categoryList = new List<SelectListItem>
-    {
-        new SelectListItem { Value = "1", Text = "Category" }
-    };
+            {
+                new SelectListItem { Value = "1", Text = "Category" }
+            };
 
             _mockProductService.Setup(s => s.GetProductById(productId)).Returns(product);
             _mockProductService.Setup(s => s.CategoryList()).Returns(categoryList);
@@ -170,7 +180,6 @@ namespace AmarTech.Test.ControllerTests
             Assert.Equal(product, viewResult.Model);
             Assert.Equal(categoryList, _controller.ViewBag.CategoryList);
         }
-
 
         [Fact]
         public void Edit_Get_InvalidModelState_ReturnsBadRequest()
@@ -199,9 +208,9 @@ namespace AmarTech.Test.ControllerTests
             };
 
             var categoryList = new List<SelectListItem>
-    {
-        new SelectListItem { Value = "1", Text = "Category" }
-    };
+            {
+                new SelectListItem { Value = "1", Text = "Category" }
+            };
 
             _mockProductService.Setup(s => s.GetProductById(productId)).Returns(product);
             _mockProductService.Setup(s => s.CategoryList()).Returns(categoryList);
@@ -215,7 +224,6 @@ namespace AmarTech.Test.ControllerTests
             Assert.Equal(product, viewResult.Model);
             Assert.Equal(categoryList, _controller.ViewBag.CategoryList);
         }
-
 
         [Fact]
         public void Edit_Post_InvalidModelState_ReturnsViewWithSameModel()
@@ -240,11 +248,16 @@ namespace AmarTech.Test.ControllerTests
             var product = new Product { Id = 1, Title = "Updated Product" };
             var mockFile = new Mock<IFormFile>();
             DateTime beforeUpdate = DateTime.Now;
+            var userName = "testUser";
+
+            // Setup GetCurrentUserName mock
+            SetupUserIdentity("testUserId", userName);
 
             // Act
             var result = _controller.Edit(product, mockFile.Object);
 
             // Assert
+            Assert.Equal(userName, product.UpdatedBy);
             _mockProductService.Verify(s => s.EditPathOfProduct(product, mockFile.Object, _testWebRootPath), Times.Once);
             _mockProductService.Verify(s => s.UpdateProduct(product), Times.Once);
             Assert.True(product.UpdatedDate >= beforeUpdate);
@@ -281,9 +294,9 @@ namespace AmarTech.Test.ControllerTests
             };
 
             var categoryList = new List<SelectListItem>
-             {
-              new SelectListItem { Value = "1", Text = "Category" }
-             };
+            {
+                new SelectListItem { Value = "1", Text = "Category" }
+            };
 
             _mockProductService.Setup(s => s.GetProductById(productId)).Returns(product);
             _mockProductService.Setup(s => s.CategoryList()).Returns(categoryList);
@@ -297,7 +310,6 @@ namespace AmarTech.Test.ControllerTests
             Assert.Equal(product, viewResult.Model);
             Assert.Equal(categoryList, _controller.ViewBag.CategoryList);
         }
-
 
         [Fact]
         public void DeletePost_InvalidModelState_ReturnsBadRequest()
@@ -337,6 +349,105 @@ namespace AmarTech.Test.ControllerTests
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);
             Assert.Equal("Product deleted successfully", _controller.TempData["success"]);
+        }
+
+        [Fact]
+        public void GetCurrentUserName_ReturnsUserNameFromService()
+        {
+            // Arrange
+            string userId = "test-user-id";
+            string expectedUserName = "TestUser";
+
+            // Setup the User.Identity.FindFirst claim
+            SetupUserIdentity(userId, expectedUserName);
+
+            // Setup the ApplicationUserService to return the expected username
+            _mockApplicationUserService.Setup(s => s.GetUserName(userId)).Returns(expectedUserName);
+
+            // Act
+            var method = typeof(ProductController).GetMethod("GetCurrentUserName",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            var result = method?.Invoke(_controller, null) as string;
+
+            // Assert
+            Assert.Equal(expectedUserName, result);
+            _mockApplicationUserService.Verify(s => s.GetUserName(userId), Times.Once);
+        }
+
+        [Fact]
+        public void GetCurrentUserName_NoUserIdentity_ReturnsEmptyOrNull()
+        {
+            // Arrange - Don't setup any claims identity
+
+            // Act
+            var method = typeof(ProductController).GetMethod("GetCurrentUserName",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            var result = method?.Invoke(_controller, null) as string;
+
+            // Assert
+            Assert.Null(result); // Or whatever the service returns when userId is null
+            _mockApplicationUserService.Verify(s => s.GetUserName(null), Times.Once);
+        }
+
+        [Fact]
+        public void Create_Post_WithFileUploaded_PassesFileToService()
+        {
+            // Arrange
+            var product = new Product { Title = "Product with File" };
+            var mockFile = new Mock<IFormFile>();
+            mockFile.Setup(f => f.FileName).Returns("test.jpg");
+            mockFile.Setup(f => f.Length).Returns(1024); // 1KB file
+
+            // Setup GetCurrentUserName mock
+            SetupUserIdentity("testUserId", "testUser");
+
+            // Act
+            var result = _controller.Create(product, mockFile.Object);
+
+            // Assert
+            _mockProductService.Verify(s => s.CreatePathOfProduct(product, mockFile.Object, _testWebRootPath), Times.Once);
+            _mockProductService.Verify(s => s.AddProduct(product), Times.Once);
+        }
+
+        [Fact]
+        public void Edit_Post_WithFileUploaded_PassesFileToService()
+        {
+            // Arrange
+            var product = new Product { Id = 1, Title = "Updated Product with File" };
+            var mockFile = new Mock<IFormFile>();
+            mockFile.Setup(f => f.FileName).Returns("updated.jpg");
+            mockFile.Setup(f => f.Length).Returns(2048); // 2KB file
+
+            // Setup GetCurrentUserName mock
+            SetupUserIdentity("testUserId", "testUser");
+
+            // Act
+            var result = _controller.Edit(product, mockFile.Object);
+
+            // Assert
+            _mockProductService.Verify(s => s.EditPathOfProduct(product, mockFile.Object, _testWebRootPath), Times.Once);
+        }
+
+        private void SetupUserIdentity(string userId, string userName)
+        {
+            // Create ClaimsIdentity
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim(ClaimTypes.Name, userName)
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+
+            // Setup controller context
+            var context = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+            };
+            _controller.ControllerContext = context;
+
+            // Setup ApplicationUserService
+            _mockApplicationUserService.Setup(s => s.GetUserName(userId)).Returns(userName);
         }
     }
 }

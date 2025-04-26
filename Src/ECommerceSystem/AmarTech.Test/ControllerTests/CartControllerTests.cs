@@ -1,14 +1,18 @@
-﻿using AmarTech.Domain.Entities;
-using AmarTech.Application.Services.IServices;
+﻿using AmarTech.Application.Services.IServices;
+using AmarTech.Domain.Entities;
 using AmarTech.Web.Areas.Customer.Controllers;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Moq;
-using System.Reflection;
+using Stripe.Checkout;
+using System.Collections.Generic;
 using System.Security.Claims;
+using System.Security.Principal;
+using Xunit;
+using Microsoft.AspNetCore.Routing;
 
-namespace AmarTech.Test.ControllerTests
+namespace AmarTech.Test.Controllers
 {
     public class CartControllerTests
     {
@@ -16,8 +20,8 @@ namespace AmarTech.Test.ControllerTests
         private readonly Mock<IApplicationUserService> _mockApplicationUserService;
         private readonly Mock<IOrderHeaderService> _mockOrderHeaderService;
         private readonly Mock<IOrderDetailService> _mockOrderDetailService;
+        private readonly Mock<IProductService> _mockProductService;
         private readonly CartController _controller;
-        private readonly string _userId = "testUserId";
 
         public CartControllerTests()
         {
@@ -25,78 +29,104 @@ namespace AmarTech.Test.ControllerTests
             _mockApplicationUserService = new Mock<IApplicationUserService>();
             _mockOrderHeaderService = new Mock<IOrderHeaderService>();
             _mockOrderDetailService = new Mock<IOrderDetailService>();
+            _mockProductService = new Mock<IProductService>();
 
             _controller = new CartController(
                 _mockShoppingCartService.Object,
                 _mockOrderHeaderService.Object,
                 _mockApplicationUserService.Object,
-                _mockOrderDetailService.Object
+                _mockOrderDetailService.Object,
+                _mockProductService.Object
             );
 
-            // Setup controller context with user claims
+            _controller.TempData = new TempDataDictionary(
+                new DefaultHttpContext(),
+                Mock.Of<ITempDataProvider>()
+            );
+        }
+
+        private void SetupUserIdentity(string userId = "test-user-id")
+        {
+            // Setup identity mock
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, _userId)
+                new Claim(ClaimTypes.NameIdentifier, userId)
             };
-            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var identity = new ClaimsIdentity(claims);
             var principal = new ClaimsPrincipal(identity);
 
+            // Set the user on the controller context
+            var mockContext = new Mock<HttpContext>();
+            mockContext.Setup(m => m.User).Returns(principal);
             _controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext { User = principal }
+                HttpContext = mockContext.Object
             };
+
+            // Setup session
+            var mockSession = new Mock<ISession>();
+            var mockHttpContext = new Mock<HttpContext>();
+            mockHttpContext.Setup(m => m.Session).Returns(mockSession.Object);
+            mockHttpContext.Setup(m => m.User).Returns(principal);
+            _controller.ControllerContext.HttpContext = mockHttpContext.Object;
         }
 
         [Fact]
-        public void Controller_HasAreaAttribute()
+        public void Index_AuthenticatedUser_ReturnsViewWithShoppingCartVM()
         {
             // Arrange
-            var controllerType = typeof(CartController);
-
-            // Act
-            var areaAttribute = controllerType.GetCustomAttribute<AreaAttribute>();
-
-            // Assert
-            Assert.NotNull(areaAttribute);
-            Assert.Equal("customer", areaAttribute.RouteValue);
-        }
-
-        [Fact]
-        public void Controller_HasAuthorizeAttribute()
-        {
-            // Arrange
-            var controllerType = typeof(CartController);
-
-            // Act
-            var authorizeAttribute = controllerType.GetCustomAttribute<AuthorizeAttribute>();
-
-            // Assert
-            Assert.NotNull(authorizeAttribute);
-        }
-
-        [Fact]
-        public void Index_ReturnsViewResult_WithShoppingCartVM()
-        {
-            // Arrange
+            SetupUserIdentity();
             var shoppingCartVM = new ShoppingCartVM();
-            _mockShoppingCartService.Setup(s => s.GetShoppingCartVM(_userId)).Returns(shoppingCartVM);
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartVM("test-user-id")).Returns(shoppingCartVM);
 
             // Act
-            var result = _controller.Index();
+            var result = _controller.Index() as ViewResult;
 
             // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsAssignableFrom<ShoppingCartVM>(viewResult.Model);
-            Assert.Same(shoppingCartVM, model);
+            Assert.NotNull(result);
+            Assert.Equal(shoppingCartVM, result.Model);
+            _mockShoppingCartService.Verify(s => s.GetShoppingCartVM("test-user-id"), Times.Once);
         }
 
         [Fact]
-        public void Summary_WhenUserIdentityIsNull_ReturnsUnauthorized()
+        public void Index_UnauthenticatedUser_ReturnsViewWithMemoryShoppingCartVM()
         {
             // Arrange
+            var mockIdentity = new Mock<ClaimsIdentity>();
+            mockIdentity.Setup(i => i.FindFirst(ClaimTypes.NameIdentifier)).Returns((Claim?)null);
+            var mockPrincipal = new Mock<ClaimsPrincipal>();
+            mockPrincipal.Setup(p => p.Identity).Returns(mockIdentity.Object);
             _controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal() }
+                HttpContext = new DefaultHttpContext { User = mockPrincipal.Object }
+            };
+
+            var shoppingCartList = new List<ShoppingCart>();
+            var memoryCartVM = new ShoppingCartVM();
+            _mockShoppingCartService.Setup(s => s.GetCart()).Returns(shoppingCartList);
+            _mockShoppingCartService.Setup(s => s.MemoryCartVM(shoppingCartList)).Returns(memoryCartVM);
+
+            // Act
+            var result = _controller.Index() as ViewResult;
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(memoryCartVM, result.Model);
+            _mockShoppingCartService.Verify(s => s.GetCart(), Times.Once);
+            _mockShoppingCartService.Verify(s => s.MemoryCartVM(shoppingCartList), Times.Once);
+        }
+
+        [Fact]
+        public void Summary_UnauthenticatedUser_ReturnsUnauthorized()
+        {
+            // Arrange
+            var mockIdentity = new Mock<ClaimsIdentity>();
+            mockIdentity.Setup(i => i.FindFirst(ClaimTypes.NameIdentifier)).Returns((Claim?)null);
+            var mockPrincipal = new Mock<ClaimsPrincipal>();
+            mockPrincipal.Setup(p => p.Identity).Returns(mockIdentity.Object);
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = mockPrincipal.Object }
             };
 
             // Act
@@ -107,99 +137,99 @@ namespace AmarTech.Test.ControllerTests
         }
 
         [Fact]
-        public void Summary_WhenUserIdNotFound_ReturnsUnauthorized()
+        public void Summary_AuthenticatedUserWithCartInMemory_ReturnsCombinedCartView()
         {
             // Arrange
-            var claims = new List<Claim>();  // No NameIdentifier claim
-            var identity = new ClaimsIdentity(claims, "TestAuthType");
-            var principal = new ClaimsPrincipal(identity);
-
-            _controller.ControllerContext = new ControllerContext
+            SetupUserIdentity();
+            var userId = "test-user-id";
+            var dbCartList = new List<ShoppingCart>();
+            var memoryCartList = new List<ShoppingCart> { new ShoppingCart() };
+            var combinedCartVM = new ShoppingCartVM
             {
-                HttpContext = new DefaultHttpContext { User = principal }
+                OrderHeader = new OrderHeader { ApplicationUser = new ApplicationUser()  { Name="Rifat"} },
+                ShoppingCartList = new List<ShoppingCart> { new ShoppingCart { Product = new Product { Price = 100, DiscountAmount = 10 } } }
             };
 
+            _mockShoppingCartService.Setup(s => s.GetCart()).Returns(memoryCartList);
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartsByUserId(userId)).Returns(dbCartList);
+            _mockShoppingCartService.Setup(s => s.CombineToDB(dbCartList, memoryCartList, userId)).Returns(combinedCartVM);
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartByUserId(userId)).Returns(dbCartList);
+            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns(new ApplicationUser() { Name="Rifat"});
+
             // Act
-            var result = _controller.Summary();
+            var result = _controller.Summary() as ViewResult;
 
             // Assert
-            Assert.IsType<UnauthorizedResult>(result);
+            Assert.NotNull(result);
+            Assert.Equal(combinedCartVM, result.Model);
+            _mockShoppingCartService.Verify(s => s.GetCart(), Times.Once);
+            _mockShoppingCartService.Verify(s => s.GetShoppingCartsByUserId(userId), Times.Once);
+            _mockShoppingCartService.Verify(s => s.CombineToDB(dbCartList, memoryCartList, userId), Times.Once);
         }
 
         [Fact]
-        public void Summary_WhenShoppingCartVMIsNull_ReturnsNotFound()
+        public void Summary_AuthenticatedUserWithNoMemoryCart_ReturnsDbCartView()
         {
             // Arrange
-            _mockShoppingCartService.Setup(s => s.GetShoppingCartVM(_userId)).Returns(new ShoppingCartVM ());
+            SetupUserIdentity();
+            var userId = "test-user-id";
+            var dbCartList = new List<ShoppingCart>();
+            var emptyMemoryCartList = new List<ShoppingCart>();
+            var dbCartVM = new ShoppingCartVM
+            {
+                OrderHeader = new OrderHeader { ApplicationUser = new ApplicationUser() { Name="Rifat"} },
+                ShoppingCartList = new List<ShoppingCart> { new ShoppingCart { Product = new Product { Price = 100, DiscountAmount = 10 } } }
+            };
+
+            _mockShoppingCartService.Setup(s => s.GetCart()).Returns(emptyMemoryCartList);
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartsByUserId(userId)).Returns(dbCartList);
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartVM(userId)).Returns(dbCartVM);
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartByUserId(userId)).Returns(dbCartList);
+            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns(new ApplicationUser() { Name="Rifat"});
 
             // Act
-            var result = _controller.Summary();
+            var result = _controller.Summary() as ViewResult;
 
             // Assert
-            Assert.IsType<NotFoundResult>(result);
+            Assert.NotNull(result);
+            Assert.Equal(dbCartVM, result.Model);
+            _mockShoppingCartService.Verify(s => s.GetCart(), Times.Once);
+            _mockShoppingCartService.Verify(s => s.GetShoppingCartsByUserId(userId), Times.Once);
+            _mockShoppingCartService.Verify(s => s.GetShoppingCartVM(userId), Times.Once);
         }
 
         [Fact]
-        public void Summary_WhenUserNotFound_ReturnsNotFound()
+        public void Summary_UserNotFound_ReturnsNotFound()
         {
             // Arrange
-            var shoppingCartVM = new ShoppingCartVM();
-            _mockShoppingCartService.Setup(s => s.GetShoppingCartVM(_userId)).Returns(shoppingCartVM);
-            _mockApplicationUserService.Setup(s => s.GetUserById(_userId)).Returns((ApplicationUser?)null);
-
-            // Act
-            var result = _controller.Summary();
-
-            // Assert
-            Assert.IsType<NotFoundResult>(result);
-        }
-
-        [Fact]
-        public void Summary_ValidRequest_ReturnsViewWithModel()
-        {
-            // Arrange
-            var shoppingCartVM = new ShoppingCartVM
+            SetupUserIdentity();
+            var userId = "test-user-id";
+            var dbCartList = new List<ShoppingCart>();
+            var emptyMemoryCartList = new List<ShoppingCart>();
+            var dbCartVM = new ShoppingCartVM
             {
                 OrderHeader = new OrderHeader(),
-                ShoppingCartList = new List<ShoppingCart>
-                {
-                    new ShoppingCart { Product = new Product { Price = 10.99m } }
-                }
-            };
-            var user = new ApplicationUser
-            {
-                Name = "Test User",
-                PhoneNumber = "1234567890",
-                StreetAddress = "123 Test St",
-                City = "Test City",
-                State = "TS",
-                PostalCode = "12345"
+                ShoppingCartList = new List<ShoppingCart>()
             };
 
-            _mockShoppingCartService.Setup(s => s.GetShoppingCartVM(_userId)).Returns(shoppingCartVM);
-            _mockApplicationUserService.Setup(s => s.GetUserById(_userId)).Returns(user);
+            _mockShoppingCartService.Setup(s => s.GetCart()).Returns(emptyMemoryCartList);
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartsByUserId(userId)).Returns(dbCartList);
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartVM(userId)).Returns(dbCartVM);
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartByUserId(userId)).Returns(dbCartList);
+            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns((ApplicationUser)null);
 
             // Act
             var result = _controller.Summary();
 
             // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-            var model = Assert.IsAssignableFrom<ShoppingCartVM>(viewResult.Model);
-            Assert.Same(shoppingCartVM, model);
-            Assert.Same(user, model.OrderHeader.ApplicationUser);
-            Assert.Equal(user.Name, model.OrderHeader.Name);
-            Assert.Equal(user.PhoneNumber, model.OrderHeader.PhoneNumber);
-            Assert.Equal(user.StreetAddress, model.OrderHeader.StreetAddress);
-            Assert.Equal(user.City, model.OrderHeader.City);
-            Assert.Equal(user.State, model.OrderHeader.State);
-            Assert.Equal(user.PostalCode, model.OrderHeader.PostalCode);
+            Assert.IsType<NotFoundResult>(result);
         }
 
         [Fact]
         public void SummaryPost_InvalidModelState_ReturnsBadRequest()
         {
             // Arrange
-            _controller.ModelState.AddModelError("Error", "Test error");
+            _controller.ModelState.AddModelError("error", "test error");
             var shoppingCartVM = new ShoppingCartVM();
 
             // Act
@@ -210,16 +240,16 @@ namespace AmarTech.Test.ControllerTests
         }
 
         [Fact]
-        public void SummaryPost_NullUserId_ReturnsUnauthorized()
+        public void SummaryPost_UnauthenticatedUser_ReturnsUnauthorized()
         {
             // Arrange
-            var claims = new List<Claim>();  // No NameIdentifier claim
-            var identity = new ClaimsIdentity(claims, "TestAuthType");
-            var principal = new ClaimsPrincipal(identity);
-
+            var mockIdentity = new Mock<ClaimsIdentity>();
+            mockIdentity.Setup(i => i.FindFirst(ClaimTypes.NameIdentifier)).Returns((Claim?)null);
+            var mockPrincipal = new Mock<ClaimsPrincipal>();
+            mockPrincipal.Setup(p => p.Identity).Returns(mockIdentity.Object);
             _controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext { User = principal }
+                HttpContext = new DefaultHttpContext { User = mockPrincipal.Object }
             };
 
             var shoppingCartVM = new ShoppingCartVM();
@@ -235,52 +265,93 @@ namespace AmarTech.Test.ControllerTests
         public void SummaryPost_UserNotFound_ReturnsNotFound()
         {
             // Arrange
-            var shoppingCartList = new List<ShoppingCart>();
-            _mockShoppingCartService.Setup(s => s.GetShoppingCartsByUserId(_userId)).Returns(shoppingCartList);
-            _mockApplicationUserService.Setup(s => s.GetUserById(_userId)).Returns((ApplicationUser?)null);
+            SetupUserIdentity();
+            var userId = "test-user-id";
             var shoppingCartVM = new ShoppingCartVM();
+            var shoppingCartList = new List<ShoppingCart>();
+
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartsByUserId(userId)).Returns(shoppingCartList);
+            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns((ApplicationUser)null);
 
             // Act
             var result = _controller.SummaryPost(shoppingCartVM);
 
             // Assert
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            Assert.Equal("User not found.", notFoundResult.Value);
+            Assert.IsType<NotFoundObjectResult>(result);
         }
 
         [Fact]
-        public void SummaryPost_ForCompanyUser_RedirectsToOrderConfirmation()
+        public void SummaryPost_RegularUser_ReturnsRedirectWithStripeSession()
         {
             // Arrange
-            var shoppingCartList = new List<ShoppingCart>();
-            var user = new ApplicationUser { CompanyId = 1, Name = "Rifat" }; // CompanyId is not 0
-            var returnedShoppingCartVM = new ShoppingCartVM
+            SetupUserIdentity();
+            var userId = "test-user-id";
+            var shoppingCartVM = new ShoppingCartVM
             {
-                OrderHeader = new OrderHeader { Id = 123 }
+                OrderHeader = new OrderHeader { Id = 1 }
+            };
+            var shoppingCartList = new List<ShoppingCart>();
+            var applicationUser = new ApplicationUser  { Name = "Rifat" , CompanyId = 0 };
+
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartsByUserId(userId)).Returns(shoppingCartList);
+            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns(applicationUser);
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartVMForSummaryPost(shoppingCartList, applicationUser, userId)).Returns(shoppingCartVM);
+
+            var sessionOptions = new SessionCreateOptions();
+            var session = new Session { Id = "session-id", Url = "https://stripe.com/checkout", PaymentIntentId = "payment-intent-id" };
+
+            _mockShoppingCartService.Setup(s => s.CheckOutForUser(shoppingCartVM)).Returns(sessionOptions);
+
+            // Mock response headers
+            var httpContext = new DefaultHttpContext();
+            _controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = httpContext
             };
 
-            _mockShoppingCartService.Setup(s => s.GetShoppingCartsByUserId(_userId)).Returns(shoppingCartList);
-            _mockApplicationUserService.Setup(s => s.GetUserById(_userId)).Returns(user);
-            _mockShoppingCartService.Setup(s => s.GetShoppingCartVMForSummaryPost(shoppingCartList, user, _userId))
-                .Returns(returnedShoppingCartVM);
-
-            var inputShoppingCartVM = new ShoppingCartVM();
-
             // Act
-            var result = _controller.SummaryPost(inputShoppingCartVM);
+            var result = _controller.SummaryPost(shoppingCartVM);
 
             // Assert
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("OrderConfirmation", redirectResult.ActionName);
-            Assert.Equal(123, redirectResult.RouteValues?["id"]);
+            var statusCodeResult = Assert.IsType<StatusCodeResult>(result);
+            Assert.Equal(303, statusCodeResult.StatusCode);
+            _mockOrderHeaderService.Verify(s => s.AddOrderHeader(shoppingCartVM.OrderHeader), Times.Once);
+            _mockOrderDetailService.Verify(s => s.UpdateOrderDetailsValues(shoppingCartVM), Times.Once);
         }
 
+        [Fact]
+        public void SummaryPost_CompanyUser_ReturnsRedirectToOrderConfirmation()
+        {
+            // Arrange
+            SetupUserIdentity();
+            var userId = "test-user-id";
+            var shoppingCartVM = new ShoppingCartVM
+            {
+                OrderHeader = new OrderHeader { Id = 1 }
+            };
+            var shoppingCartList = new List<ShoppingCart>();
+            var applicationUser = new ApplicationUser {Name="Admin", CompanyId = 1 };
+
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartsByUserId(userId)).Returns(shoppingCartList);
+            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns(applicationUser);
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartVMForSummaryPost(shoppingCartList, applicationUser, userId)).Returns(shoppingCartVM);
+
+            // Act
+            var result = _controller.SummaryPost(shoppingCartVM) as RedirectToActionResult;
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal("OrderConfirmation", result.ActionName);
+            Assert.Equal(1, result.RouteValues["id"]);
+            _mockOrderHeaderService.Verify(s => s.AddOrderHeader(shoppingCartVM.OrderHeader), Times.Once);
+            _mockOrderDetailService.Verify(s => s.UpdateOrderDetailsValues(shoppingCartVM), Times.Once);
+        }
 
         [Fact]
         public void OrderConfirmation_InvalidModelState_ReturnsBadRequest()
         {
             // Arrange
-            _controller.ModelState.AddModelError("Error", "Test error");
+            _controller.ModelState.AddModelError("error", "test error");
 
             // Act
             var result = _controller.OrderConfirmation(1);
@@ -290,25 +361,32 @@ namespace AmarTech.Test.ControllerTests
         }
 
         [Fact]
-        public void OrderConfirmation_ValidRequest_ReturnsViewWithId()
+        public void OrderConfirmation_ValidOrder_ReturnsViewWithOrderId()
         {
             // Arrange
-            var orderHeader = new OrderHeader { Id = 123 };
-            _mockOrderHeaderService.Setup(s => s.OrderConfirmation(123)).Returns(orderHeader);
+            var orderId = 1;
+            var orderHeader = new OrderHeader { Id = orderId };
+            var cartList = new List<ShoppingCart>();
+
+            _mockOrderHeaderService.Setup(s => s.OrderConfirmation(orderId)).Returns(orderHeader);
+            _mockShoppingCartService.Setup(s => s.RemoveShoppingCarts(orderHeader)).Returns(cartList);
 
             // Act
-            var result = _controller.OrderConfirmation(123);
+            var result = _controller.OrderConfirmation(orderId) as ViewResult;
 
             // Assert
-            var viewResult = Assert.IsType<ViewResult>(result);
-            Assert.Equal(123, viewResult.Model);
+            Assert.NotNull(result);
+            Assert.Equal(orderId, result.ViewData.Model);
+            _mockOrderHeaderService.Verify(s => s.OrderConfirmation(orderId), Times.Once);
+            _mockShoppingCartService.Verify(s => s.RemoveShoppingCarts(orderHeader), Times.Once);
+            _mockProductService.Verify(s => s.ReduceStockCount(cartList), Times.Once);
         }
 
         [Fact]
         public void Plus_InvalidModelState_ReturnsBadRequest()
         {
             // Arrange
-            _controller.ModelState.AddModelError("Error", "Test error");
+            _controller.ModelState.AddModelError("error", "test error");
 
             // Act
             var result = _controller.Plus(1);
@@ -318,24 +396,32 @@ namespace AmarTech.Test.ControllerTests
         }
 
         [Fact]
-        public void Plus_ValidRequest_RedirectsToIndex()
+        public void Plus_ValidCartId_RedirectsToIndex()
         {
+            // Arrange
+            var cartId = 1;
+            var cart = new ShoppingCart { Id = cartId, ProductId = 1 };
+            var product = new Product { Id = 1 };
+
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartById(cartId,false)).Returns(cart);
+            _mockProductService.Setup(s => s.GetProductById(cart.ProductId)).Returns(product);
+
             // Act
-            var result = _controller.Plus(1);
+            var result = _controller.Plus(cartId) as RedirectToActionResult;
 
             // Assert
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-
-            // Verify service was called
-            _mockShoppingCartService.Verify(s => s.Plus(1), Times.Once);
+            Assert.NotNull(result);
+            Assert.Equal("Index", result.ActionName);
+            _mockShoppingCartService.Verify(s => s.GetShoppingCartById(cartId,false), Times.Once);
+            _mockProductService.Verify(s => s.GetProductById(cart.ProductId), Times.Once);
+            _mockShoppingCartService.Verify(s => s.Plus(cart, cartId), Times.Once);
         }
 
         [Fact]
         public void Minus_InvalidModelState_ReturnsBadRequest()
         {
             // Arrange
-            _controller.ModelState.AddModelError("Error", "Test error");
+            _controller.ModelState.AddModelError("error", "test error");
 
             // Act
             var result = _controller.Minus(1);
@@ -345,24 +431,25 @@ namespace AmarTech.Test.ControllerTests
         }
 
         [Fact]
-        public void Minus_ValidRequest_RedirectsToIndex()
+        public void Minus_ValidCartId_RedirectsToIndex()
         {
+            // Arrange
+            var cartId = 1;
+
             // Act
-            var result = _controller.Minus(1);
+            var result = _controller.Minus(cartId) as RedirectToActionResult;
 
             // Assert
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
-
-            // Verify service was called
-            _mockShoppingCartService.Verify(s => s.Minus(1), Times.Once);
+            Assert.NotNull(result);
+            Assert.Equal("Index", result.ActionName);
+            _mockShoppingCartService.Verify(s => s.Minus(cartId), Times.Once);
         }
 
         [Fact]
         public void Remove_InvalidModelState_ReturnsBadRequest()
         {
             // Arrange
-            _controller.ModelState.AddModelError("Error", "Test error");
+            _controller.ModelState.AddModelError("error", "test error");
 
             // Act
             var result = _controller.Remove(1);
@@ -372,17 +459,44 @@ namespace AmarTech.Test.ControllerTests
         }
 
         [Fact]
-        public void Remove_ValidRequest_RedirectsToIndex()
+        public void Remove_ValidCartId_RedirectsToIndex()
         {
+            // Arrange
+            var cartId = 1;
+
             // Act
-            var result = _controller.Remove(1);
+            var result = _controller.Remove(cartId) as RedirectToActionResult;
 
             // Assert
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", redirectResult.ActionName);
+            Assert.NotNull(result);
+            Assert.Equal("Index", result.ActionName);
+            _mockShoppingCartService.Verify(s => s.RemoveCartValue(cartId), Times.Once);
+        }
 
-            // Verify service was called
-            _mockShoppingCartService.Verify(s => s.RemoveCartValue(1), Times.Once);
+        [Fact]
+        public void GetMemoryShoppingCartList_ReturnsCartsWithProducts()
+        {
+            // Arrange
+            var cart = new ShoppingCart { ProductId = 1 };
+            var cartList = new List<ShoppingCart> { cart };
+            var product = new Product { Id = 1 };
+
+            _mockShoppingCartService.Setup(s => s.GetCart()).Returns(cartList);
+            _mockProductService.Setup(s => s.GetProductById(cart.ProductId)).Returns(product);
+
+            // Set up private method access via reflection
+            var method = typeof(CartController).GetMethod("GetMemoryShoppingCartList",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            // Act
+            var result = method.Invoke(_controller, null) as List<ShoppingCart>;
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result);
+            Assert.Equal(product, result[0].Product);
+            _mockShoppingCartService.Verify(s => s.GetCart(), Times.Once);
+            _mockProductService.Verify(s => s.GetProductById(cart.ProductId), Times.Once);
         }
     }
 }

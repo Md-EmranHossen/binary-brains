@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmarTech.Domain", "AmarTech
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmarTech.Application", "AmarTech.Application\AmarTech.Application.csproj", "{F8DB651B-079C-4C30-9DD5-DB283444FE2A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmarTech.Test", "AmarTech.Test\AmarTech.Test.csproj", "{C65EDCA5-C0DA-4DC0-BB2F-FB976D14C5D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{F8DB651B-079C-4C30-9DD5-DB283444FE2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8DB651B-079C-4C30-9DD5-DB283444FE2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8DB651B-079C-4C30-9DD5-DB283444FE2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C65EDCA5-C0DA-4DC0-BB2F-FB976D14C5D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C65EDCA5-C0DA-4DC0-BB2F-FB976D14C5D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C65EDCA5-C0DA-4DC0-BB2F-FB976D14C5D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C65EDCA5-C0DA-4DC0-BB2F-FB976D14C5D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
