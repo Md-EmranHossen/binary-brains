@@ -38,17 +38,6 @@
 
                 <!-- Start Navbar Links -->
                 <ul class="navbar-nav me-auto">
-                    @{
-                        if (User.IsInRole(SD.Role_Admin))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-light" data-lte-toggle="sidebar" href="#" role="button">
-                                    <i class="bi bi-list"></i>
-                                </a>
-                            </li>
-                        }
-                    }
-
 
                     <li class="nav-item">
                         <a class="nav-link text-light hover-light" asp-area="Customer" asp-controller="Home" asp-action="Index">
@@ -118,9 +107,10 @@
         </nav>
         <!-- End Header -->
         <!-- Sidebar (Visible Only to Admins) -->
+        <!-- Sidebar (Visible Only to Admins) -->
         @if (User.IsInRole(SD.Role_Admin))
         {
-            <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+            <aside class="app-sidebar bg-dark shadow" data-bs-theme="dark">
                 <div class="sidebar-brand">
                     <a href="/" class="brand-link">
                         <img src="~/images/AmarTech.png" alt="AdminLTE Logo" class="brand-image opacity-75 shadow" />
@@ -143,7 +133,6 @@
                                 }
                             </li>
 
-
                             <!-- MANAGEMENT Section -->
                             <li class="nav-header">MANAGEMENT</li>
                             <li class="nav-item">
@@ -153,7 +142,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link " asp-area="Admin" asp-controller="Product" asp-action="Index">
+                                <a class="nav-link" asp-area="Admin" asp-controller="Product" asp-action="Index">
                                     <i class="nav-icon bi bi-box-seam"></i>
                                     <p>Product</p>
                                 </a>
@@ -164,14 +153,12 @@
                                     <p>Company</p>
                                 </a>
                             </li>
-
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="Admin" asp-controller="Order" asp-action="Index">
                                     <i class="nav-icon bi bi-list-check"></i>
                                     <p>Manage Order</p>
                                 </a>
                             </li>
-
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="Identity" asp-controller="Account" asp-action="Register">
                                     <i class="nav-icon bi bi-person-plus"></i>
@@ -204,28 +191,28 @@
                         <h5 class="text-uppercase mb-3">About Amar Tech</h5>
                         <p class="mb-3">Amar Tech is a leading provider of premium tech products and solutions. Our mission is to deliver exceptional quality and service to all our customers.</p>
                         <div class="d-flex">
-                            <a href="#" class="me-3 text-light"><i class="bi bi-facebook fs-5"></i></a>
-                            <a href="#" class="me-3 text-light"><i class="bi bi-twitter-x fs-5"></i></a>
-                            <a href="#" class="me-3 text-light"><i class="bi bi-instagram fs-5"></i></a>
-                            <a href="#" class="me-3 text-light"><i class="bi bi-linkedin fs-5"></i></a>
-                            <a href="#" class="text-light"><i class="bi bi-youtube fs-5"></i></a>
+                            <a  class="me-3 text-light"><i class="bi bi-facebook fs-5"></i></a>
+                            <a  class="me-3 text-light"><i class="bi bi-twitter-x fs-5"></i></a>
+                            <a  class="me-3 text-light"><i class="bi bi-instagram fs-5"></i></a>
+                            <a  class="me-3 text-light"><i class="bi bi-linkedin fs-5"></i></a>
+                            <a  class="text-light"><i class="bi bi-youtube fs-5"></i></a>
                         </div>
                     </div>
                     <div class="col-md-4 mb-3 mb-md-0">
                         <h5 class="text-uppercase mb-3">Quick Links</h5>
                         <ul class="list-unstyled">
                             <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="Index" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>Home</a></li>
-                            <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>Privacy Policy</a></li>
-                            <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="Terms" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>Terms of Service</a></li>
-                            <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="About" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>About Us</a></li>
-                            <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="Contact" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>Contact Us</a></li>
+                            <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="Index" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>Privacy Policy</a></li>
+                            <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="Index" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>Terms of Service</a></li>
+                            <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="Index" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>About Us</a></li>
+                            <li class="mb-2"><a asp-area="Customer" asp-controller="Home" asp-action="Index" class="text-decoration-none text-light"><i class="bi bi-chevron-right me-1"></i>Contact Us</a></li>
                         </ul>
                     </div>
                     <div class="col-md-4">
                         <h5 class="text-uppercase mb-3">Contact Information</h5>
                         <ul class="list-unstyled">
-                            <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>123 Tech Street, Silicon Valley, CA 94041</li>
-                            <li class="mb-2"><i class="bi bi-telephone me-2"></i>+1 (555) 123-4567</li>
+                            <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>Road No. 1, Block G, Mirpur 2, Dhaka 1216, Bangladesh</li>
+                            <li class="mb-2"><i class="bi bi-telephone me-2"></i>+880 1794307576</li>
                             <li class="mb-2"><i class="bi bi-envelope me-2"></i>info@amartech.com</li>
                             <li class="mb-2"><i class="bi bi-clock me-2"></i>Monday - Friday: 9:00 AM - 6:00 PM</li>
                         </ul>
