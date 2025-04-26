@@ -160,9 +160,9 @@ namespace AmarTech.Application.Services
             return new List<ShoppingCart>();
             
         }
-        public void Plus(int cartId)
+        public void Plus(ShoppingCart? cartFromDb,int cartId)
         {
-            var cartFromDb = GetShoppingCartById(cartId);
+            
             if (cartFromDb == null)
             {
                 PlusMemoryCach(cartId);
@@ -179,7 +179,7 @@ namespace AmarTech.Application.Services
 
             var cart = cartList?.FirstOrDefault(c => c.Id == cartId);
 
-            if (cart != null && cart.Count < cart.Product.StockQuantity)
+            if (cart != null && cart.Count <= cart.Product.StockQuantity)
             {
                 cart.Count++;
             }
@@ -193,6 +193,7 @@ namespace AmarTech.Application.Services
             {
                 return;
             }
+           
             UpdateShoppingCart(cartFromDb);
             _unitOfWork.Commit();
         }

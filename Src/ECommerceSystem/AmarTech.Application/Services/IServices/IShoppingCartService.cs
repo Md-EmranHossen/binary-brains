@@ -25,7 +25,7 @@ namespace AmarTech.Application.Services.IServices
 
         List<ShoppingCart> RemoveShoppingCarts(OrderHeader? orderHeader);
 
-        void Plus(int cartId);
+        void Plus(ShoppingCart? cartFromDb,int cartId);
 
         void Minus(int cartId);
 

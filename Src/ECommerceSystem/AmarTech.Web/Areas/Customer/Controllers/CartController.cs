@@ -186,7 +186,12 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             {
                 return BadRequest(ModelState);
             }
-            _shoppingCartService.Plus(cartId);
+            var cartFromDb = _shoppingCartService.GetShoppingCartById(cartId);
+            if (cartFromDb != null)
+            {
+                cartFromDb.Product = _productService.GetProductById(cartFromDb.ProductId)??new Product();
+            }
+            _shoppingCartService.Plus(cartFromDb, cartId);
 
             return RedirectToAction(nameof(Index));
 
@@ -208,6 +213,7 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             {
                 return BadRequest(ModelState);
             }
+            
             _shoppingCartService.RemoveCartValue(cartId);
 
 
