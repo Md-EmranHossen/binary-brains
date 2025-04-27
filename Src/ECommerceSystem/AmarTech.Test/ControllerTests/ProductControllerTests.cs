@@ -377,15 +377,19 @@ namespace AmarTech.Test.ControllerTests
         [Fact]
         public void GetCurrentUserName_NoUserIdentity_ReturnsEmptyOrNull()
         {
-            // Arrange - Don't setup any claims identity
+            // Arrange
+            // Set up controller with no user identity
+            var httpContext = new DefaultHttpContext(); // No user identity by default
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            };
 
             // Act
-            var method = typeof(ProductController).GetMethod("GetCurrentUserName",
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-            var result = method?.Invoke(_controller, null) as string;
+            var result = _controller.GetCurrentUserName();
 
             // Assert
-            Assert.Null(result); // Or whatever the service returns when userId is null
+            Assert.Null(result); // Expect null when no user identity exists
             _mockApplicationUserService.Verify(s => s.GetUserName(null), Times.Once);
         }
 
