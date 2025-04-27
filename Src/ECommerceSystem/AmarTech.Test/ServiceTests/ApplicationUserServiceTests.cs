@@ -63,7 +63,24 @@ namespace AmarTech.Test.ServiceTests
 
             // Assert
             Assert.Equal(expectedUsers, result);
-            _mockApplicationUserRepository.Verify(repo => repo.GetAll(null,"Company"), Times.Once);
+            _mockApplicationUserRepository.Verify(repo => repo.GetAll(null, "Company"), Times.Once);
+        }
+
+        [Fact]
+        public void GetAllUsersCount_ShouldReturnTotalUserCount()
+        {
+            // Arrange
+            int expectedCount = 5;
+
+            _mockApplicationUserRepository.Setup(repo => repo.GetAllUsersCount())
+                .Returns(expectedCount);
+
+            // Act
+            var result = _applicationUserService.GetAllUsersCount();
+
+            // Assert
+            Assert.Equal(expectedCount, result);
+            _mockApplicationUserRepository.Verify(repo => repo.GetAllUsersCount(), Times.Once);
         }
 
         [Fact]
@@ -130,7 +147,7 @@ namespace AmarTech.Test.ServiceTests
                 Company = new Company { Id = 1, Name = "Company1" }
             };
 
-            _mockApplicationUserRepository.Setup(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(),includeProperty,false))
+            _mockApplicationUserRepository.Setup(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), includeProperty, false))
                 .Returns(expectedUser);
 
             // Act
@@ -138,7 +155,7 @@ namespace AmarTech.Test.ServiceTests
 
             // Assert
             Assert.Equal(expectedUser, result);
-            _mockApplicationUserRepository.Verify(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(),includeProperty,false), Times.Once);
+            _mockApplicationUserRepository.Verify(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), includeProperty, false), Times.Once);
         }
 
         [Fact]
@@ -147,7 +164,7 @@ namespace AmarTech.Test.ServiceTests
             // Arrange
             string userId = "nonexistent";
 
-            _mockApplicationUserRepository.Setup(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), null,false))
+            _mockApplicationUserRepository.Setup(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), null, false))
                 .Returns((ApplicationUser?)null);
 
             // Act
@@ -155,7 +172,7 @@ namespace AmarTech.Test.ServiceTests
 
             // Assert
             Assert.Null(result);
-            _mockApplicationUserRepository.Verify(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(),null,false), Times.Once);
+            _mockApplicationUserRepository.Verify(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), null, false), Times.Once);
         }
 
         [Fact]
@@ -165,7 +182,7 @@ namespace AmarTech.Test.ServiceTests
             string userId = "nonexistent";
             string includeProperty = "Company";
 
-            _mockApplicationUserRepository.Setup(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(),includeProperty,false))
+            _mockApplicationUserRepository.Setup(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), includeProperty, false))
                 .Returns((ApplicationUser?)null);
 
             // Act
@@ -173,7 +190,74 @@ namespace AmarTech.Test.ServiceTests
 
             // Assert
             Assert.Null(result);
-            _mockApplicationUserRepository.Verify(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(),includeProperty,false), Times.Once);
+            _mockApplicationUserRepository.Verify(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), includeProperty, false), Times.Once);
+        }
+
+        [Fact]
+        public void GetUserName_ShouldReturnUserNameWhenUserExists()
+        {
+            // Arrange
+            string userId = "1";
+            var expectedUser = new ApplicationUser { Id = userId, Name = "User1" };
+
+            _mockApplicationUserRepository.Setup(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), null, false))
+                .Returns(expectedUser);
+
+            // Act
+            var result = _applicationUserService.GetUserName(userId);
+
+            // Assert
+            Assert.Equal("User1", result);
+            _mockApplicationUserRepository.Verify(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), null, false), Times.Once);
+        }
+
+        [Fact]
+        public void GetUserName_ShouldReturnEmptyStringWhenUserDoesNotExist()
+        {
+            // Arrange
+            string userId = "nonexistent";
+
+            _mockApplicationUserRepository.Setup(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), null, false))
+                .Returns((ApplicationUser?)null);
+
+            // Act
+            var result = _applicationUserService.GetUserName(userId);
+
+            // Assert
+            Assert.Equal("", result);
+            _mockApplicationUserRepository.Verify(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), null, false), Times.Once);
+        }
+
+        [Fact]
+        public void GetUserName_ShouldReturnEmptyStringWhenUserNameIsNull()
+        {
+            // Arrange
+            string userId = "1";
+            var expectedUser = new ApplicationUser { Id = userId, Name = null };
+
+            _mockApplicationUserRepository.Setup(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), null, false))
+                .Returns(expectedUser);
+
+            // Act
+            var result = _applicationUserService.GetUserName(userId);
+
+            // Assert
+            Assert.Equal("", result);
+            _mockApplicationUserRepository.Verify(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), null, false), Times.Once);
+        }
+
+        [Fact]
+        public void GetUserName_ShouldReturnEmptyStringWhenUserIdIsNull()
+        {
+            // Arrange
+            string? userId = null;
+
+            // Act
+            var result = _applicationUserService.GetUserName(userId);
+
+            // Assert
+            Assert.Equal("", result);
+            _mockApplicationUserRepository.Verify(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), null, false), Times.Once);
         }
     }
 }
