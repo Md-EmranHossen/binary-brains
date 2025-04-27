@@ -12,7 +12,7 @@ using System.Security.Principal;
 using Xunit;
 using Microsoft.AspNetCore.Routing;
 
-namespace AmarTech.Test.Controllers
+namespace AmarTech.Test.ControllerTests
 {
     public class CartControllerTests
     {

@@ -166,7 +166,7 @@ namespace AmarTech.Test.ServiceTests
         public void DeleteProduct_WithNonExistentId_ShouldNotDeleteProduct()
         {
             // Arrange
-            _mockProductRepository.Setup(r => r.Get(It.IsAny<Expression<Func<Product, bool>>>(), It.IsAny<string>(),false))
+            _mockProductRepository.Setup(r => r.Get(It.IsAny<Expression<Func<Product, bool>>>(), It.IsAny<string>(), false))
                 .Returns((Product?)null);
 
             // Act
@@ -250,7 +250,6 @@ namespace AmarTech.Test.ServiceTests
             }
         }
 
-
         [Fact]
         public void EditPathOfProduct_WithNullProduct_ShouldNotUpdateImageUrl()
         {
@@ -278,6 +277,38 @@ namespace AmarTech.Test.ServiceTests
 
             // Assert
             Assert.Equal(oldImageUrl, product.ImageUrl);
+        }
+
+        [Fact]
+        public void EditPathOfProduct_WithEmptyWwwRootPath_ShouldNotUpdateImageUrl()
+        {
+            // Arrange
+            var product = new Product { Id = 1, Title = "Product 1", ImageUrl = "/images/product/oldimage.jpg" };
+            var mockFile = new Mock<IFormFile>();
+            var oldImageUrl = product.ImageUrl;
+
+            // Act
+            _productService.EditPathOfProduct(product, mockFile.Object, "");
+
+            // Assert
+            Assert.Equal(oldImageUrl, product.ImageUrl);
+            mockFile.Verify(f => f.CopyTo(It.IsAny<Stream>()), Times.Never);
+        }
+
+        [Fact]
+        public void EditPathOfProduct_WithNullWwwRootPath_ShouldNotUpdateImageUrl()
+        {
+            // Arrange
+            var product = new Product { Id = 1, Title = "Product 1", ImageUrl = "/images/product/oldimage.jpg" };
+            var mockFile = new Mock<IFormFile>();
+            var oldImageUrl = product.ImageUrl;
+
+            // Act
+            _productService.EditPathOfProduct(product, mockFile.Object, null!);
+
+            // Assert
+            Assert.Equal(oldImageUrl, product.ImageUrl);
+            mockFile.Verify(f => f.CopyTo(It.IsAny<Stream>()), Times.Never);
         }
 
         [Fact]
@@ -309,7 +340,7 @@ namespace AmarTech.Test.ServiceTests
 
                 // Use regex to check if the URL contains a valid GUID pattern
                 var guidPattern = @"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
-                var match = Regex.Match(product?.ImageUrl??"", guidPattern);
+                var match = Regex.Match(product?.ImageUrl ?? "", guidPattern);
                 Assert.True(match.Success, "The ImageUrl does not contain a valid GUID.");
             }
             finally
@@ -321,11 +352,6 @@ namespace AmarTech.Test.ServiceTests
                 }
             }
         }
-
-
-
-
-
 
         [Fact]
         public void CreatePathOfProduct_WithNullProduct_ShouldNotSetImageUrl()
@@ -342,6 +368,53 @@ namespace AmarTech.Test.ServiceTests
         }
 
         [Fact]
+        public void CreatePathOfProduct_WithNullFile_ShouldNotSetImageUrl()
+        {
+            // Arrange
+            var product = new Product { Id = 1, Title = "Product 1" };
+            var originalImageUrl = product.ImageUrl;
+            var wwwRootPath = "C:\\fakepath";
+
+            // Act
+            _productService.CreatePathOfProduct(product, null, wwwRootPath);
+
+            // Assert
+            Assert.Equal(originalImageUrl, product.ImageUrl);
+        }
+
+        [Fact]
+        public void CreatePathOfProduct_WithEmptyWwwRootPath_ShouldNotSetImageUrl()
+        {
+            // Arrange
+            var product = new Product { Id = 1, Title = "Product 1" };
+            var mockFile = new Mock<IFormFile>();
+            var originalImageUrl = product.ImageUrl;
+
+            // Act
+            _productService.CreatePathOfProduct(product, mockFile.Object, "");
+
+            // Assert
+            Assert.Equal(originalImageUrl, product.ImageUrl);
+            mockFile.Verify(f => f.CopyTo(It.IsAny<Stream>()), Times.Never);
+        }
+
+        [Fact]
+        public void CreatePathOfProduct_WithNullWwwRootPath_ShouldNotSetImageUrl()
+        {
+            // Arrange
+            var product = new Product { Id = 1, Title = "Product 1" };
+            var mockFile = new Mock<IFormFile>();
+            var originalImageUrl = product.ImageUrl;
+
+            // Act
+            _productService.CreatePathOfProduct(product, mockFile.Object, null!);
+
+            // Assert
+            Assert.Equal(originalImageUrl, product.ImageUrl);
+            mockFile.Verify(f => f.CopyTo(It.IsAny<Stream>()), Times.Never);
+        }
+
+        [Fact]
         public void GetProductByIdwithCategory_ShouldReturnProductWithCategory()
         {
             // Arrange
@@ -349,12 +422,12 @@ namespace AmarTech.Test.ServiceTests
             {
                 Id = 1,
                 Title = "Product 1",
-                Category = new Category { Id = 1, Name = "Category 1" ,CreatedBy="admin"}
+                Category = new Category { Id = 1, Name = "Category 1", CreatedBy = "admin" }
             };
 
             _mockProductRepository.Setup(r => r.Get(
                 It.IsAny<Expression<Func<Product, bool>>>(),
-                It.Is<string>(s => s == "Category"),false))
+                It.Is<string>(s => s == "Category"), false))
                 .Returns(expectedProduct);
 
             // Act
@@ -367,6 +440,154 @@ namespace AmarTech.Test.ServiceTests
             _mockProductRepository.Verify(r => r.Get(
                 It.IsAny<Expression<Func<Product, bool>>>(),
                 It.Is<string>(s => s == "Category"), false), Times.Once);
+        }
+
+        [Fact]
+        public void SkipAndTake_ShouldReturnPagedProducts()
+        {
+            // Arrange
+            int page = 2;
+            string searchQuery = "test";
+            var expectedProducts = new List<Product>
+            {
+                new Product { Id = 13, Title = "Test Product 13", Category = new Category { Id = 1, Name = "Category 1" } },
+                new Product { Id = 14, Title = "Test Product 14", Category = new Category { Id = 2, Name = "Category 2" } }
+            };
+
+            _mockProductRepository.Setup(r => r.SkipAndTake(
+                It.Is<int>(i => i == 12),
+                It.Is<int>(i => i == 2),
+                It.Is<string>(s => s == "test"),
+                It.Is<string>(s => s == "Category")))
+                .Returns(expectedProducts);
+
+            // Act
+            var result = _productService.SkipAndTake(page, searchQuery);
+
+            // Assert
+            Assert.Equal(expectedProducts, result);
+            _mockProductRepository.Verify(r => r.SkipAndTake(12, 2, "test", "Category"), Times.Once);
+        }
+
+        [Fact]
+        public void SkipAndTake_WithDefaultPage_ShouldUsePageOne()
+        {
+            // Arrange
+            int? page = null;
+            var expectedProducts = new List<Product>
+            {
+                new Product { Id = 1, Title = "Product 1", Category = new Category { Id = 1, Name = "Category 1" } },
+                new Product { Id = 2, Title = "Product 2", Category = new Category { Id = 2, Name = "Category 2" } }
+            };
+
+            _mockProductRepository.Setup(r => r.SkipAndTake(
+                It.Is<int>(i => i == 12),
+                It.Is<int>(i => i == 1),
+                It.IsAny<string>(),
+                It.Is<string>(s => s == "Category")))
+                .Returns(expectedProducts);
+
+            // Act
+            var result = _productService.SkipAndTake(page);
+
+            // Assert
+            Assert.Equal(expectedProducts, result);
+            _mockProductRepository.Verify(r => r.SkipAndTake(12, 1, null, "Category"), Times.Once);
+        }
+
+        [Fact]
+        public void CalculateTotalPage_ShouldReturnCorrectPageCount()
+        {
+            // Arrange
+            int totalProductCount = 25;
+            int expectedPageCount = 3; // 25/12 = 2.08, ceil to 3
+
+            // Act
+            var result = _productService.CalculateTotalPage(totalProductCount);
+
+            // Assert
+            Assert.Equal(expectedPageCount, result);
+        }
+
+        [Fact]
+        public void CalculateTotalPage_WithExactMultiple_ShouldReturnCorrectPageCount()
+        {
+            // Arrange
+            int totalProductCount = 24;
+            int expectedPageCount = 2; // 24/12 = 2.0
+
+            // Act
+            var result = _productService.CalculateTotalPage(totalProductCount);
+
+            // Assert
+            Assert.Equal(expectedPageCount, result);
+        }
+
+        [Fact]
+        public void CalculateTotalPage_WithZeroProducts_ShouldReturnZeroPages()
+        {
+            // Arrange
+            int totalProductCount = 0;
+            int expectedPageCount = 0; // 0/12 = 0
+
+            // Act
+            var result = _productService.CalculateTotalPage(totalProductCount);
+
+            // Assert
+            Assert.Equal(expectedPageCount, result);
+        }
+
+        [Fact]
+        public void ReduceStockCount_ShouldCallRepositoryAndCommit()
+        {
+            // Arrange
+            var cartList = new List<ShoppingCart>
+            {
+                new ShoppingCart { ProductId = 1, Count = 2 },
+                new ShoppingCart { ProductId = 2, Count = 3 }
+            };
+
+            // Act
+            _productService.ReduceStockCount(cartList);
+
+            // Assert
+            _mockProductRepository.Verify(r => r.ReduceStockCount(cartList), Times.Once);
+            _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
+        }
+
+        [Fact]
+        public void GetAllProductsCount_ShouldReturnTotalCount()
+        {
+            // Arrange
+            string searchQuery = "test";
+            int expectedCount = 25;
+
+            _mockProductRepository.Setup(r => r.GetAllProductsCount(searchQuery))
+                .Returns(expectedCount);
+
+            // Act
+            var result = _productService.GetAllProductsCount(searchQuery);
+
+            // Assert
+            Assert.Equal(expectedCount, result);
+            _mockProductRepository.Verify(r => r.GetAllProductsCount(searchQuery), Times.Once);
+        }
+
+        [Fact]
+        public void GetAllProductsCount_WithNoSearchQuery_ShouldReturnTotalCount()
+        {
+            // Arrange
+            int expectedCount = 50;
+
+            _mockProductRepository.Setup(r => r.GetAllProductsCount(null))
+                .Returns(expectedCount);
+
+            // Act
+            var result = _productService.GetAllProductsCount();
+
+            // Assert
+            Assert.Equal(expectedCount, result);
+            _mockProductRepository.Verify(r => r.GetAllProductsCount(null), Times.Once);
         }
     }
 }

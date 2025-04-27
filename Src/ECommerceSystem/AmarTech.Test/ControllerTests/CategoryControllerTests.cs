@@ -12,7 +12,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using Xunit;
 
-namespace AmarTech.Test.Controllers
+namespace AmarTech.Test.ControllerTests
 {
     public class CategoryControllerTests
     {

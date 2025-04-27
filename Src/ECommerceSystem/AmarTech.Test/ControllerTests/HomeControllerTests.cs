@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace AmarTech.Test.Controllers
+namespace AmarTech.Test.ControllerTests
 {
     public class HomeControllerTests
     {

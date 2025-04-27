@@ -143,6 +143,42 @@ namespace AmarTech.Test.RepositoryTests
         }
 
         [Fact]
+        public void GetUserRole_ShouldReturnEmptyString_WhenRoleIdDoesNotExist()
+        {
+            // Arrange
+            // Add a user role with a non-existent role ID
+            var userRole = new IdentityUserRole<string> { UserId = "user3", RoleId = "nonExistentRoleId" };
+            _context.UserRoles.Add(userRole);
+            _context.SaveChanges();
+
+            // Act
+            var roleName = _repository.GetUserRole("user3");
+
+            // Assert
+            roleName.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void GetUserRole_ShouldReturnEmptyString_WhenRoleNameIsNull()
+        {
+            // Arrange
+            // Add a role with null name
+            var role = new IdentityRole { Id = "role3", Name = null, NormalizedName = "NULL" };
+            _context.Roles.Add(role);
+
+            // Add a user role with the null-named role
+            var userRole = new IdentityUserRole<string> { UserId = "user3", RoleId = "role3" };
+            _context.UserRoles.Add(userRole);
+            _context.SaveChanges();
+
+            // Act
+            var roleName = _repository.GetUserRole("user3");
+
+            // Assert
+            roleName.Should().BeEmpty();
+        }
+
+        [Fact]
         public void Update_ShouldUpdateUser()
         {
             // Arrange
@@ -169,6 +205,53 @@ namespace AmarTech.Test.RepositoryTests
             roles.Should().HaveCount(2);
             roles.Should().Contain(r => r.Text == "Admin" && r.Value == "Admin");
             roles.Should().Contain(r => r.Text == "Customer" && r.Value == "Customer");
+        }
+
+        [Fact]
+        public void GetAllUsersCount_ShouldReturnCorrectCount()
+        {
+            // Act
+            var count = _repository.GetAllUsersCount();
+
+            // Assert
+            count.Should().Be(3);
+        }
+
+        [Fact]
+        public void GetAllUsersCount_ShouldReturnUpdatedCount_AfterAddingUser()
+        {
+            // Arrange
+            var newUser = new ApplicationUser
+            {
+                Id = "user4",
+                UserName = "newuser@example.com",
+                NormalizedUserName = "NEWUSER@EXAMPLE.COM",
+                Email = "newuser@example.com",
+                Name = "New User"
+            };
+            _context.ApplicationUsers.Add(newUser);
+            _context.SaveChanges();
+
+            // Act
+            var count = _repository.GetAllUsersCount();
+
+            // Assert
+            count.Should().Be(4);
+        }
+
+        [Fact]
+        public void GetAllUsersCount_ShouldReturnUpdatedCount_AfterRemovingUser()
+        {
+            // Arrange
+            var user = _context.ApplicationUsers.Find("user3");
+            _context.ApplicationUsers.Remove(user!);
+            _context.SaveChanges();
+
+            // Act
+            var count = _repository.GetAllUsersCount();
+
+            // Assert
+            count.Should().Be(2);
         }
 
         [Fact]
