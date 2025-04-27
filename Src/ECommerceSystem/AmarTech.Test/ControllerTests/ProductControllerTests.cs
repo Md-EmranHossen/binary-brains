@@ -59,6 +59,22 @@ namespace AmarTech.Test.ControllerTests
         }
 
         [Fact]
+        public void Index_EmptyProductList_ReturnsViewWithEmptyList()
+        {
+            // Arrange
+            var emptyProductList = new List<Product>();
+            _mockProductService.Setup(s => s.GetAllProducts()).Returns(emptyProductList);
+
+            // Act
+            var result = _controller.Index();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var model = Assert.IsAssignableFrom<IEnumerable<Product>>(viewResult.Model);
+            Assert.Empty(model);
+        }
+
+        [Fact]
         public void Create_Get_ReturnsViewWithCategoryList()
         {
             // Arrange
@@ -76,6 +92,21 @@ namespace AmarTech.Test.ControllerTests
             // Assert
             var viewResult = Assert.IsType<ViewResult>(result);
             Assert.Equal(expectedCategoryList, _controller.ViewBag.CategoryList);
+        }
+
+        [Fact]
+        public void Create_Get_EmptyCategoryList_ReturnsViewWithEmptyList()
+        {
+            // Arrange
+            var emptyCategoryList = new List<SelectListItem>();
+            _mockProductService.Setup(s => s.CategoryList()).Returns(emptyCategoryList);
+
+            // Act
+            var result = _controller.Create();
+
+            // Assert
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Empty(_controller.ViewBag.CategoryList);
         }
 
         [Fact]
@@ -116,6 +147,29 @@ namespace AmarTech.Test.ControllerTests
             var redirectResult = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("Index", redirectResult.ActionName);
             Assert.Equal("Product created successfully", _controller.TempData["success"]);
+        }
+
+        [Fact]
+        public void Create_Post_WithoutFile_HandlesNullFile()
+        {
+            // Arrange
+            var product = new Product { Title = "Product without file" };
+            IFormFile? file = null;
+            var userName = "testUser";
+
+            // Setup GetCurrentUserName mock
+            SetupUserIdentity("testUserId", userName);
+
+            // Act
+            var result = _controller.Create(product, file);
+
+            // Assert
+            Assert.Equal(userName, product.CreatedBy);
+            _mockProductService.Verify(s => s.CreatePathOfProduct(product, null, _testWebRootPath), Times.Once);
+            _mockProductService.Verify(s => s.AddProduct(product), Times.Once);
+
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
         }
 
         [Fact]
@@ -268,6 +322,30 @@ namespace AmarTech.Test.ControllerTests
         }
 
         [Fact]
+        public void Edit_Post_WithoutFile_HandlesNullFile()
+        {
+            // Arrange
+            var product = new Product { Id = 1, Title = "Updated Product Without File" };
+            IFormFile? file = null;
+            var userName = "testUser";
+
+            // Setup GetCurrentUserName mock
+            SetupUserIdentity("testUserId", userName);
+
+            // Act
+            var result = _controller.Edit(product, file);
+
+            // Assert
+            Assert.Equal(userName, product.UpdatedBy);
+            _mockProductService.Verify(s => s.EditPathOfProduct(product, null, _testWebRootPath), Times.Once);
+            _mockProductService.Verify(s => s.UpdateProduct(product), Times.Once);
+            Assert.True(product.UpdatedDate <= DateTime.Now);
+
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
+        }
+
+        [Fact]
         public void Delete_Get_InvalidModelState_ReturnsBadRequest()
         {
             // Arrange
@@ -309,6 +387,17 @@ namespace AmarTech.Test.ControllerTests
             Assert.Equal("Delete", viewResult.ViewName);
             Assert.Equal(product, viewResult.Model);
             Assert.Equal(categoryList, _controller.ViewBag.CategoryList);
+        }
+
+        [Fact]
+        public void Delete_Get_NullId_ReturnsNotFound()
+        {
+            // Act
+            var result = _controller.Delete(null);
+
+            // Assert
+            // Should cause LoadProductViewWithCategories to return NotFound
+            Assert.IsType<NotFoundResult>(result);
         }
 
         [Fact]
@@ -365,9 +454,7 @@ namespace AmarTech.Test.ControllerTests
             _mockApplicationUserService.Setup(s => s.GetUserName(userId)).Returns(expectedUserName);
 
             // Act
-            var method = typeof(ProductController).GetMethod("GetCurrentUserName",
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-            var result = method?.Invoke(_controller, null) as string;
+            var result = _controller.GetCurrentUserName();
 
             // Assert
             Assert.Equal(expectedUserName, result);
@@ -390,6 +477,34 @@ namespace AmarTech.Test.ControllerTests
 
             // Assert
             Assert.Null(result); // Expect null when no user identity exists
+            _mockApplicationUserService.Verify(s => s.GetUserName(null), Times.Once);
+        }
+
+        [Fact]
+        public void GetCurrentUserName_WithClaimsIdentityButNoNameIdentifierClaim_ReturnsNull()
+        {
+            // Arrange
+            // Create a claims identity without the name identifier claim
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, "TestUser")
+                // No NameIdentifier claim
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+
+            // Setup controller context
+            var context = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = claimsPrincipal }
+            };
+            _controller.ControllerContext = context;
+
+            // Act
+            var result = _controller.GetCurrentUserName();
+
+            // Assert
+            Assert.Null(result);
             _mockApplicationUserService.Verify(s => s.GetUserName(null), Times.Once);
         }
 

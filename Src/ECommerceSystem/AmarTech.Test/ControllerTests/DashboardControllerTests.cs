@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
 
-namespace AmarTech.Test.Controllers
+namespace AmarTech.Test.ControllerTests
 {
     public class DashboardControllerTests
     {

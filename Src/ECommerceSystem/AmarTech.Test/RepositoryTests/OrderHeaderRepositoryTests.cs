@@ -83,6 +83,16 @@ namespace AmarTech.Test.RepositoryTests
         }
 
         [Fact]
+        public void GetAllOrderHeadersCount_ShouldReturnCorrectCount()
+        {
+            // Act
+            var count = _repository.GetAllOrderHeadersCount();
+
+            // Assert
+            count.Should().Be(2);
+        }
+
+        [Fact]
         public void Update_ShouldUpdateOrderHeader()
         {
             // Arrange
