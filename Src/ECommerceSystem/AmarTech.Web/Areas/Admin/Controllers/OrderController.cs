@@ -156,21 +156,43 @@ namespace AmarTech.Web.Areas.Admin.Controllers
 
         private IEnumerable<OrderHeader>? GetOrderHeaders()
         {
-            if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+            if (IsUserInAdminOrEmployeeRole())
             {
                 return _orderHeaderService.GetAllOrderHeaders(ApplicationUser);
             }
 
-            if (User.Identity is ClaimsIdentity identity && identity.FindFirst(ClaimTypes.NameIdentifier) is Claim userIdClaim)
+            var userId = GetUserId();
+            if (userId != null)
             {
-                return _orderHeaderService.GetAllOrderHeadersById(userIdClaim.Value, ApplicationUser);
+                return _orderHeaderService.GetAllOrderHeadersById(userId, ApplicationUser);
             }
 
             return null;
         }
 
+        private bool IsUserInAdminOrEmployeeRole()
+        {
+            return User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee);
+        }
+
+        private string? GetUserId()
+        {
+            if (User.Identity is not ClaimsIdentity identity)
+            {
+                return null;
+            }
+
+            var userIdClaim = identity.FindFirst(ClaimTypes.NameIdentifier);
+            return userIdClaim?.Value;
+        }
+
         private IEnumerable<OrderHeader> FilterOrdersByStatus(IEnumerable<OrderHeader> orderData, string? status)
         {
+            if (status == null)
+            {
+                return orderData;
+            }
+
             return status switch
             {
                 "pending" => orderData.Where(u => u.PaymentStatus == SD.PaymentStatusPending),
@@ -204,17 +226,30 @@ namespace AmarTech.Web.Areas.Admin.Controllers
                 return null;
             }
 
-            orderHeader.Name = orderVM.orderHeader.Name;
-            orderHeader.PhoneNumber = orderVM.orderHeader.PhoneNumber;
-            orderHeader.StreetAddress = orderVM.orderHeader.StreetAddress;
-            orderHeader.City = orderVM.orderHeader.City;
-            orderHeader.State = orderVM.orderHeader.State;
-            orderHeader.PostalCode = orderVM.orderHeader.PostalCode;
-            orderHeader.Carrier = orderVM.orderHeader.Carrier ?? orderHeader.Carrier;
-            orderHeader.TrackingNumber = orderVM.orderHeader.TrackingNumber ?? orderHeader.TrackingNumber;
-
+            UpdateOrderHeaderFields(orderHeader, orderVM.orderHeader);
             _orderHeaderService.UpdateOrderHeader(orderHeader);
             return orderHeader;
+        }
+
+        private void UpdateOrderHeaderFields(OrderHeader orderHeader, OrderHeader updatedHeader)
+        {
+            orderHeader.Name = updatedHeader.Name;
+            orderHeader.PhoneNumber = updatedHeader.PhoneNumber;
+            orderHeader.StreetAddress = updatedHeader.StreetAddress;
+            orderHeader.City = updatedHeader.City;
+            orderHeader.State = updatedHeader.State;
+            orderHeader.PostalCode = updatedHeader.PostalCode;
+
+            // Only update if not null
+            if (updatedHeader.Carrier != null)
+            {
+                orderHeader.Carrier = updatedHeader.Carrier;
+            }
+
+            if (updatedHeader.TrackingNumber != null)
+            {
+                orderHeader.TrackingNumber = updatedHeader.TrackingNumber;
+            }
         }
 
         private OrderHeader? UpdateShippingDetails(OrderVM orderVM)
@@ -225,18 +260,32 @@ namespace AmarTech.Web.Areas.Admin.Controllers
                 return null;
             }
 
-            orderHeader.TrackingNumber = orderVM.orderHeader.TrackingNumber;
-            orderHeader.Carrier = orderVM.orderHeader.Carrier;
+            UpdateTrackingInformation(orderHeader, orderVM.orderHeader);
+            UpdateOrderStatusForShipping(orderHeader);
+            UpdatePaymentDueDateIfNeeded(orderHeader);
+
+            _orderHeaderService.UpdateOrderHeader(orderHeader);
+            return orderHeader;
+        }
+
+        private void UpdateTrackingInformation(OrderHeader orderHeader, OrderHeader updatedHeader)
+        {
+            orderHeader.TrackingNumber = updatedHeader.TrackingNumber;
+            orderHeader.Carrier = updatedHeader.Carrier;
+        }
+
+        private void UpdateOrderStatusForShipping(OrderHeader orderHeader)
+        {
             orderHeader.OrderStatus = SD.StatusShipped;
             orderHeader.ShippingDate = DateTime.Now;
+        }
 
+        private void UpdatePaymentDueDateIfNeeded(OrderHeader orderHeader)
+        {
             if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
             {
                 orderHeader.PaymentDueDate = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
             }
-
-            _orderHeaderService.UpdateOrderHeader(orderHeader);
-            return orderHeader;
         }
 
         private OrderHeader? ProcessOrderCancellation(OrderVM orderVM)
@@ -247,22 +296,34 @@ namespace AmarTech.Web.Areas.Admin.Controllers
                 return null;
             }
 
-            if (orderHeader.PaymentStatus == SD.PaymentStatusApproved && orderHeader.PaymentIntentId != null)
+            CancelOrder(orderHeader);
+            return orderHeader;
+        }
+
+        private void CancelOrder(OrderHeader orderHeader)
+        {
+            bool isApprovedPayment = orderHeader.PaymentStatus == SD.PaymentStatusApproved &&
+                                     orderHeader.PaymentIntentId != null;
+
+            if (isApprovedPayment)
             {
-                var options = new RefundCreateOptions
-                {
-                    Reason = RefundReasons.RequestedByCustomer,
-                    PaymentIntent = orderHeader.PaymentIntentId
-                };
-                new RefundService().Create(options);
+                ProcessRefund(orderHeader.PaymentIntentId);
                 _orderHeaderService.UpdateStatus(orderHeader.Id, SD.StatusCancelled, SD.StatusRefunded);
-            }
-            else
-            {
-                _orderHeaderService.UpdateStatus(orderHeader.Id, SD.StatusCancelled, SD.StatusCancelled);
+                return;
             }
 
-            return orderHeader;
+            _orderHeaderService.UpdateStatus(orderHeader.Id, SD.StatusCancelled, SD.StatusCancelled);
+        }
+
+        private void ProcessRefund(string paymentIntentId)
+        {
+            var options = new RefundCreateOptions
+            {
+                Reason = RefundReasons.RequestedByCustomer,
+                PaymentIntent = paymentIntentId
+            };
+
+            new RefundService().Create(options);
         }
 
         private OrderVM? PopulateOrderViewModel(OrderVM orderVM)
@@ -281,39 +342,53 @@ namespace AmarTech.Web.Areas.Admin.Controllers
         private string CreateStripeSession(OrderVM orderVM)
         {
             var domain = $"{Request.Scheme}://{Request.Host.Value}/";
-            var options = new SessionCreateOptions
+            var options = CreateSessionOptions(orderVM, domain);
+            AddLineItemsToSession(options, orderVM.orderDetails);
+
+            var session = new SessionService().Create(options);
+            _orderHeaderService.UpdateStripePaymentID(orderVM.orderHeader.Id, session.Id, session.PaymentIntentId);
+            return session.Url;
+        }
+
+        private SessionCreateOptions CreateSessionOptions(OrderVM orderVM, string domain)
+        {
+            return new SessionCreateOptions
             {
                 SuccessUrl = domain + $"admin/order/PaymentConfirmation?orderHeaderId={orderVM.orderHeader.Id}",
                 CancelUrl = domain + $"admin/order/details?id={orderVM.orderHeader.Id}",
                 LineItems = new List<SessionLineItemOptions>(),
                 Mode = "payment",
             };
+        }
 
-            foreach (var item in orderVM.orderDetails)
+        private void AddLineItemsToSession(SessionCreateOptions options, IEnumerable<OrderDetail> orderDetails)
+        {
+            foreach (var item in orderDetails)
             {
                 if (item.Product == null)
                 {
                     continue;
                 }
 
-                options.LineItems.Add(new SessionLineItemOptions
-                {
-                    PriceData = new SessionLineItemPriceDataOptions
-                    {
-                        UnitAmount = (long)(item.Price * 100),
-                        Currency = "usd",
-                        ProductData = new SessionLineItemPriceDataProductDataOptions
-                        {
-                            Name = item.Product.Title
-                        }
-                    },
-                    Quantity = item.Count
-                });
+                options.LineItems.Add(CreateLineItem(item));
             }
+        }
 
-            var session = new SessionService().Create(options);
-            _orderHeaderService.UpdateStripePaymentID(orderVM.orderHeader.Id, session.Id, session.PaymentIntentId);
-            return session.Url;
+        private SessionLineItemOptions CreateLineItem(OrderDetail item)
+        {
+            return new SessionLineItemOptions
+            {
+                PriceData = new SessionLineItemPriceDataOptions
+                {
+                    UnitAmount = (long)(item.Price * 100),
+                    Currency = "usd",
+                    ProductData = new SessionLineItemPriceDataProductDataOptions
+                    {
+                        Name = item.Product.Title
+                    }
+                },
+                Quantity = item.Count
+            };
         }
 
         private OrderHeader? ProcessPaymentConfirmation(int orderHeaderId)
@@ -324,17 +399,37 @@ namespace AmarTech.Web.Areas.Admin.Controllers
                 return null;
             }
 
-            if (orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment)
+            UpdatePaymentStatusIfNeeded(orderHeader);
+            return orderHeader;
+        }
+
+        private void UpdatePaymentStatusIfNeeded(OrderHeader orderHeader)
+        {
+            if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
             {
-                var session = new SessionService().Get(orderHeader.SessionId);
-                if (string.Equals(session.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase))
-                {
-                    _orderHeaderService.UpdateStripePaymentID(orderHeaderId, session.Id, session.PaymentIntentId);
-                    _orderHeaderService.UpdateStatus(orderHeaderId, orderHeader.OrderStatus ?? SD.StatusShipped, SD.PaymentStatusApproved);
-                }
+                return;
             }
 
-            return orderHeader;
+            var session = new SessionService().Get(orderHeader.SessionId);
+            if (!IsPaymentComplete(session))
+            {
+                return;
+            }
+
+            UpdatePaymentStatus(orderHeader, session);
+        }
+
+        private bool IsPaymentComplete(Session session)
+        {
+            return string.Equals(session.PaymentStatus, "paid", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void UpdatePaymentStatus(OrderHeader orderHeader, Session session)
+        {
+            _orderHeaderService.UpdateStripePaymentID(orderHeader.Id, session.Id, session.PaymentIntentId);
+
+            string orderStatus = orderHeader.OrderStatus ?? SD.StatusShipped;
+            _orderHeaderService.UpdateStatus(orderHeader.Id, orderStatus, SD.PaymentStatusApproved);
         }
 
         #endregion
