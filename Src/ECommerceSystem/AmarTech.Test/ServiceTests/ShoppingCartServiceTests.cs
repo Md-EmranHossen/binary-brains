@@ -382,30 +382,35 @@ namespace AmarTech.Test.ServiceTests
             Assert.Equal(36, result.OrderHeader.OrderTotal);
         }
 
-       /* [Fact]
+        [Fact]
         public void RemoveShoppingCarts_WithValidOrderHeader_ShouldRemoveCartsAndCommit()
         {
             // Arrange
             var orderHeader = new OrderHeader { Id = 1, ApplicationUserId = _userId };
             var carts = new List<ShoppingCart>
-            {
-                new ShoppingCart { Id = 1, ProductId = 1, ApplicationUserId = _userId },
-                new ShoppingCart { Id = 2, ProductId = 2, ApplicationUserId = _userId }
-            };
+    {
+        new ShoppingCart { Id = 1, ProductId = 1, ApplicationUserId = _userId },
+        new ShoppingCart { Id = 2, ProductId = 2, ApplicationUserId = _userId }
+    };
 
             _mockShoppingCartRepository.Setup(r => r.GetAll(
                 It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
                 It.IsAny<string>()))
                 .Returns(carts);
 
+            _mockShoppingCartRepository.Setup(r => r.RemoveRange(It.IsAny<IEnumerable<ShoppingCart>>()))
+                .Callback<IEnumerable<ShoppingCart>>(c => { /* Simulate removal */ });
+
+            _mockUnitOfWork.Setup(u => u.Commit());
+
             // Act
             var result = _service.RemoveShoppingCarts(orderHeader);
 
             // Assert
             Assert.Equal(carts, result);
-            _mockShoppingCartRepository.Verify(r => r.RemoveRange(carts), Times.Once);
-            _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
-        }*/
+            _mockShoppingCartRepository.Verify(r => r.RemoveRange(carts), Times.Once());
+            _mockUnitOfWork.Verify(u => u.Commit(), Times.Exactly(2)); // Expect two calls
+        }
 
         [Fact]
         public void RemoveShoppingCarts_WithNullOrderHeader_ShouldReturnEmptyList()
@@ -1215,7 +1220,7 @@ namespace AmarTech.Test.ServiceTests
             _mockShoppingCartRepository.Setup(r => r.GetAll(
                 It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
                 It.IsAny<string>()))
-                .Returns((IEnumerable<ShoppingCart>)null);
+                .Returns((IEnumerable<ShoppingCart>)null!);
 
             // Act
             var result = _service.GetShoppingCartsByUserId(_userId);
