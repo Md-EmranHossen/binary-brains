@@ -482,7 +482,7 @@ namespace AmarTech.Test.ServiceTests
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Never(), "Commit should not be called when stock is exceeded");
         }
 
-       /* [Fact]
+        [Fact]
         public void Plus_WithMemoryCart_ShouldIncrementCount()
         {
             // Arrange
@@ -495,30 +495,27 @@ namespace AmarTech.Test.ServiceTests
                 .Setup(r => r.Get(
                     It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
                     null, false))
-                .Returns((ShoppingCart)null);
+                .Returns((ShoppingCart?)null);
 
-            // Set up cache with TryGetValue
+            // Correctly setup TryGetValue
+            object outCarts = carts;
             _mockMemoryCache
-                .Setup(m => m.TryGetValue(_guestCartKey, out It.IsAny<object>()))
-                .Returns((object key, out object value) =>
-                {
-                    value = carts;
-                    return true;
-                });
+                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts!))
+                .Returns(true);
 
-            var cacheEntry = new Mock<ICacheEntry>();
-            cacheEntry.SetupSet(e => e.Value = It.IsAny<object>());
+            var cacheEntryMock = new Mock<ICacheEntry>();
             _mockMemoryCache
-                .Setup(m => m.CreateEntry(It.IsAny<object>()))
-                .Returns(cacheEntry.Object);
+                .Setup(m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)))
+                .Returns(cacheEntryMock.Object);
 
             // Act
             _service.Plus(null, cartId);
 
             // Assert
             Assert.Equal(2, carts[0].Count);
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts, It.IsAny<MemoryCacheEntryOptions>()), Times.Once(), "Cache Set should be called once");
-        }*/
+            _mockMemoryCache.Verify(m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)), Times.Once);
+        }
+
 
         [Fact]
         public void Minus_WithDatabaseCart_ShouldDecrementCount()

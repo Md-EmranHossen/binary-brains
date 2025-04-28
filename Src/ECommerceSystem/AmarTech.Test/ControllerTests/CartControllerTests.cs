@@ -271,7 +271,7 @@ namespace AmarTech.Test.ControllerTests
             var shoppingCartList = new List<ShoppingCart>();
 
             _mockShoppingCartService.Setup(s => s.GetShoppingCartsByUserId(userId)).Returns(shoppingCartList);
-            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns((ApplicationUser)null);
+            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns((ApplicationUser?)null);
 
             // Act
             var result = _controller.SummaryPost(shoppingCartVM);
