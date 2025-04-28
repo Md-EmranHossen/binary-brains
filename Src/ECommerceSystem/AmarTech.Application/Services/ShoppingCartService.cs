@@ -218,7 +218,7 @@ namespace AmarTech.Application.Services
             if (cart == null) return;
             if (cart.Count <= 1)
             {
-                cartList?.Remove(cart);
+                cartList.Remove(cart);
             }
 
             else
@@ -268,7 +268,7 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
             var cart = cartList?.FirstOrDefault(c => c.Id == cartId);
             if (cart == null) return;
 
-            cartList?.Remove(cart);
+            cartList.Remove(cart);
             
 
             SetInMemory(cartList);

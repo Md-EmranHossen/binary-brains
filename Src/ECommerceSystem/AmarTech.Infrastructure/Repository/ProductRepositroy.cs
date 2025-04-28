@@ -13,6 +13,8 @@ namespace AmarTech.Infrastructure.Repository
     public class ProductRepositroy : Repository<Product>, IProductRepository
     {
         private readonly ApplicationDbContext _db;
+        private static readonly char[] _splitByComma = new[] { ',' };
+
         public ProductRepositroy(ApplicationDbContext db) : base(db)
         {
             _db = db;
@@ -41,7 +43,7 @@ namespace AmarTech.Infrastructure.Repository
             if (!string.IsNullOrEmpty(includeProperties))
             {
                 foreach (var includeProp in includeProperties
-                             .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                             .Split(_splitByComma, StringSplitOptions.RemoveEmptyEntries))
                 {
                     query = query.Include(includeProp);
                 }
@@ -77,7 +79,10 @@ namespace AmarTech.Infrastructure.Repository
                 if (!string.IsNullOrEmpty(searchQuery))
                 {
                     searchQuery = searchQuery.ToLower();
-                    query = query.Where(u => u.Title.ToLower().Contains(searchQuery) || u.Description.ToLower().Contains(searchQuery));
+                    query = query.Where(u =>
+    u.Title.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) ||
+    u.Description.Contains(searchQuery, StringComparison.OrdinalIgnoreCase));
+
 
                 }
                 return query.Count();

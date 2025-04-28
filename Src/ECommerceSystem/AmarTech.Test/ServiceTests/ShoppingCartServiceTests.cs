@@ -337,10 +337,10 @@ namespace AmarTech.Test.ServiceTests
         public void AddOrUpdateShoppingCart_WithInvalidInputs_ShouldReturnFalse()
         {
             // Test cases with invalid inputs
-            Assert.False(_service.AddOrUpdateShoppingCart(null, _userId));
+            Assert.False(_service.AddOrUpdateShoppingCart(null!, _userId));
             Assert.False(_service.AddOrUpdateShoppingCart(new ShoppingCart { ProductId = 0 }, _userId));
             Assert.False(_service.AddOrUpdateShoppingCart(new ShoppingCart { ProductId = 1 }, ""));
-            Assert.False(_service.AddOrUpdateShoppingCart(new ShoppingCart { ProductId = 1 }, null));
+            Assert.False(_service.AddOrUpdateShoppingCart(new ShoppingCart { ProductId = 1 }, null!));
         }
 
         [Fact]
@@ -471,7 +471,7 @@ namespace AmarTech.Test.ServiceTests
                     It.Is<Expression<Func<ShoppingCart, bool>>>(expr =>
                         !expr.ToString().Contains("Id")),
                     null, false))
-                .Returns((ShoppingCart)null);
+                .Returns((ShoppingCart?)null);
 
             // Act
             _service.Plus(cart, cartId);
@@ -482,7 +482,7 @@ namespace AmarTech.Test.ServiceTests
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Never(), "Commit should not be called when stock is exceeded");
         }
 
-/*        [Fact]
+       /* [Fact]
         public void Plus_WithMemoryCart_ShouldIncrementCount()
         {
             // Arrange
@@ -584,12 +584,12 @@ namespace AmarTech.Test.ServiceTests
                 .Setup(r => r.Get(
                     It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
                     null, false))
-                .Returns((ShoppingCart)null);
+                .Returns((ShoppingCart?)null);
 
             // Setup memory cache to return carts when TryGetValue is called
             object outCarts = carts;
             _mockMemoryCache
-                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts))
+                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts!))
                 .Returns(true);
 
             // Setup CreateEntry which will be used by the Set extension method
@@ -619,12 +619,12 @@ namespace AmarTech.Test.ServiceTests
                 .Setup(r => r.Get(
                     It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
                     null, false))
-                .Returns((ShoppingCart)null);
+                .Returns((ShoppingCart?)null);
 
             // Setup memory cache to return carts when TryGetValue is called
             object outCarts = carts;
             _mockMemoryCache
-                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts))
+                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts!))
                 .Returns(true);
 
             // Setup CreateEntry which will be used by the Set extension method
@@ -683,12 +683,12 @@ namespace AmarTech.Test.ServiceTests
                 .Setup(r => r.Get(
                     It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
                     null, false))
-                .Returns((ShoppingCart)null);
+                .Returns((ShoppingCart?)null);
 
             // Setup TryGetValue correctly
             object outCarts = carts;
             _mockMemoryCache
-                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts))
+                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts!))
                 .Returns(true);
 
             var cacheEntryMock = new Mock<ICacheEntry>();
@@ -877,7 +877,7 @@ namespace AmarTech.Test.ServiceTests
             // Setup memory cache to return existingCarts when TryGetValue is called
             object outExistingCarts = existingCarts;
             _mockMemoryCache
-                .Setup(m => m.TryGetValue(_guestCartKey, out outExistingCarts))
+                .Setup(m => m.TryGetValue(_guestCartKey, out outExistingCarts!))
                 .Returns(true);
 
             // Setup memory cache for the Set method
@@ -906,7 +906,7 @@ namespace AmarTech.Test.ServiceTests
             // Setup memory cache to return expectedCarts when TryGetValue is called
             object outExpectedCarts = expectedCarts;
             _mockMemoryCache
-                .Setup(m => m.TryGetValue(_guestCartKey, out outExpectedCarts))
+                .Setup(m => m.TryGetValue(_guestCartKey, out outExpectedCarts!))
                 .Returns(true);
 
             // Act
@@ -920,9 +920,9 @@ namespace AmarTech.Test.ServiceTests
         public void GetCart_WithNoCachedCarts_ShouldReturnEmptyList()
         {
             // Arrange
-            object outNullCarts = null;
+            object outNullCarts = null!;
             _mockMemoryCache
-                .Setup(m => m.TryGetValue(_guestCartKey, out outNullCarts))
+                .Setup(m => m.TryGetValue(_guestCartKey, out outNullCarts!))
                 .Returns(false);
 
             // Act
@@ -1087,7 +1087,7 @@ namespace AmarTech.Test.ServiceTests
             // Arrange
             var carts = new List<ShoppingCart>
             {
-                new ShoppingCart { Id = 1, ProductId = 1, ApplicationUserId = _userId, Count = 1, Product = null },
+                new ShoppingCart { Id = 1, ProductId = 1, ApplicationUserId = _userId, Count = 1, Product = null! },
                 new ShoppingCart {
                     Id = 2,
                     ProductId = 2,
@@ -1139,7 +1139,7 @@ namespace AmarTech.Test.ServiceTests
                 OrderHeader = new OrderHeader { Id = 1 },
                 ShoppingCartList = new List<ShoppingCart>
                 {
-                    new ShoppingCart { Id = 1, ProductId = 1, Count = 1, Price = 10, Product = null }, // Null product
+                    new ShoppingCart { Id = 1, ProductId = 1, Count = 1, Price = 10, Product = null! }, // Null product
                     new ShoppingCart {
                         Id = 2,
                         ProductId = 2,
@@ -1166,9 +1166,9 @@ namespace AmarTech.Test.ServiceTests
             int cartId = 1;
 
             // Setup memory cache to return null when TryGetValue is called
-            object outNullCarts = null;
+            object outNullCarts = null!;
             _mockMemoryCache
-                .Setup(m => m.TryGetValue(_guestCartKey, out outNullCarts))
+                .Setup(m => m.TryGetValue(_guestCartKey, out outNullCarts!))
                 .Returns(false);
 
             // Setup CreateEntry which will be used by the Set extension method
@@ -1233,12 +1233,12 @@ namespace AmarTech.Test.ServiceTests
     };
 
             _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
-                .Returns((ShoppingCart)null);
+                .Returns((ShoppingCart?)null);
 
             // Setup memory cache to return carts when TryGetValue is called
             object outCarts = carts;
             _mockMemoryCache
-                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts))
+                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts!))
                 .Returns(true);
 
             // Act
@@ -1262,12 +1262,12 @@ namespace AmarTech.Test.ServiceTests
     };
 
             _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
-                .Returns((ShoppingCart)null);
+                .Returns((ShoppingCart?)null);
 
             // Setup memory cache to return carts when TryGetValue is called
             object outCarts = carts;
             _mockMemoryCache
-                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts))
+                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts!))
                 .Returns(true);
 
             // Act
@@ -1366,10 +1366,10 @@ namespace AmarTech.Test.ServiceTests
 
             _mockHttpContextAccessor
                 .Setup(h => h.HttpContext)
-                .Returns((HttpContext)null);
+                .Returns((HttpContext?)null);
 
             _mockMemoryCache
-                .Setup(m => m.TryGetValue(It.IsAny<object>(), out It.Ref<object>.IsAny))
+                .Setup(m => m.TryGetValue(It.IsAny<object>(), out It.Ref<object>.IsAny!))
                 .Returns(false);
 
             // Act

@@ -220,7 +220,7 @@ namespace AmarTech.Test.RepositoryTests
 
             // Act
             _repository.ReduceStockCount(cartList);
-            _context.SaveChanges();
+            _context?.SaveChanges();
 
             // Assert
             _context?.Products?.Find(1)?.StockQuantity.Should().Be(initialStock1 - 2);

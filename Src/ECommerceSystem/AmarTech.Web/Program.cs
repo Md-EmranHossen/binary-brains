@@ -12,7 +12,6 @@ using Stripe;
 using AmarTech.Infrastructure.DbInitializer;
 using AmarTech.Application;
 using AmarTech.Domain.Entities;
-using AmarTech.Application.Services.IServices;
 using AmarTech.Application.Contract;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -86,7 +85,7 @@ builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
 builder.Services.AddScoped<IOrderHeaderService, OrderHeaderService>();
 
-//
+
 builder.Services.AddMemoryCache();
 
 

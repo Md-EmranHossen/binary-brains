@@ -63,7 +63,8 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             }
             ShoppingCartVM shoppingCartVM;
             var cartList = _shoppingCartService.GetCart();
-            var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId ?? "").ToList() ?? new List<ShoppingCart>();
+            var shoppingCartList =_shoppingCartService.GetShoppingCartsByUserId(userId).ToList();
+
             if (cartList.Count > 0)
             {
                     shoppingCartVM = _shoppingCartService.CombineToDB(shoppingCartList, cartList, userId);  
@@ -77,7 +78,7 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             {
                 return NotFound();
             }
-            var shoppingCartCount = _shoppingCartService.GetShoppingCartByUserId(userId ?? string.Empty)?.Count() ?? 0;
+            var shoppingCartCount = _shoppingCartService.GetShoppingCartByUserId(userId)?.Count() ?? 0;
             HttpContext.Session.SetInt32(SD.SessionCart, shoppingCartCount);
 
             var user = _applicationUserService.GetUserById(userId);
