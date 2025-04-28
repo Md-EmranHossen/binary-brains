@@ -8,7 +8,6 @@ using AmarTech.Infrastructure.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using AmarTech.Domain.Entities;
-using AmarTech.Application.Services.IServices;
 
 
 namespace AmarTech.Web.Areas.Admin.Controllers

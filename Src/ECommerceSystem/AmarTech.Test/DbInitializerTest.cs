@@ -37,7 +37,7 @@ namespace AmarTech.Test
         }
 
         [Fact]
-        public async Task Initialize_CreatesRoles_WhenRolesDoNotExist()
+        public void Initialize_CreatesRoles_WhenRolesDoNotExist()
         {
             // Arrange
             var context = GetInMemoryDbContext();
@@ -67,7 +67,7 @@ namespace AmarTech.Test
         }
 
         [Fact]
-        public async Task Initialize_DoesNotCreateRoles_WhenRolesExist()
+        public void Initialize_DoesNotCreateRoles_WhenRolesExist()
         {
             // Arrange
             var context = GetInMemoryDbContext();
@@ -87,7 +87,7 @@ namespace AmarTech.Test
         }
 
         [Fact]
-        public async Task Initialize_CreatesAdminUser_WithCorrectPropertiesAndRole()
+        public void Initialize_CreatesAdminUser_WithCorrectPropertiesAndRole()
         {
             // Arrange
             var context = GetInMemoryDbContext();

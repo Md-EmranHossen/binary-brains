@@ -216,7 +216,7 @@ namespace AmarTech.Test.ControllerTests
             _mockShoppingCartService.Setup(s => s.GetShoppingCartsByUserId(userId)).Returns(dbCartList);
             _mockShoppingCartService.Setup(s => s.GetShoppingCartVM(userId)).Returns(dbCartVM);
             _mockShoppingCartService.Setup(s => s.GetShoppingCartByUserId(userId)).Returns(dbCartList);
-            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns((ApplicationUser)null);
+            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns((ApplicationUser?)null);
 
             // Act
             var result = _controller.Summary();
@@ -349,7 +349,7 @@ namespace AmarTech.Test.ControllerTests
             // Assert
             Assert.NotNull(result);
             Assert.Equal("OrderConfirmation", result.ActionName);
-            Assert.Equal(1, result.RouteValues["id"]);
+            Assert.Equal(1, result.RouteValues?["id"]);
             _mockOrderHeaderService.Verify(s => s.AddOrderHeader(shoppingCartVM.OrderHeader), Times.Once);
             _mockOrderDetailService.Verify(s => s.UpdateOrderDetailsValues(shoppingCartVM), Times.Once);
         }
@@ -496,7 +496,7 @@ namespace AmarTech.Test.ControllerTests
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             // Act
-            var result = method.Invoke(_controller, null) as List<ShoppingCart>;
+            var result = method?.Invoke(_controller, null) as List<ShoppingCart>;
 
             // Assert
             Assert.NotNull(result);

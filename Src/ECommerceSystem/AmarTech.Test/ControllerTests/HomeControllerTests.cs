@@ -60,7 +60,7 @@ namespace AmarTech.Test.ControllerTests
             // Act & Assert
             var ex = Assert.Throws<ArgumentNullException>(() =>
                 new HomeController(
-                    null,
+                    null!,
                     _productServiceMock.Object,
                     _shoppingCartServiceMock.Object));
 
@@ -74,7 +74,7 @@ namespace AmarTech.Test.ControllerTests
             var ex = Assert.Throws<ArgumentNullException>(() =>
                 new HomeController(
                     _loggerMock.Object,
-                    null,
+                    null!,
                     _shoppingCartServiceMock.Object));
 
             Assert.Equal("productService", ex.ParamName);
@@ -88,7 +88,7 @@ namespace AmarTech.Test.ControllerTests
                 new HomeController(
                     _loggerMock.Object,
                     _productServiceMock.Object,
-                    null));
+                    null!));
 
             Assert.Equal("shoppingCartService", ex.ParamName);
         }
@@ -102,7 +102,7 @@ namespace AmarTech.Test.ControllerTests
         {
             // Arrange
             int? page = 1;
-            string query = null;
+            string query = null!;
             var productList = new List<Product> { new Product(), new Product() };
             int totalCount = 10;
             int totalPages = 5;
@@ -185,7 +185,7 @@ namespace AmarTech.Test.ControllerTests
         {
             // Arrange
             int? page = null;
-            string query = null;
+            string query = null!;
             var productList = new List<Product>();
             _productServiceMock.Setup(p => p.SkipAndTake(page, query))
                 .Returns(productList);
@@ -261,7 +261,7 @@ namespace AmarTech.Test.ControllerTests
             // Arrange
             int productId = 99;
             _productServiceMock.Setup(p => p.GetProductByIdwithCategory(productId))
-                .Returns((Product)null);
+                .Returns((Product?)null);
 
             // Act
             var result = _controller.Details(productId);

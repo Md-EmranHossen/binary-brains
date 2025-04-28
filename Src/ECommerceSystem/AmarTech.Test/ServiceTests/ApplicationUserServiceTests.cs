@@ -233,7 +233,7 @@ namespace AmarTech.Test.ServiceTests
         {
             // Arrange
             string userId = "1";
-            var expectedUser = new ApplicationUser { Id = userId, Name = null };
+            var expectedUser = new ApplicationUser { Id = userId, Name = null! };
 
             _mockApplicationUserRepository.Setup(repo => repo.Get(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), null, false))
                 .Returns(expectedUser);
