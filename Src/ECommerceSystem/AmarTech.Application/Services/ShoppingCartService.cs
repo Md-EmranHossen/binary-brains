@@ -245,8 +245,6 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
                 cartFromDb.Count -= 1;
                 UpdateShoppingCart(cartFromDb);
             }
-
-            _unitOfWork.Commit();
         }
 
         public void RemoveCartValue(int cartId)
