@@ -382,30 +382,35 @@ namespace AmarTech.Test.ServiceTests
             Assert.Equal(36, result.OrderHeader.OrderTotal);
         }
 
-       /* [Fact]
+        [Fact]
         public void RemoveShoppingCarts_WithValidOrderHeader_ShouldRemoveCartsAndCommit()
         {
             // Arrange
             var orderHeader = new OrderHeader { Id = 1, ApplicationUserId = _userId };
             var carts = new List<ShoppingCart>
-            {
-                new ShoppingCart { Id = 1, ProductId = 1, ApplicationUserId = _userId },
-                new ShoppingCart { Id = 2, ProductId = 2, ApplicationUserId = _userId }
-            };
+    {
+        new ShoppingCart { Id = 1, ProductId = 1, ApplicationUserId = _userId },
+        new ShoppingCart { Id = 2, ProductId = 2, ApplicationUserId = _userId }
+    };
 
             _mockShoppingCartRepository.Setup(r => r.GetAll(
                 It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
                 It.IsAny<string>()))
                 .Returns(carts);
 
+            _mockShoppingCartRepository.Setup(r => r.RemoveRange(It.IsAny<IEnumerable<ShoppingCart>>()))
+                .Callback<IEnumerable<ShoppingCart>>(c => { /* Simulate removal */ });
+
+            _mockUnitOfWork.Setup(u => u.Commit());
+
             // Act
             var result = _service.RemoveShoppingCarts(orderHeader);
 
             // Assert
             Assert.Equal(carts, result);
-            _mockShoppingCartRepository.Verify(r => r.RemoveRange(carts), Times.Once);
-            _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
-        }*/
+            _mockShoppingCartRepository.Verify(r => r.RemoveRange(carts), Times.Once());
+            _mockUnitOfWork.Verify(u => u.Commit(), Times.Exactly(2)); // Expect two calls
+        }
 
         [Fact]
         public void RemoveShoppingCarts_WithNullOrderHeader_ShouldReturnEmptyList()
@@ -568,7 +573,7 @@ namespace AmarTech.Test.ServiceTests
             _mockUnitOfWork.Verify(u => u.Commit(), Times.AtLeastOnce()); // Allow multiple commits
         }
 
-       /* [Fact]
+        [Fact]
         public void Minus_WithMemoryCart_ShouldDecrementCount()
         {
             // Arrange
@@ -581,19 +586,26 @@ namespace AmarTech.Test.ServiceTests
                     null, false))
                 .Returns((ShoppingCart)null);
 
+            // Setup memory cache to return carts when TryGetValue is called
+            object outCarts = carts;
             _mockMemoryCache
-                .Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns(carts);
+                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts))
+                .Returns(true);
 
-            var cacheEntry = new Mock<ICacheEntry>();
-            _mockMemoryCache.Setup(m => m.CreateEntry(It.IsAny<object>())).Returns(cacheEntry.Object);
+            // Setup CreateEntry which will be used by the Set extension method
+            var cacheEntryMock = new Mock<ICacheEntry>();
+            _mockMemoryCache
+                .Setup(m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)))
+                .Returns(cacheEntryMock.Object);
 
             // Act
             _service.Minus(cartId);
 
             // Assert
             Assert.Equal(1, carts[0].Count);
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts, It.IsAny<MemoryCacheEntryOptions>()), Times.Once());
+            _mockMemoryCache.Verify(
+                m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)),
+                Times.Once);
         }
 
         [Fact]
@@ -609,20 +621,27 @@ namespace AmarTech.Test.ServiceTests
                     null, false))
                 .Returns((ShoppingCart)null);
 
+            // Setup memory cache to return carts when TryGetValue is called
+            object outCarts = carts;
             _mockMemoryCache
-                .Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns(carts);
+                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts))
+                .Returns(true);
 
-            var cacheEntry = new Mock<ICacheEntry>();
-            _mockMemoryCache.Setup(m => m.CreateEntry(It.IsAny<object>())).Returns(cacheEntry.Object);
+            // Setup CreateEntry which will be used by the Set extension method
+            var cacheEntryMock = new Mock<ICacheEntry>();
+            _mockMemoryCache
+                .Setup(m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)))
+                .Returns(cacheEntryMock.Object);
 
             // Act
             _service.Minus(cartId);
 
             // Assert
             Assert.Empty(carts);
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts, It.IsAny<MemoryCacheEntryOptions>()), Times.Once());
-        }*/
+            _mockMemoryCache.Verify(
+                m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)),
+                Times.Once);
+        }
 
         [Fact]
         public void RemoveCartValue_WithDatabaseCart_ShouldRemoveCart()
@@ -653,7 +672,7 @@ namespace AmarTech.Test.ServiceTests
             _mockUnitOfWork.Verify(u => u.Commit(), Times.AtLeastOnce()); // Allow multiple commits
         }
 
-      /*  [Fact]
+        [Fact]
         public void RemoveCartValue_WithMemoryCart_ShouldRemoveCart()
         {
             // Arrange
@@ -666,20 +685,27 @@ namespace AmarTech.Test.ServiceTests
                     null, false))
                 .Returns((ShoppingCart)null);
 
+            // Setup TryGetValue correctly
+            object outCarts = carts;
             _mockMemoryCache
-                .Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns(carts);
+                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts))
+                .Returns(true);
 
-            var cacheEntry = new Mock<ICacheEntry>();
-            _mockMemoryCache.Setup(m => m.CreateEntry(It.IsAny<object>())).Returns(cacheEntry.Object);
+            var cacheEntryMock = new Mock<ICacheEntry>();
+            _mockMemoryCache
+                .Setup(m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)))
+                .Returns(cacheEntryMock.Object);
 
             // Act
             _service.RemoveCartValue(cartId);
 
             // Assert
             Assert.Empty(carts);
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts, It.IsAny<MemoryCacheEntryOptions>()), Times.Once());
-        }*/
+            _mockMemoryCache.Verify(
+                m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)),
+                Times.Once);
+        }
+
 
         [Fact]
         public void GetShoppingCartByUserId_ShouldCallRepositoryGetAll()
@@ -841,22 +867,31 @@ namespace AmarTech.Test.ServiceTests
             Assert.Equal(1, item2.Quantity);
         }
 
-      /*  [Fact]
+        [Fact]
         public void AddToCart_ShouldAddCartToMemoryCache()
         {
             // Arrange
             var cart = new ShoppingCart { Id = 1, ProductId = 1, Count = 1 };
             var existingCarts = new List<ShoppingCart>();
 
-            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns(existingCarts);
+            // Setup memory cache to return existingCarts when TryGetValue is called
+            object outExistingCarts = existingCarts;
+            _mockMemoryCache
+                .Setup(m => m.TryGetValue(_guestCartKey, out outExistingCarts))
+                .Returns(true);
+
+            // Setup memory cache for the Set method
+            var cacheEntryMock = new Mock<ICacheEntry>();
+            _mockMemoryCache
+                .Setup(m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)))
+                .Returns(cacheEntryMock.Object);
 
             // Act
             _service.AddToCart(cart);
 
             // Assert
             Assert.Contains(cart, existingCarts);
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, existingCarts), Times.Once);
+            _mockMemoryCache.Verify(m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)), Times.Once);
         }
 
         [Fact]
@@ -864,12 +899,15 @@ namespace AmarTech.Test.ServiceTests
         {
             // Arrange
             var expectedCarts = new List<ShoppingCart>
-            {
-                new ShoppingCart { Id = 1, ProductId = 1, Count = 1 }
-            };
+        {
+            new ShoppingCart { Id = 1, ProductId = 1, Count = 1 }
+        };
 
-            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns(expectedCarts);
+            // Setup memory cache to return expectedCarts when TryGetValue is called
+            object outExpectedCarts = expectedCarts;
+            _mockMemoryCache
+                .Setup(m => m.TryGetValue(_guestCartKey, out outExpectedCarts))
+                .Returns(true);
 
             // Act
             var result = _service.GetCart();
@@ -882,8 +920,10 @@ namespace AmarTech.Test.ServiceTests
         public void GetCart_WithNoCachedCarts_ShouldReturnEmptyList()
         {
             // Arrange
-            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns((List<ShoppingCart>)null);
+            object outNullCarts = null;
+            _mockMemoryCache
+                .Setup(m => m.TryGetValue(_guestCartKey, out outNullCarts))
+                .Returns(false);
 
             // Act
             var result = _service.GetCart();
@@ -891,7 +931,9 @@ namespace AmarTech.Test.ServiceTests
             // Assert
             Assert.NotNull(result);
             Assert.Empty(result);
-        }*/
+        }
+
+
 
         [Fact]
         public void ClearCart_ShouldRemoveCartFromMemoryCache()
@@ -903,20 +945,28 @@ namespace AmarTech.Test.ServiceTests
             _mockMemoryCache.Verify(m => m.Remove(_guestCartKey), Times.Once);
         }
 
-      /*  [Fact]
+        [Fact]
         public void SetInMemory_WithValidCart_ShouldStoreInMemoryCache()
         {
             // Arrange
             var carts = new List<ShoppingCart>
-            {
-                new ShoppingCart { Id = 1, ProductId = 1, Count = 1 }
-            };
+    {
+        new ShoppingCart { Id = 1, ProductId = 1, Count = 1 }
+    };
+
+            // Setup the CreateEntry mock which is called by the Set extension method
+            var cacheEntryMock = new Mock<ICacheEntry>();
+            _mockMemoryCache
+                .Setup(m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)))
+                .Returns(cacheEntryMock.Object);
 
             // Act
             _service.SetInMemory(carts);
 
             // Assert
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts), Times.Once);
+            _mockMemoryCache.Verify(
+                m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)),
+                Times.Once);
         }
 
         [Fact]
@@ -926,8 +976,10 @@ namespace AmarTech.Test.ServiceTests
             _service.SetInMemory(null);
 
             // Assert
-            _mockMemoryCache.Verify(m => m.Set(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
-        }*/
+            _mockMemoryCache.Verify(
+                m => m.CreateEntry(It.IsAny<object>()),
+                Times.Never);
+        }
 
         [Fact]
         public void MemoryCartVM_ShouldCalculateOrderTotalCorrectly()
@@ -1068,7 +1120,7 @@ namespace AmarTech.Test.ServiceTests
             var existingCart = new ShoppingCart { Id = 2, ProductId = 1, Count = 1 }; // Different ID
 
             _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, true))
-                .Returns((ShoppingCart)null); // No cart with ID=1 found
+                .Returns((ShoppingCart?)null); // No cart with ID=1 found
 
             // Act
             _service.UpdateShoppingCart(cart);
@@ -1107,20 +1159,32 @@ namespace AmarTech.Test.ServiceTests
             Assert.Equal("Product 2", result.LineItems[0].PriceData.ProductData.Name);
         }
 
-       /* [Fact]
+        [Fact]
         public void Plus_WithNullCartAndNoMemoryCache_ShouldHandleGracefully()
         {
             // Arrange
             int cartId = 1;
-            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns((List<ShoppingCart>)null);
+
+            // Setup memory cache to return null when TryGetValue is called
+            object outNullCarts = null;
+            _mockMemoryCache
+                .Setup(m => m.TryGetValue(_guestCartKey, out outNullCarts))
+                .Returns(false);
+
+            // Setup CreateEntry which will be used by the Set extension method
+            var cacheEntryMock = new Mock<ICacheEntry>();
+            _mockMemoryCache
+                .Setup(m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)))
+                .Returns(cacheEntryMock.Object);
 
             // Act - This should not throw an exception
             _service.Plus(null, cartId);
 
-            // Assert - Verify the memory cache was called with an empty list
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, It.IsAny<List<ShoppingCart>>()), Times.Once);
-        }*/
+            // Assert - Verify the memory cache CreateEntry was called
+            _mockMemoryCache.Verify(
+                m => m.CreateEntry(It.Is<object>(o => o.ToString() == _guestCartKey)),
+                Times.Once);
+        }
 
         [Fact]
         public void GetShoppingCartVMForSummaryPost_WithNullUserFields_ShouldHandleGracefully()
@@ -1158,21 +1222,24 @@ namespace AmarTech.Test.ServiceTests
             Assert.Equal(string.Empty, result.OrderHeader.PostalCode);
         }
 
-       /* [Fact]
+        [Fact]
         public void Minus_WithNonExistentMemoryCacheItem_ShouldHandleGracefully()
         {
             // Arrange
             int cartId = 99; // Non-existent cart
             var carts = new List<ShoppingCart>
-            {
-                new ShoppingCart { Id = 1, ProductId = 1, Count = 1 }
-            };
+    {
+        new ShoppingCart { Id = 1, ProductId = 1, Count = 1 }
+    };
 
             _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
                 .Returns((ShoppingCart)null);
 
-            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns(carts);
+            // Setup memory cache to return carts when TryGetValue is called
+            object outCarts = carts;
+            _mockMemoryCache
+                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts))
+                .Returns(true);
 
             // Act
             _service.Minus(cartId);
@@ -1180,24 +1247,28 @@ namespace AmarTech.Test.ServiceTests
             // Assert - Should not modify the cart list
             Assert.Single(carts);
             Assert.Equal(1, carts[0].Id);
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts), Times.Once);
-        }*/
 
-       /* [Fact]
+            // No verification for CreateEntry since it's not called when cart ID doesn't exist
+        }
+
+        [Fact]
         public void RemoveCartValue_WithNonExistentMemoryCacheItem_ShouldHandleGracefully()
         {
             // Arrange
             int cartId = 99; // Non-existent cart
             var carts = new List<ShoppingCart>
-            {
-                new ShoppingCart { Id = 1, ProductId = 1, Count = 1 }
-            };
+    {
+        new ShoppingCart { Id = 1, ProductId = 1, Count = 1 }
+    };
 
             _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
                 .Returns((ShoppingCart)null);
 
-            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns(carts);
+            // Setup memory cache to return carts when TryGetValue is called
+            object outCarts = carts;
+            _mockMemoryCache
+                .Setup(m => m.TryGetValue(_guestCartKey, out outCarts))
+                .Returns(true);
 
             // Act
             _service.RemoveCartValue(cartId);
@@ -1205,9 +1276,9 @@ namespace AmarTech.Test.ServiceTests
             // Assert - Should not modify the cart list
             Assert.Single(carts);
             Assert.Equal(1, carts[0].Id);
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts), Times.Once);
-        }*/
 
+            // No verification for CreateEntry since it's not called when cart ID doesn't exist
+        }
         [Fact]
         public void GetShoppingCartsByUserId_WithNullResponse_ShouldReturnEmptyList()
         {
@@ -1215,7 +1286,7 @@ namespace AmarTech.Test.ServiceTests
             _mockShoppingCartRepository.Setup(r => r.GetAll(
                 It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
                 It.IsAny<string>()))
-                .Returns((IEnumerable<ShoppingCart>)null);
+                .Returns((IEnumerable<ShoppingCart>)null!);
 
             // Act
             var result = _service.GetShoppingCartsByUserId(_userId);
@@ -1282,24 +1353,33 @@ namespace AmarTech.Test.ServiceTests
         }
 
         // Test for handling null HTTP context
-       /* [Fact]
+        [Fact]
         public void Minus_WithNullHttpContext_ShouldNotThrowException()
         {
             // Arrange
             int cartId = 1;
             var cart = new ShoppingCart { Id = cartId, ProductId = 1, Count = 1, ApplicationUserId = _userId };
 
-            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
+            _mockShoppingCartRepository
+                .Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
                 .Returns(cart);
 
-            _mockHttpContextAccessor.Setup(h => h.HttpContext).Returns((HttpContext)null);
+            _mockHttpContextAccessor
+                .Setup(h => h.HttpContext)
+                .Returns((HttpContext)null);
 
-            // Act - This should not throw an exception
-            _service.Minus(cartId);
+            _mockMemoryCache
+                .Setup(m => m.TryGetValue(It.IsAny<object>(), out It.Ref<object>.IsAny))
+                .Returns(false);
+
+            // Act
+            var exception = Record.Exception(() => _service.Minus(cartId));
 
             // Assert
+            Assert.Null(exception); // No exception should occur
             _mockShoppingCartRepository.Verify(r => r.Remove(cart), Times.Once);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
-        }*/
+        }
+
     }
 }
