@@ -1,5 +1,4 @@
 ﻿using AmarTech.Domain.Entities;
-using AmarTech.Infrastructure.Repository;
 using AmarTech.Infrastructure.Repository.IRepository;
 using AmarTech.Application.Services;
 using Microsoft.AspNetCore.Http;
@@ -9,63 +8,39 @@ using Stripe.Checkout;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Xunit;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace AmarTech.Test.ServiceTests
 {
     public class ShoppingCartServiceTests
     {
-       /* private readonly Mock<IShoppingCartRepository> _mockShoppingCartRepo;
+        private readonly Mock<IShoppingCartRepository> _mockShoppingCartRepository;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IHttpContextAccessor> _mockHttpContextAccessor;
         private readonly Mock<IMemoryCache> _mockMemoryCache;
-        private readonly ShoppingCartService _shoppingCartService;
-        private readonly string _testUserId = "test-user-id";
+        private readonly Mock<HttpContext> _mockHttpContext;
+        private readonly Mock<ISession> _mockSession;
+        private readonly ShoppingCartService _service;
+        private readonly string _userId = "test-user-id";
         private readonly string _guestCartKey = "guest_cart";
 
         public ShoppingCartServiceTests()
         {
-            _mockShoppingCartRepo = new Mock<IShoppingCartRepository>();
+            _mockShoppingCartRepository = new Mock<IShoppingCartRepository>();
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockHttpContextAccessor = new Mock<IHttpContextAccessor>();
             _mockMemoryCache = new Mock<IMemoryCache>();
+            _mockHttpContext = new Mock<HttpContext>();
+            _mockSession = new Mock<ISession>();
 
-            // Setup HTTP Context with mock session
-            var mockHttpContext = new Mock<HttpContext>();
-            var mockSession = new Mock<ISession>();
-            var sessionDict = new Dictionary<string, byte[]>();
+            _mockHttpContext.Setup(c => c.Session).Returns(_mockSession.Object);
+            _mockHttpContextAccessor.Setup(h => h.HttpContext).Returns(_mockHttpContext.Object);
 
-            mockSession.Setup(s => s.Set(It.IsAny<string>(), It.IsAny<byte[]>()))
-                .Callback<string, byte[]>((key, value) => sessionDict[key] = value);
-            mockSession.Setup(s => s.TryGetValue(It.IsAny<string>(), out It.Ref<byte[]>.IsAny!))
-                .Returns<string, byte[]>((key, value) =>
-                {
-                    if (sessionDict.TryGetValue(key, out byte[]? result))
-                    {
-                        value = result;
-                        return true;
-                    }
-                    value = null!;
-                    return false;
-                });
-            mockSession.Setup(s => s.SetInt32(It.IsAny<string>(), It.IsAny<int>()))
-                .Callback<string, int>((key, value) => { *//* do nothing *//* });
-
-            mockHttpContext.Setup(c => c.Session).Returns(mockSession.Object);
-            _mockHttpContextAccessor.Setup(a => a.HttpContext).Returns(mockHttpContext.Object);
-
-            // Setup Memory Cache
-            var cacheEntryMock = new Mock<ICacheEntry>();
-            _mockMemoryCache.Setup(m => m.CreateEntry(It.IsAny<object>()))
-                .Returns(cacheEntryMock.Object);
-
-            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns((List<ShoppingCart>)null);
-
-            _shoppingCartService = new ShoppingCartService(
-                _mockShoppingCartRepo.Object,
+            _service = new ShoppingCartService(
+                _mockShoppingCartRepository.Object,
                 _mockUnitOfWork.Object,
                 _mockHttpContextAccessor.Object,
                 _mockMemoryCache.Object
@@ -73,606 +48,398 @@ namespace AmarTech.Test.ServiceTests
         }
 
         [Fact]
-        public void AddShoppingCart_ShouldAddCartAndCommit()
+        public void AddShoppingCart_ShouldCallRepositoryAddAndCommit()
         {
             // Arrange
             var cart = new ShoppingCart { Id = 1, ProductId = 1, Count = 1 };
 
             // Act
-            _shoppingCartService.AddShoppingCart(cart);
+            _service.AddShoppingCart(cart);
 
             // Assert
-            _mockShoppingCartRepo.Verify(r => r.Add(cart), Times.Once);
+            _mockShoppingCartRepository.Verify(r => r.Add(cart), Times.Once);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
         }
 
         [Fact]
-        public void DeleteShoppingCart_WhenCartExists_ShouldRemoveCartAndCommit()
+        public void DeleteShoppingCart_WithValidId_ShouldRemoveCartAndCommit()
         {
             // Arrange
             int cartId = 1;
             var cart = new ShoppingCart { Id = cartId, ProductId = 1, Count = 1 };
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
                 .Returns(cart);
 
             // Act
-            _shoppingCartService.DeleteShoppingCart(cartId);
+            _service.DeleteShoppingCart(cartId);
 
             // Assert
-            _mockShoppingCartRepo.Verify(r => r.Remove(cart), Times.Once);
+            _mockShoppingCartRepository.Verify(r => r.Remove(cart), Times.Once);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
         }
 
         [Fact]
-        public void DeleteShoppingCart_WhenCartDoesNotExist_ShouldNotRemoveOrCommit()
-        {
-            // Arrange
-            int cartId = 1;
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
-                .Returns((ShoppingCart?)null);
-
-            // Act
-            _shoppingCartService.DeleteShoppingCart(cartId);
-
-            // Assert
-            _mockShoppingCartRepo.Verify(r => r.Remove(It.IsAny<ShoppingCart>()), Times.Never);
-            _mockUnitOfWork.Verify(u => u.Commit(), Times.Never);
-        }
-
-        [Fact]
-        public void DeleteShoppingCart_WithNullId_ShouldNotRemoveOrCommit()
+        public void DeleteShoppingCart_WithNullId_ShouldNotCallRepository()
         {
             // Arrange
             int? cartId = null;
 
             // Act
-            _shoppingCartService.DeleteShoppingCart(cartId);
+            _service.DeleteShoppingCart(cartId);
 
             // Assert
-            _mockShoppingCartRepo.Verify(r => r.Remove(It.IsAny<ShoppingCart>()), Times.Never);
+            _mockShoppingCartRepository.Verify(r => r.Remove(It.IsAny<ShoppingCart>()), Times.Never);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Never);
         }
 
         [Fact]
-        public void GetShoppingCartById_ShouldReturnCart()
+        public void GetShoppingCartById_ShouldCallRepositoryGet()
         {
             // Arrange
             int cartId = 1;
             var expectedCart = new ShoppingCart { Id = cartId };
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
                 .Returns(expectedCart);
 
             // Act
-            var result = _shoppingCartService.GetShoppingCartById(cartId);
+            var result = _service.GetShoppingCartById(cartId);
 
             // Assert
             Assert.Equal(expectedCart, result);
+            _mockShoppingCartRepository.Verify(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false), Times.Once);
         }
 
-        [Fact]
-        public void GetShoppingCartById_WithTracking_ShouldReturnCart()
+      /*  [Fact]
+        public void GetShoppingCartByUserAndProduct_ShouldCallRepositoryGet()
         {
             // Arrange
-            int cartId = 1;
-            bool track = true;
-            var expectedCart = new ShoppingCart { Id = cartId };
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
-                .Returns(expectedCart);
-
-            // Act
-            var result = _shoppingCartService.GetShoppingCartById(cartId, track);
-
-            // Assert
-            Assert.Equal(expectedCart, result);
-        }
-
-        [Fact]
-        public void GetShoppingCartByUserAndProduct_ShouldReturnCart()
-        {
-            // Arrange
-            string userId = "user123";
             int productId = 1;
-            var expectedCart = new ShoppingCart { ApplicationUserId = userId, ProductId = productId };
-
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
+            var expectedCart = new ShoppingCart { Id = 1, ProductId = productId, ApplicationUserId = _userId };
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, true))
                 .Returns(expectedCart);
 
             // Act
-            var result = _shoppingCartService.GetShoppingCartByUserAndProduct(userId, productId);
+            var result = _service.GetShoppingCartByUserAndProduct(_userId, productId);
 
             // Assert
             Assert.Equal(expectedCart, result);
+            _mockShoppingCartRepository.Verify(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, true), Times.Once);
         }
 
         [Fact]
-        public void UpdateShoppingCart_WhenCartExists_ShouldUpdateCountAndCommit()
+        public void UpdateShoppingCart_WithExistingCart_ShouldUpdateAndCommit()
         {
             // Arrange
-            var cart = new ShoppingCart { Id = 1, Count = 5 };
-            var existingCart = new ShoppingCart { Id = 1, Count = 1 };
+            var cart = new ShoppingCart { Id = 1, ProductId = 1, Count = 2 };
+            var existingCart = new ShoppingCart { Id = 1, ProductId = 1, Count = 1 };
 
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, true))
                 .Returns(existingCart);
 
             // Act
-            _shoppingCartService.UpdateShoppingCart(cart);
+            _service.UpdateShoppingCart(cart);
 
             // Assert
-            Assert.Equal(5, existingCart.Count);  // Verify count was updated
-            _mockShoppingCartRepo.Verify(r => r.Update(existingCart), Times.Once);
+            Assert.Equal(cart.Count, existingCart.Count);
+            _mockShoppingCartRepository.Verify(r => r.Update(existingCart), Times.Once);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
-        }
+        }*/
 
         [Fact]
-        public void UpdateShoppingCart_WhenCartDoesNotExist_ShouldNotUpdateOrCommit()
+        public void UpdateShoppingCart_WithNonExistingCart_ShouldNotUpdateOrCommit()
         {
             // Arrange
-            var cart = new ShoppingCart { Id = 1, Count = 5 };
+            var cart = new ShoppingCart { Id = 1, ProductId = 1, Count = 2 };
 
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
-                .Returns((ShoppingCart?)null);
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, true))
+                .Returns((ShoppingCart)null);
 
             // Act
-            _shoppingCartService.UpdateShoppingCart(cart);
+            _service.UpdateShoppingCart(cart);
 
             // Assert
-            _mockShoppingCartRepo.Verify(r => r.Update(It.IsAny<ShoppingCart>()), Times.Never);
+            _mockShoppingCartRepository.Verify(r => r.Update(It.IsAny<ShoppingCart>()), Times.Never);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Never);
         }
 
         [Fact]
-        public void GetShoppingCartsByUserId_ShouldReturnUserCarts()
+        public void GetShoppingCartsByUserId_ShouldCallRepositoryGetAll()
         {
             // Arrange
-            string userId = "user123";
             var expectedCarts = new List<ShoppingCart>
             {
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 1 },
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 2 }
+                new ShoppingCart { Id = 1, ProductId = 1, ApplicationUserId = _userId, Product = new Product { Id = 1, Price = 10 } },
+                new ShoppingCart { Id = 2, ProductId = 2, ApplicationUserId = _userId, Product = new Product { Id = 2, Price = 20 } }
             };
 
-            _mockShoppingCartRepo.Setup(r => r.GetAll(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
+            _mockShoppingCartRepository.Setup(r => r.GetAll(
+                It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
                 It.IsAny<string>()))
                 .Returns(expectedCarts);
 
+
             // Act
-            var result = _shoppingCartService.GetShoppingCartsByUserId(userId);
+            var result = _service.GetShoppingCartsByUserId(_userId);
 
             // Assert
             Assert.Equal(expectedCarts, result);
-            Assert.Equal(2, result.Count());
+            _mockShoppingCartRepository.Verify(r => r.GetAll(
+     It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
+     "Product"), Times.Once);
+
         }
 
         [Fact]
-        public void GetShoppingCartsByUserId_WhenNoCartsExist_ShouldReturnEmptyList()
-        {
-            // Arrange
-            string userId = "user123";
-            _mockShoppingCartRepo.Setup(r => r.GetAll(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>()))
-                .Returns((IEnumerable<ShoppingCart>)null);
-
-            // Act
-            var result = _shoppingCartService.GetShoppingCartsByUserId(userId);
-
-            // Assert
-            Assert.Empty(result);
-        }
-
-        [Fact]
-        public void RemoveRange_ShouldRemoveCartsAndCommit()
+        public void RemoveRange_ShouldCallRepositoryRemoveRangeAndCommit()
         {
             // Arrange
             var carts = new List<ShoppingCart>
             {
-                new ShoppingCart { Id = 1 },
-                new ShoppingCart { Id = 2 }
+                new ShoppingCart { Id = 1, ProductId = 1 },
+                new ShoppingCart { Id = 2, ProductId = 2 }
             };
 
             // Act
-            _shoppingCartService.RemoveRange(carts);
+            _service.RemoveRange(carts);
 
             // Assert
-            _mockShoppingCartRepo.Verify(r => r.RemoveRange(carts), Times.Once);
+            _mockShoppingCartRepository.Verify(r => r.RemoveRange(carts), Times.Once);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
         }
 
         [Fact]
-        public void CreateCartWithProduct_ShouldReturnNewCart()
+        public void CreateCartWithProduct_ShouldReturnCartWithCorrectProductInfo()
         {
             // Arrange
-            var product = new Product { Id = 5, Title = "Test Product", Price = 10.99m };
+            var product = new Product { Id = 1, Price = 10, Title = "Test Product" };
 
             // Act
-            var result = _shoppingCartService.CreateCartWithProduct(product);
+            var result = _service.CreateCartWithProduct(product);
 
             // Assert
-            Assert.Equal(product, result.Product);
+            Assert.NotNull(result);
             Assert.Equal(product.Id, result.ProductId);
+            Assert.Equal(product, result.Product);
             Assert.Equal(1, result.Count);
         }
 
-        [Fact]
-        public void AddOrUpdateShoppingCart_WithExistingCart_ShouldUpdateCountAndCommit()
+  /*      [Fact]
+        public void AddOrUpdateShoppingCart_WithExistingCart_ShouldUpdateCount()
         {
             // Arrange
-            string userId = "user123";
-            int productId = 1;
-            var existingCart = new ShoppingCart { Id = 1, ApplicationUserId = userId, ProductId = productId, Count = 1 };
-            var newCart = new ShoppingCart { ProductId = productId, Count = 2 };
+            var product = new Product { Id = 1, Price = 10, Title = "Test Product" };
+            var newCart = new ShoppingCart { ProductId = 1, Count = 2 };
+            var existingCart = new ShoppingCart { Id = 1, ProductId = 1, ApplicationUserId = _userId, Count = 1 };
 
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, true))
                 .Returns(existingCart);
 
             // Act
-            bool result = _shoppingCartService.AddOrUpdateShoppingCart(newCart, userId);
+            bool result = _service.AddOrUpdateShoppingCart(newCart, _userId);
 
             // Assert
             Assert.True(result);
-            Assert.Equal(3, existingCart.Count);  // 1 (existing) + 2 (new) = 3
-            _mockShoppingCartRepo.Verify(r => r.Update(existingCart), Times.Once);
+            Assert.Equal(_userId, newCart.ApplicationUserId);
+            Assert.Equal(3, existingCart.Count); // 1 (existing) + 2 (new)
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
-        }
+        }*/
 
-        [Fact]
-        public void AddOrUpdateShoppingCart_WithNewProduct_ShouldAddNewCartAndCommit()
+       /* [Fact]
+        public void AddOrUpdateShoppingCart_WithNewCart_ShouldAddCart()
         {
             // Arrange
-            string userId = "user123";
-            int productId = 1;
-            var newCart = new ShoppingCart { ProductId = productId, Count = 1 };
+            var newCart = new ShoppingCart { ProductId = 1, Count = 1 };
 
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
-                .Returns((ShoppingCart?)null);
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, true))
+                .Returns((ShoppingCart)null);
 
             // Act
-            bool result = _shoppingCartService.AddOrUpdateShoppingCart(newCart, userId);
+            bool result = _service.AddOrUpdateShoppingCart(newCart, _userId);
 
             // Assert
             Assert.True(result);
-            Assert.Equal(userId, newCart.ApplicationUserId);
-            _mockShoppingCartRepo.Verify(r => r.Add(newCart), Times.Once);
+            Assert.Equal(_userId, newCart.ApplicationUserId);
+            _mockShoppingCartRepository.Verify(r => r.Add(newCart), Times.Once);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
-        }
+        }*/
 
         [Fact]
-        public void AddOrUpdateShoppingCart_WithInvalidParams_ShouldReturnFalse()
+        public void AddOrUpdateShoppingCart_WithInvalidInputs_ShouldReturnFalse()
         {
-            // Arrange - Invalid inputs
-            string emptyUserId = "";
-            var nullCart = (ShoppingCart?)null;
-            var invalidProductCart = new ShoppingCart { ProductId = 0 };
-
-            // Act & Assert
-            Assert.False(_shoppingCartService.AddOrUpdateShoppingCart(invalidProductCart, _testUserId));
-            Assert.False(_shoppingCartService.AddOrUpdateShoppingCart(nullCart!, _testUserId));
-            Assert.False(_shoppingCartService.AddOrUpdateShoppingCart(new ShoppingCart { ProductId = 1 }, emptyUserId));
+            // Test cases with invalid inputs
+            Assert.False(_service.AddOrUpdateShoppingCart(null, _userId));
+            Assert.False(_service.AddOrUpdateShoppingCart(new ShoppingCart { ProductId = 0 }, _userId));
+            Assert.False(_service.AddOrUpdateShoppingCart(new ShoppingCart { ProductId = 1 }, ""));
+            Assert.False(_service.AddOrUpdateShoppingCart(new ShoppingCart { ProductId = 1 }, null));
         }
 
         [Fact]
-        public void GetShoppingCartVM_ShouldReturnViewModel()
+        public void GetShoppingCartVM_ShouldReturnCorrectVM()
         {
             // Arrange
-            string userId = "user123";
-            var products = new List<Product>
-            {
-                new Product { Id = 1, Title = "Product 1", Price = 10m },
-                new Product { Id = 2, Title = "Product 2", Price = 20m }
-            };
-
-            var shoppingCarts = new List<ShoppingCart>
-            {
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 1, Count = 2, Product = products[0] },
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 2, Count = 1, Product = products[1] }
-            };
-
-            _mockShoppingCartRepo.Setup(r => r.GetAll(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>()))
-                .Returns(shoppingCarts);
-
-            // Act
-            var result = _shoppingCartService.GetShoppingCartVM(userId);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(shoppingCarts, result.ShoppingCartList);
-            Assert.Equal(40.0, result.OrderHeader.OrderTotal); 
-        }
-
-        [Fact]
-        public void GetShoppingCartVM_WithProductDiscounts_ShouldCalculateCorrectTotal()
-        {
-            // Arrange
-            string userId = "user123";
-            var products = new List<Product>
-            {
-                new Product { Id = 1, Title = "Product 1", Price = 10m, DiscountAmount = 2m },
-                new Product { Id = 2, Title = "Product 2", Price = 20m, DiscountAmount = 5m }
-            };
-
-            var shoppingCarts = new List<ShoppingCart>
-            {
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 1, Count = 2, Product = products[0] },
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 2, Count = 1, Product = products[1] }
-            };
-
-            _mockShoppingCartRepo.Setup(r => r.GetAll(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>()))
-                .Returns(shoppingCarts);
-
-            // Act
-            var result = _shoppingCartService.GetShoppingCartVM(userId);
-
-            // Assert
-            Assert.NotNull(result);
-            // (10-2)*2 + (20-5)*1 = 16 + 15 = 31
-            Assert.Equal(31.0, result.OrderHeader.OrderTotal);
-        }
-
-        [Fact]
-        public void GetShoppingCartVM_WithNullProducts_ShouldHandleGracefully()
-        {
-            // Arrange
-            string userId = "user123";
-            var shoppingCarts = new List<ShoppingCart>
-            {
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 1, Count = 2, Product = null },
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 2, Count = 1, Product = new Product { Price = 20m } }
-            };
-
-            _mockShoppingCartRepo.Setup(r => r.GetAll(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>()))
-                .Returns(shoppingCarts);
-
-            // Act
-            var result = _shoppingCartService.GetShoppingCartVM(userId);
-
-            // Assert
-            Assert.NotNull(result);
-            // Only the valid product should be counted: 20 * 1 = 20
-            Assert.Equal(20.0, result.OrderHeader.OrderTotal);
-        }
-
-        [Fact]
-        public void RemoveShoppingCarts_WithValidOrder_ShouldRemoveCartsAndCommit()
-        {
-            // Arrange
-            string userId = "user123";
-            var orderHeader = new OrderHeader { ApplicationUserId = userId };
             var carts = new List<ShoppingCart>
             {
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 1 },
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 2 }
+                new ShoppingCart {
+                    Id = 1,
+                    ProductId = 1,
+                    ApplicationUserId = _userId,
+                    Count = 2,
+                    Product = new Product { Id = 1, Price = 10, DiscountAmount = 1 }
+                },
+                new ShoppingCart {
+                    Id = 2,
+                    ProductId = 2,
+                    ApplicationUserId = _userId,
+                    Count = 1,
+                    Product = new Product { Id = 2, Price = 20, DiscountAmount = 2 }
+                }
             };
 
-            _mockShoppingCartRepo.Setup(r => r.GetAll(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
+            _mockShoppingCartRepository.Setup(r => r.GetAll(
+                It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
+                It.IsAny<string>()))
+                .Returns(carts);
+
+            // Expected total: (10-1)*2 + (20-2)*1 = 18 + 18 = 36
+
+            // Act
+            var result = _service.GetShoppingCartVM(_userId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(carts, result.ShoppingCartList);
+            Assert.NotNull(result.OrderHeader);
+            Assert.Equal(36, result.OrderHeader.OrderTotal);
+        }
+
+       /* [Fact]
+        public void RemoveShoppingCarts_WithValidOrderHeader_ShouldRemoveCartsAndCommit()
+        {
+            // Arrange
+            var orderHeader = new OrderHeader { Id = 1, ApplicationUserId = _userId };
+            var carts = new List<ShoppingCart>
+            {
+                new ShoppingCart { Id = 1, ProductId = 1, ApplicationUserId = _userId },
+                new ShoppingCart { Id = 2, ProductId = 2, ApplicationUserId = _userId }
+            };
+
+            _mockShoppingCartRepository.Setup(r => r.GetAll(
+                It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
                 It.IsAny<string>()))
                 .Returns(carts);
 
             // Act
-            var result = _shoppingCartService.RemoveShoppingCarts(orderHeader);
+            var result = _service.RemoveShoppingCarts(orderHeader);
 
             // Assert
             Assert.Equal(carts, result);
-            _mockShoppingCartRepo.Verify(r => r.RemoveRange(carts), Times.Once);
+            _mockShoppingCartRepository.Verify(r => r.RemoveRange(carts), Times.Once);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
-        }
+        }*/
 
         [Fact]
-        public void RemoveShoppingCarts_WithNullOrder_ShouldReturnEmptyList()
+        public void RemoveShoppingCarts_WithNullOrderHeader_ShouldReturnEmptyList()
         {
-            // Arrange
-            OrderHeader? nullOrder = null;
-
             // Act
-            var result = _shoppingCartService.RemoveShoppingCarts(nullOrder);
+            var result = _service.RemoveShoppingCarts(null);
 
             // Assert
             Assert.Empty(result);
-            _mockShoppingCartRepo.Verify(r => r.RemoveRange(It.IsAny<List<ShoppingCart>>()), Times.Never);
+            _mockShoppingCartRepository.Verify(r => r.RemoveRange(It.IsAny<List<ShoppingCart>>()), Times.Never);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Never);
         }
 
-        [Fact]
-        public void Plus_WithDbCart_ShouldIncrementCount()
+      /*  [Fact]
+        public void Plus_WithDatabaseCart_ShouldIncrementCount()
         {
             // Arrange
             int cartId = 1;
-            var cart = new ShoppingCart
-            {
-                Id = cartId,
-                Count = 1,
-                Product = new Product { StockQuantity = 10 }
-            };
-
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
-                .Returns(cart);
+            var product = new Product { Id = 1, Price = 10, StockQuantity = 5 };
+            var cart = new ShoppingCart { Id = cartId, ProductId = 1, Count = 1, Product = product };
 
             // Act
-            _shoppingCartService.Plus(cart, cartId);
+            _service.Plus(cart, cartId);
 
             // Assert
             Assert.Equal(2, cart.Count);
-            _mockShoppingCartRepo.Verify(r => r.Update(cart), Times.Once);
+            _mockShoppingCartRepository.Verify(r => r.Update(cart), Times.Once);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
         }
 
         [Fact]
-        public void Plus_WithDbCart_ExceedingStock_ShouldNotIncrement()
+        public void Plus_WithDatabaseCart_ExceedingStock_ShouldNotIncrementCount()
         {
             // Arrange
             int cartId = 1;
-            var cart = new ShoppingCart
-            {
-                Id = cartId,
-                Count = 10,
-                Product = new Product { StockQuantity = 10 }
-            };
-
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
-                .Returns(cart);
+            var product = new Product { Id = 1, Price = 10, StockQuantity = 1 };
+            var cart = new ShoppingCart { Id = cartId, ProductId = 1, Count = 1, Product = product };
 
             // Act
-            _shoppingCartService.Plus(cart, cartId);
+            _service.Plus(cart, cartId);
 
             // Assert
-            Assert.Equal(10, cart.Count); // Count remains unchanged
-            _mockShoppingCartRepo.Verify(r => r.Update(It.IsAny<ShoppingCart>()), Times.Never);
+            Assert.Equal(1, cart.Count); // Count should remain unchanged
+            _mockShoppingCartRepository.Verify(r => r.Update(cart), Times.Never);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Never);
-        }
+        }*/
 
-        [Fact]
+      /*  [Fact]
         public void Plus_WithMemoryCart_ShouldIncrementCount()
         {
             // Arrange
             int cartId = 1;
-            var memoryCart = new List<ShoppingCart>
-            {
-                new ShoppingCart
-                {
-                    Id = cartId,
-                    Count = 1,
-                    Product = new Product { StockQuantity = 10 }
-                }
-            };
+            var product = new Product { Id = 1, Price = 10, StockQuantity = 5 };
+            var carts = new List<ShoppingCart> { new ShoppingCart { Id = cartId, ProductId = 1, Count = 1, Product = product } };
 
-            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns(memoryCart);
+            var cacheEntry = new Mock<ICacheEntry>();
+            _mockMemoryCache.Setup(m => m.CreateEntry(It.IsAny<object>())).Returns(cacheEntry.Object);
+            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey)).Returns(carts);
 
             // Act
-            _shoppingCartService.Plus(null, cartId);
+            _service.Plus(null, cartId);
 
             // Assert
-            Assert.Equal(2, memoryCart[0].Count);
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, memoryCart, It.IsAny<MemoryCacheEntryOptions>()), Times.AtLeastOnce);
+            Assert.Equal(2, carts[0].Count);
+            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts), Times.Once);
         }
 
         [Fact]
-        public void Plus_WithMemoryCart_ExceedingStock_ShouldNotIncrement()
+        public void Minus_WithDatabaseCart_ShouldDecrementCount()
         {
             // Arrange
             int cartId = 1;
-            var memoryCart = new List<ShoppingCart>
-            {
-                new ShoppingCart
-                {
-                    Id = cartId,
-                    Count = 10,
-                    Product = new Product { StockQuantity = 10 }
-                }
-            };
+            var cart = new ShoppingCart { Id = cartId, ProductId = 1, Count = 2, ApplicationUserId = _userId };
 
-            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns(memoryCart);
-
-            // Act
-            _shoppingCartService.Plus(null, cartId);
-
-            // Assert
-            Assert.Equal(10, memoryCart[0].Count); // Count remains unchanged
-        }
-
-        [Fact]
-        public void Minus_WithDbCart_ShouldDecrementCount()
-        {
-            // Arrange
-            int cartId = 1;
-            string userId = "test-user";
-            var cart = new ShoppingCart
-            {
-                Id = cartId,
-                Count = 2,
-                ApplicationUserId = userId
-            };
-
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
                 .Returns(cart);
 
-            _mockShoppingCartRepo.Setup(r => r.GetAll(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>()))
-                .Returns(new List<ShoppingCart> { cart });
-
             // Act
-            _shoppingCartService.Minus(cartId);
+            _service.Minus(cartId);
 
             // Assert
             Assert.Equal(1, cart.Count);
-            _mockShoppingCartRepo.Verify(r => r.Update(cart), Times.Once);
+            _mockShoppingCartRepository.Verify(r => r.Update(cart), Times.Once);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
         }
 
         [Fact]
-        public void Minus_WithDbCart_CountIsOne_ShouldRemoveCart()
+        public void Minus_WithDatabaseCart_CountOne_ShouldDeleteCart()
         {
             // Arrange
             int cartId = 1;
-            string userId = "test-user";
-            var cart = new ShoppingCart
-            {
-                Id = cartId,
-                Count = 1,
-                ApplicationUserId = userId
-            };
+            var cart = new ShoppingCart { Id = cartId, ProductId = 1, Count = 1, ApplicationUserId = _userId };
 
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
                 .Returns(cart);
 
-            _mockShoppingCartRepo.Setup(r => r.GetAll(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>()))
-                .Returns(new List<ShoppingCart> { cart });
+            _mockShoppingCartRepository.Setup(r => r.GetAll(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null))
+                .Returns(new List<ShoppingCart>());
 
             // Act
-            _shoppingCartService.Minus(cartId);
+            _service.Minus(cartId);
 
             // Assert
-            _mockShoppingCartRepo.Verify(r => r.Remove(cart), Times.Once);
+            _mockShoppingCartRepository.Verify(r => r.Remove(cart), Times.Once);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
         }
 
@@ -681,241 +448,185 @@ namespace AmarTech.Test.ServiceTests
         {
             // Arrange
             int cartId = 1;
-            var memoryCart = new List<ShoppingCart>
-            {
-                new ShoppingCart
-                {
-                    Id = cartId,
-                    Count = 2
-                }
-            };
+            var carts = new List<ShoppingCart> { new ShoppingCart { Id = cartId, ProductId = 1, Count = 2 } };
 
-            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns(memoryCart);
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
+                .Returns((ShoppingCart)null);
 
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
-                .Returns((ShoppingCart?)null);
+            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey)).Returns(carts);
 
             // Act
-            _shoppingCartService.Minus(cartId);
+            _service.Minus(cartId);
 
             // Assert
-            Assert.Equal(1, memoryCart[0].Count);
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, memoryCart, It.IsAny<MemoryCacheEntryOptions>()), Times.AtLeastOnce);
+            Assert.Equal(1, carts[0].Count);
+            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts), Times.Once);
         }
 
         [Fact]
-        public void Minus_WithMemoryCart_CountIsOne_ShouldRemoveCart()
+        public void Minus_WithMemoryCart_CountOne_ShouldRemoveCart()
         {
             // Arrange
             int cartId = 1;
-            var memoryCart = new List<ShoppingCart>
-            {
-                new ShoppingCart
-                {
-                    Id = cartId,
-                    Count = 1
-                }
-            };
+            var carts = new List<ShoppingCart> { new ShoppingCart { Id = cartId, ProductId = 1, Count = 1 } };
 
-            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns(memoryCart);
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
+                .Returns((ShoppingCart)null);
 
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
-                .Returns((ShoppingCart?)null);
+            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey)).Returns(carts);
 
             // Act
-            _shoppingCartService.Minus(cartId);
+            _service.Minus(cartId);
 
             // Assert
-            Assert.Empty(memoryCart);
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, memoryCart, It.IsAny<MemoryCacheEntryOptions>()), Times.AtLeastOnce);
-        }
+            Assert.Empty(carts);
+            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts), Times.Once);
+        }*/
 
-        [Fact]
-        public void RemoveCartValue_WithDbCart_ShouldRemoveCart()
+        /*[Fact]
+        public void RemoveCartValue_WithDatabaseCart_ShouldRemoveCart()
         {
             // Arrange
             int cartId = 1;
-            string userId = "test-user";
-            var cart = new ShoppingCart
-            {
-                Id = cartId,
-                ApplicationUserId = userId
-            };
+            var cart = new ShoppingCart { Id = cartId, ProductId = 1, Count = 1, ApplicationUserId = _userId };
 
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
                 .Returns(cart);
 
-            _mockShoppingCartRepo.Setup(r => r.GetAll(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>()))
-                .Returns(new List<ShoppingCart> { cart });
+            _mockShoppingCartRepository.Setup(r => r.GetAll(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null))
+                .Returns(new List<ShoppingCart>());
 
             // Act
-            _shoppingCartService.RemoveCartValue(cartId);
+            _service.RemoveCartValue(cartId);
 
             // Assert
-            _mockShoppingCartRepo.Verify(r => r.Remove(cart), Times.Once);
+            _mockShoppingCartRepository.Verify(r => r.Remove(cart), Times.Once);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
-        }
+        }*/
 
-        [Fact]
+      /*  [Fact]
         public void RemoveCartValue_WithMemoryCart_ShouldRemoveCart()
         {
             // Arrange
             int cartId = 1;
-            var memoryCart = new List<ShoppingCart>
-            {
-                new ShoppingCart { Id = cartId }
-            };
+            var carts = new List<ShoppingCart> { new ShoppingCart { Id = cartId, ProductId = 1, Count = 1 } };
 
-            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
-                .Returns(memoryCart);
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
+                .Returns((ShoppingCart)null);
 
-            _mockShoppingCartRepo.Setup(r => r.Get(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>(),
-                It.IsAny<bool>()))
-                .Returns((ShoppingCart?)null);
+            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey)).Returns(carts);
 
             // Act
-            _shoppingCartService.RemoveCartValue(cartId);
+            _service.RemoveCartValue(cartId);
 
             // Assert
-            Assert.Empty(memoryCart);
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, memoryCart, It.IsAny<MemoryCacheEntryOptions>()), Times.AtLeastOnce);
-        }
+            Assert.Empty(carts);
+            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts), Times.Once);
+        }*/
 
         [Fact]
-        public void GetShoppingCartByUserId_ShouldReturnCartsByUserId()
+        public void GetShoppingCartByUserId_ShouldCallRepositoryGetAll()
         {
             // Arrange
-            string userId = "user123";
             var expectedCarts = new List<ShoppingCart>
             {
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 1 },
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 2 }
+                new ShoppingCart { Id = 1, ProductId = 1, ApplicationUserId = _userId },
+                new ShoppingCart { Id = 2, ProductId = 2, ApplicationUserId = _userId }
             };
 
-            _mockShoppingCartRepo.Setup(r => r.GetAll(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
-                It.IsAny<string>()))
+            _mockShoppingCartRepository.Setup(r => r.GetAll(
+                It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
+                null))
                 .Returns(expectedCarts);
 
             // Act
-            var result = _shoppingCartService.GetShoppingCartByUserId(userId);
+            var result = _service.GetShoppingCartByUserId(_userId);
 
             // Assert
             Assert.Equal(expectedCarts, result);
-            Assert.Equal(2, result.Count());
+            _mockShoppingCartRepository.Verify(r => r.GetAll(
+                It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
+                null), Times.Once);
         }
 
         [Fact]
-        public void GetShoppingCartVMForSummaryPost_ShouldReturnCorrectViewModel()
+        public void GetShoppingCartVMForSummaryPost_ShouldCalculateOrderTotalCorrectly()
         {
             // Arrange
-            string userId = "user123";
-            var applicationUser = new ApplicationUser
+            var user = new ApplicationUser
             {
-                Id = userId,
+                Id = _userId,
                 Name = "Test User",
-                PhoneNumber = "1234567890",
-                StreetAddress = "123 Main St",
+                PhoneNumber = "123456789",
+                StreetAddress = "123 Test St",
                 City = "Test City",
                 State = "TS",
-                PostalCode = "12345",
-                CompanyId = 0  // Regular user
-            };
-
-            var products = new List<Product>
-            {
-                new Product { Id = 1, Title = "Product 1", Price = 10m },
-                new Product { Id = 2, Title = "Product 2", Price = 20m }
+                PostalCode = "12345"
             };
 
             var carts = new List<ShoppingCart>
             {
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 1, Count = 2, Product = products[0] },
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 2, Count = 1, Product = products[1] }
+                new ShoppingCart
+                {
+                    Id = 1,
+                    ProductId = 1,
+                    Count = 2,
+                    Product = new Product { Id = 1, Price = 10, DiscountAmount = 1, Title = "Product 1" }
+                },
+                new ShoppingCart
+                {
+                    Id = 2,
+                    ProductId = 2,
+                    Count = 1,
+                    Product = new Product { Id = 2, Price = 20, DiscountAmount = 2, Title = "Product 2" }
+                }
             };
 
             // Act
-            var result = _shoppingCartService.GetShoppingCartVMForSummaryPost(carts, applicationUser, userId);
+            var result = _service.GetShoppingCartVMForSummaryPost(carts, user, _userId);
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal(carts, result.ShoppingCartList);
-            Assert.Equal(40.0, result.OrderHeader.OrderTotal);  // (10 * 2) + (20 * 1) = 40
-            Assert.Equal(userId, result.OrderHeader.ApplicationUserId);
-            Assert.Equal("Test User", result.OrderHeader.Name);
+            Assert.NotNull(result.OrderHeader);
+            Assert.Equal(_userId, result.OrderHeader.ApplicationUserId);
+            Assert.Equal(user.Name, result.OrderHeader.Name);
+            Assert.Equal(user.PhoneNumber, result.OrderHeader.PhoneNumber);
+            Assert.Equal(user.StreetAddress, result.OrderHeader.StreetAddress);
+            Assert.Equal(user.City, result.OrderHeader.City);
+            Assert.Equal(user.State, result.OrderHeader.State);
+            Assert.Equal(user.PostalCode, result.OrderHeader.PostalCode);
+            Assert.Equal(36, result.OrderHeader.OrderTotal); // (10-1)*2 + (20-2)*1 = 18 + 18 = 36
+            Assert.Equal(9, result.ShoppingCartList.ElementAt(0).Price); // 10-1
+            Assert.Equal(18, result.ShoppingCartList.ElementAt(1).Price); // 20-2
             Assert.Equal(SD.PaymentStatusPending, result.OrderHeader.PaymentStatus);
             Assert.Equal(SD.StatusPending, result.OrderHeader.OrderStatus);
-
-            // Check product prices were copied to cart items
-            Assert.Equal(10.0, result.ShoppingCartList.First(c => c.ProductId == 1).Price);
-            Assert.Equal(20.0, result.ShoppingCartList.First(c => c.ProductId == 2).Price);
-        }
-
-        [Fact]
-        public void GetShoppingCartVMForSummaryPost_WithProductDiscounts_ShouldCalculateDiscountedPrices()
-        {
-            // Arrange
-            string userId = "user123";
-            var applicationUser = new ApplicationUser { Id = userId, Name = "Test User" };
-
-            var products = new List<Product>
-            {
-                new Product { Id = 1, Title = "Product 1", Price = 10m, DiscountAmount = 2m },
-                new Product { Id = 2, Title = "Product 2", Price = 20m, DiscountAmount = 5m }
-            };
-
-            var carts = new List<ShoppingCart>
-            {
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 1, Count = 2, Product = products[0] },
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 2, Count = 1, Product = products[1] }
-            };
-
-            // Act
-            var result = _shoppingCartService.GetShoppingCartVMForSummaryPost(carts, applicationUser, userId);
-
-            // Assert
-            Assert.NotNull(result);
-            // (10-2)*2 + (20-5)*1 = 16 + 15 = 31
-            Assert.Equal(31.0, result.OrderHeader.OrderTotal);
-            Assert.Equal(8.0, result.ShoppingCartList.First(c => c.ProductId == 1).Price); // 10 - 2 = 8
-            Assert.Equal(15.0, result.ShoppingCartList.First(c => c.ProductId == 2).Price); // 20 - 5 = 15
         }
 
         [Fact]
         public void GetShoppingCartVMForSummaryPost_WithCompanyUser_ShouldSetDelayedPayment()
         {
             // Arrange
-            string userId = "user123";
-            var applicationUser = new ApplicationUser
+            var user = new ApplicationUser
             {
-                Id = userId,
-                Name = "Company User",
+                Id = _userId,
+                Name = "Test User",
                 CompanyId = 1  // Company user
             };
 
-            var product = new Product { Id = 1, Title = "Product 1", Price = 10m };
             var carts = new List<ShoppingCart>
             {
-                new ShoppingCart { ApplicationUserId = userId, ProductId = 1, Count = 1, Product = product }
+                new ShoppingCart
+                {
+                    Id = 1,
+                    ProductId = 1,
+                    Count = 1,
+                    Product = new Product { Id = 1, Price = 10, DiscountAmount = 0 }
+                }
             };
 
             // Act
-            var result = _shoppingCartService.GetShoppingCartVMForSummaryPost(carts, applicationUser, userId);
+            var result = _service.GetShoppingCartVMForSummaryPost(carts, user, _userId);
 
             // Assert
             Assert.Equal(SD.PaymentStatusDelayedPayment, result.OrderHeader.PaymentStatus);
@@ -923,88 +634,57 @@ namespace AmarTech.Test.ServiceTests
         }
 
         [Fact]
-        public void CheckOutForUser_ShouldCreateStripeSession()
+        public void CheckOutForUser_ShouldCreateCorrectStripeOptions()
         {
             // Arrange
-            var shoppingCartVM = new ShoppingCartVM
+            var cartVM = new ShoppingCartVM
             {
                 OrderHeader = new OrderHeader { Id = 1 },
                 ShoppingCartList = new List<ShoppingCart>
                 {
                     new ShoppingCart
                     {
-                        Product = new Product { Id = 1, Title = "Product 1" },
-                        Price = 10.0,
-                        Count = 2
+                        Id = 1,
+                        ProductId = 1,
+                        Count = 2,
+                        Price = 9,
+                        Product = new Product { Id = 1, Title = "Product 1", Price = 10, DiscountAmount = 1 }
                     },
                     new ShoppingCart
                     {
-                        Product = new Product { Id = 2, Title = "Product 2" },
-                        Price = 20.0,
-                        Count = 1
+                        Id = 2,
+                        ProductId = 2,
+                        Count = 1,
+                        Price = 18,
+                        Product = new Product { Id = 2, Title = "Product 2", Price = 20, DiscountAmount = 2 }
                     }
                 }
             };
 
             // Act
-            var result = _shoppingCartService.CheckOutForUser(shoppingCartVM);
+            var result = _service.CheckOutForUser(cartVM);
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal("payment", result.Mode);
+            Assert.Equal($"https://localhost:7000/customer/cart/OrderConfirmation?id={cartVM.OrderHeader.Id}", result.SuccessUrl);
+            Assert.Equal("https://localhost:7000/customer/cart/index", result.CancelUrl);
             Assert.Equal(2, result.LineItems.Count);
 
-            // Check first line item
-            var firstItem = result.LineItems[0];
-            Assert.Equal(1000, firstItem.PriceData.UnitAmount);  // $10.00 = 1000 cents
-            Assert.Equal("usd", firstItem.PriceData.Currency);
-            Assert.Equal("Product 1", firstItem.PriceData.ProductData.Name);
-            Assert.Equal(2, firstItem.Quantity);
+            var item1 = result.LineItems[0];
+            Assert.Equal(900, item1.PriceData.UnitAmount); // $9.00
+            Assert.Equal("usd", item1.PriceData.Currency);
+            Assert.Equal("Product 1", item1.PriceData.ProductData.Name);
+            Assert.Equal(2, item1.Quantity);
 
-            // Check second line item  
-            var secondItem = result.LineItems[1];
-            Assert.Equal(2000, secondItem.PriceData.UnitAmount);  // $20.00 = 2000 cents
-            Assert.Equal("Product 2", secondItem.PriceData.ProductData.Name);
-            Assert.Equal(1, secondItem.Quantity);
-
-            // Check URLs
-            Assert.Contains("OrderConfirmation?id=1", result.SuccessUrl);
-            Assert.Contains("customer/cart/index", result.CancelUrl);
+            var item2 = result.LineItems[1];
+            Assert.Equal(1800, item2.PriceData.UnitAmount); // $18.00
+            Assert.Equal("usd", item2.PriceData.Currency);
+            Assert.Equal("Product 2", item2.PriceData.ProductData.Name);
+            Assert.Equal(1, item2.Quantity);
         }
 
-        [Fact]
-        public void CheckOutForUser_WithNullProductInCart_ShouldSkipThatItem()
-        {
-            // Arrange
-            var shoppingCartVM = new ShoppingCartVM
-            {
-                OrderHeader = new OrderHeader { Id = 1 },
-                ShoppingCartList = new List<ShoppingCart>
-                {
-                    new ShoppingCart
-                    {
-                        Product = new Product { Id = 1, Title = "Product 1" },
-                        Price = 10.0,
-                        Count = 2
-                    },
-                    new ShoppingCart
-                    {
-                        Product = null, // Null product should be skipped
-                        Price = 20.0,
-                        Count = 1
-                    }
-                }
-            };
-
-            // Act
-            var result = _shoppingCartService.CheckOutForUser(shoppingCartVM);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Single(result.LineItems); // Only one valid item
-        }
-
-        [Fact]
+      /*  [Fact]
         public void AddToCart_ShouldAddCartToMemoryCache()
         {
             // Arrange
@@ -1015,144 +695,120 @@ namespace AmarTech.Test.ServiceTests
                 .Returns(existingCarts);
 
             // Act
-            _shoppingCartService.AddToCart(cart);
+            _service.AddToCart(cart);
 
             // Assert
-            Assert.Single(existingCarts);
-            Assert.Equal(cart, existingCarts[0]);
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, existingCarts, It.IsAny<MemoryCacheEntryOptions>()), Times.AtLeastOnce);
+            Assert.Contains(cart, existingCarts);
+            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, existingCarts), Times.Once);
         }
 
         [Fact]
-        public void GetCart_WhenCacheHasValue_ShouldReturnCachedValue()
+        public void GetCart_ShouldReturnCartsFromMemoryCache()
         {
             // Arrange
             var expectedCarts = new List<ShoppingCart>
             {
-                new ShoppingCart { Id = 1, ProductId = 1 }
+                new ShoppingCart { Id = 1, ProductId = 1, Count = 1 }
             };
 
             _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
                 .Returns(expectedCarts);
 
             // Act
-            var result = _shoppingCartService.GetCart();
+            var result = _service.GetCart();
 
             // Assert
             Assert.Equal(expectedCarts, result);
-            Assert.Single(result);
         }
 
         [Fact]
-        public void GetCart_WhenCacheIsEmpty_ShouldReturnEmptyList()
+        public void GetCart_WithNoCachedCarts_ShouldReturnEmptyList()
         {
             // Arrange
             _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
                 .Returns((List<ShoppingCart>)null);
 
             // Act
-            var result = _shoppingCartService.GetCart();
+            var result = _service.GetCart();
 
             // Assert
             Assert.NotNull(result);
             Assert.Empty(result);
-        }
+        }*/
 
         [Fact]
-        public void ClearCart_ShouldRemoveFromMemoryCache()
+        public void ClearCart_ShouldRemoveCartFromMemoryCache()
         {
             // Act
-            _shoppingCartService.ClearCart();
+            _service.ClearCart();
 
             // Assert
             _mockMemoryCache.Verify(m => m.Remove(_guestCartKey), Times.Once);
         }
 
-        [Fact]
-        public void SetInMemory_WithValidCart_ShouldSetInMemoryCache()
+      /*  [Fact]
+        public void SetInMemory_WithValidCart_ShouldStoreInMemoryCache()
         {
             // Arrange
-            var carts = new List<ShoppingCart> { new ShoppingCart { Id = 1 } };
-
-            // Act
-            _shoppingCartService.SetInMemory(carts);
-
-            // Assert
-            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts, It.IsAny<MemoryCacheEntryOptions>()), Times.Once);
-        }
-
-        [Fact]
-        public void SetInMemory_WithNullCart_ShouldNotSetInMemoryCache()
-        {
-            // Act
-            _shoppingCartService.SetInMemory(null);
-
-            // Assert
-            _mockMemoryCache.Verify(m => m.Set(
-                It.IsAny<string>(),
-                It.IsAny<List<ShoppingCart>>(),
-                It.IsAny<MemoryCacheEntryOptions>()),
-                Times.Never);
-        }
-
-        [Fact]
-        public void MemoryCartVM_ShouldReturnShoppingCartVM()
-        {
-            // Arrange
-            var products = new List<Product>
-            {
-                new Product { Id = 1, Title = "Product 1", Price = 10m },
-                new Product { Id = 2, Title = "Product 2", Price = 20m }
-            };
-
             var carts = new List<ShoppingCart>
             {
-                new ShoppingCart { ProductId = 1, Count = 2, Product = products[0] },
-                new ShoppingCart { ProductId = 2, Count = 1, Product = products[1] }
+                new ShoppingCart { Id = 1, ProductId = 1, Count = 1 }
             };
 
             // Act
-            var result = _shoppingCartService.MemoryCartVM(carts);
+            _service.SetInMemory(carts);
+
+            // Assert
+            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts), Times.Once);
+        }
+
+        [Fact]
+        public void SetInMemory_WithNullCart_ShouldNotCallMemoryCache()
+        {
+            // Act
+            _service.SetInMemory(null);
+
+            // Assert
+            _mockMemoryCache.Verify(m => m.Set(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
+        }*/
+
+        [Fact]
+        public void MemoryCartVM_ShouldCalculateOrderTotalCorrectly()
+        {
+            // Arrange
+            var carts = new List<ShoppingCart>
+            {
+                new ShoppingCart {
+                    Id = 1,
+                    ProductId = 1,
+                    Count = 2,
+                    Product = new Product { Id = 1, Price = 10, DiscountAmount = 1 }
+                },
+                new ShoppingCart {
+                    Id = 2,
+                    ProductId = 2,
+                    Count = 1,
+                    Product = new Product { Id = 2, Price = 20, DiscountAmount = 2 }
+                }
+            };
+
+            // Act
+            var result = _service.MemoryCartVM(carts);
 
             // Assert
             Assert.NotNull(result);
             Assert.Equal(carts, result.ShoppingCartList);
-            Assert.Equal(40.0, result.OrderHeader.OrderTotal); // (10 * 2) + (20 * 1) = 40
+            Assert.NotNull(result.OrderHeader);
+            Assert.Equal(36, result.OrderHeader.OrderTotal); // (10-1)*2 + (20-2)*1 = 18 + 18 = 36
         }
 
         [Fact]
-        public void MemoryCartVM_WithDiscounts_ShouldCalculateCorrectTotal()
+        public void CombineToDB_ShouldMergeCartsAndClearMemory()
         {
             // Arrange
-            var products = new List<Product>
-            {
-                new Product { Id = 1, Title = "Product 1", Price = 10m, DiscountAmount = 2m },
-                new Product { Id = 2, Title = "Product 2", Price = 20m, DiscountAmount = 5m }
-            };
-
-            var carts = new List<ShoppingCart>
-            {
-                new ShoppingCart { ProductId = 1, Count = 2, Product = products[0] },
-                new ShoppingCart { ProductId = 2, Count = 1, Product = products[1] }
-            };
-
-            // Act
-            var result = _shoppingCartService.MemoryCartVM(carts);
-
-            // Assert
-            Assert.NotNull(result);
-            // (10-2)*2 + (20-5)*1 = 16 + 15 = 31
-            Assert.Equal(31.0, result.OrderHeader.OrderTotal);
-        }
-
-        [Fact]
-        public void CombineToDB_ShouldCombineCartsAndClearCache()
-        {
-            // Arrange
-            string userId = "user123";
             var dbCarts = new List<ShoppingCart>
             {
-                new ShoppingCart { Id = 1, ApplicationUserId = userId, ProductId = 1, Count = 1 }
+                new ShoppingCart { Id = 1, ProductId = 1, Count = 1, ApplicationUserId = _userId }
             };
 
             var memoryCarts = new List<ShoppingCart>
@@ -1162,79 +818,331 @@ namespace AmarTech.Test.ServiceTests
 
             var combinedCarts = new List<ShoppingCart>
             {
-                new ShoppingCart { Id = 1, ApplicationUserId = userId, ProductId = 1, Count = 1 },
-                new ShoppingCart { Id = 2, ApplicationUserId = userId, ProductId = 2, Count = 1 }
+                new ShoppingCart {
+                    Id = 1,
+                    ProductId = 1,
+                    Count = 1,
+                    ApplicationUserId = _userId,
+                    Product = new Product { Id = 1, Price = 10, DiscountAmount = 0 }
+                },
+                new ShoppingCart {
+                    Id = 2,
+                    ProductId = 2,
+                    Count = 1,
+                    ApplicationUserId = _userId,
+                    Product = new Product { Id = 2, Price = 20, DiscountAmount = 0 }
+                }
             };
 
-            var products = new List<Product>
-            {
-                new Product { Id = 1, Title = "Product 1", Price = 10m },
-                new Product { Id = 2, Title = "Product 2", Price = 20m }
-            };
-
-            // Setup repository to simulate combining carts
-            _mockShoppingCartRepo.Setup(r => r.CombineToDB(dbCarts, memoryCarts, userId))
-                .Verifiable();
-
-            // Setup GetShoppingCartsByUserId to return combined carts after combining
-            _mockShoppingCartRepo.Setup(r => r.GetAll(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
+            _mockShoppingCartRepository.Setup(r => r.GetAll(
+                It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
                 It.IsAny<string>()))
                 .Returns(combinedCarts);
 
             // Act
-            var result = _shoppingCartService.CombineToDB(dbCarts, memoryCarts, userId);
+            var result = _service.CombineToDB(dbCarts, memoryCarts, _userId);
 
             // Assert
-            _mockShoppingCartRepo.Verify(r => r.CombineToDB(dbCarts, memoryCarts, userId), Times.Once);
-            _mockMemoryCache.Verify(m => m.Remove(_guestCartKey), Times.Once);
             Assert.NotNull(result);
             Assert.Equal(combinedCarts, result.ShoppingCartList);
+            Assert.Equal(30, result.OrderHeader.OrderTotal); // 10*1 + 20*1 = 30
+
+            _mockShoppingCartRepository.Verify(r => r.CombineToDB(dbCarts, memoryCarts, _userId), Times.Once);
+            _mockMemoryCache.Verify(m => m.Remove(_guestCartKey), Times.Once);
+        }
+
+        // Additional tests for edge cases
+
+        [Fact]
+        public void GetShoppingCartVM_WithNullUserId_ShouldReturnEmptyCart()
+        {
+            // Arrange
+            _mockShoppingCartRepository.Setup(r => r.GetAll(
+                It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
+                It.IsAny<string>()))
+                .Returns(new List<ShoppingCart>());
+
+            // Act
+            var result = _service.GetShoppingCartVM(null);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result.ShoppingCartList);
+            Assert.NotNull(result.OrderHeader);
+            Assert.Equal(0, result.OrderHeader.OrderTotal);
         }
 
         [Fact]
-        public void CombineToDB_WithProductPricesAndDiscounts_ShouldCalculateCorrectTotal()
+        public void GetShoppingCartVM_WithProductsHavingNullReferences_ShouldHandleGracefully()
         {
             // Arrange
-            string userId = "user123";
-            var products = new List<Product>
+            var carts = new List<ShoppingCart>
             {
-                new Product { Id = 1, Title = "Product 1", Price = 10m, DiscountAmount = 2m },
-                new Product { Id = 2, Title = "Product 2", Price = 20m, DiscountAmount = 5m }
+                new ShoppingCart { Id = 1, ProductId = 1, ApplicationUserId = _userId, Count = 1, Product = null },
+                new ShoppingCart {
+                    Id = 2,
+                    ProductId = 2,
+                    ApplicationUserId = _userId,
+                    Count = 1,
+                    Product = new Product { Id = 2, Price = 20, DiscountAmount = 2 }
+                }
             };
 
-            var dbCarts = new List<ShoppingCart>
-            {
-                new ShoppingCart { Id = 1, ApplicationUserId = userId, ProductId = 1, Count = 1, Product = products[0] }
-            };
-
-            var memoryCarts = new List<ShoppingCart>
-            {
-                new ShoppingCart { Id = 2, ProductId = 2, Count = 1, Product = products[1] }
-            };
-
-            var combinedCarts = new List<ShoppingCart>
-            {
-                new ShoppingCart { Id = 1, ApplicationUserId = userId, ProductId = 1, Count = 1, Product = products[0] },
-                new ShoppingCart { Id = 2, ApplicationUserId = userId, ProductId = 2, Count = 1, Product = products[1] }
-            };
-
-            // Setup repository
-            _mockShoppingCartRepo.Setup(r => r.CombineToDB(dbCarts, memoryCarts, userId))
-                .Verifiable();
-
-            _mockShoppingCartRepo.Setup(r => r.GetAll(
-                It.IsAny<Expression<Func<ShoppingCart, bool>>>(),
+            _mockShoppingCartRepository.Setup(r => r.GetAll(
+                It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
                 It.IsAny<string>()))
-                .Returns(combinedCarts);
+                .Returns(carts);
 
             // Act
-            var result = _shoppingCartService.CombineToDB(dbCarts, memoryCarts, userId);
+            var result = _service.GetShoppingCartVM(_userId);
 
             // Assert
             Assert.NotNull(result);
-            // (10-2)*1 + (20-5)*1 = 8 + 15 = 23
-            Assert.Equal(23.0, result.OrderHeader.OrderTotal);
+            Assert.Equal(carts, result.ShoppingCartList);
+            Assert.NotNull(result.OrderHeader);
+            Assert.Equal(18, result.OrderHeader.OrderTotal); // Only count the valid product: (20-2)*1 = 18
+        }
+
+        [Fact]
+        public void UpdateShoppingCart_WithMismatchedIds_ShouldNotUpdate()
+        {
+            // Arrange
+            var cart = new ShoppingCart { Id = 1, ProductId = 1, Count = 2 };
+            var existingCart = new ShoppingCart { Id = 2, ProductId = 1, Count = 1 }; // Different ID
+
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, true))
+                .Returns((ShoppingCart)null); // No cart with ID=1 found
+
+            // Act
+            _service.UpdateShoppingCart(cart);
+
+            // Assert
+            _mockShoppingCartRepository.Verify(r => r.Update(It.IsAny<ShoppingCart>()), Times.Never);
+            _mockUnitOfWork.Verify(u => u.Commit(), Times.Never);
+        }
+
+        [Fact]
+        public void CheckOutForUser_WithNullProduct_ShouldSkipItem()
+        {
+            // Arrange
+            var cartVM = new ShoppingCartVM
+            {
+                OrderHeader = new OrderHeader { Id = 1 },
+                ShoppingCartList = new List<ShoppingCart>
+                {
+                    new ShoppingCart { Id = 1, ProductId = 1, Count = 1, Price = 10, Product = null }, // Null product
+                    new ShoppingCart {
+                        Id = 2,
+                        ProductId = 2,
+                        Count = 1,
+                        Price = 20,
+                        Product = new Product { Id = 2, Title = "Product 2" }
+                    }
+                }
+            };
+
+            // Act
+            var result = _service.CheckOutForUser(cartVM);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result.LineItems); // Only one item should be added
+            Assert.Equal("Product 2", result.LineItems[0].PriceData.ProductData.Name);
+        }
+
+       /* [Fact]
+        public void Plus_WithNullCartAndNoMemoryCache_ShouldHandleGracefully()
+        {
+            // Arrange
+            int cartId = 1;
+            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
+                .Returns((List<ShoppingCart>)null);
+
+            // Act - This should not throw an exception
+            _service.Plus(null, cartId);
+
+            // Assert - Verify the memory cache was called with an empty list
+            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, It.IsAny<List<ShoppingCart>>()), Times.Once);
+        }*/
+
+        [Fact]
+        public void GetShoppingCartVMForSummaryPost_WithNullUserFields_ShouldHandleGracefully()
+        {
+            // Arrange
+            var user = new ApplicationUser
+            {
+                Id = _userId,
+                Name = "Test User",
+                // All other fields are null
+            };
+
+            var carts = new List<ShoppingCart>
+            {
+                new ShoppingCart
+                {
+                    Id = 1,
+                    ProductId = 1,
+                    Count = 1,
+                    Product = new Product { Id = 1, Price = 10, DiscountAmount = 0 }
+                }
+            };
+
+            // Act
+            var result = _service.GetShoppingCartVMForSummaryPost(carts, user, _userId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(_userId, result.OrderHeader.ApplicationUserId);
+            Assert.Equal(user.Name, result.OrderHeader.Name);
+            Assert.Equal(string.Empty, result.OrderHeader.PhoneNumber);
+            Assert.Equal(string.Empty, result.OrderHeader.StreetAddress);
+            Assert.Equal(string.Empty, result.OrderHeader.City);
+            Assert.Equal(string.Empty, result.OrderHeader.State);
+            Assert.Equal(string.Empty, result.OrderHeader.PostalCode);
+        }
+
+       /* [Fact]
+        public void Minus_WithNonExistentMemoryCacheItem_ShouldHandleGracefully()
+        {
+            // Arrange
+            int cartId = 99; // Non-existent cart
+            var carts = new List<ShoppingCart>
+            {
+                new ShoppingCart { Id = 1, ProductId = 1, Count = 1 }
+            };
+
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
+                .Returns((ShoppingCart)null);
+
+            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
+                .Returns(carts);
+
+            // Act
+            _service.Minus(cartId);
+
+            // Assert - Should not modify the cart list
+            Assert.Single(carts);
+            Assert.Equal(1, carts[0].Id);
+            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts), Times.Once);
+        }*/
+
+       /* [Fact]
+        public void RemoveCartValue_WithNonExistentMemoryCacheItem_ShouldHandleGracefully()
+        {
+            // Arrange
+            int cartId = 99; // Non-existent cart
+            var carts = new List<ShoppingCart>
+            {
+                new ShoppingCart { Id = 1, ProductId = 1, Count = 1 }
+            };
+
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
+                .Returns((ShoppingCart)null);
+
+            _mockMemoryCache.Setup(m => m.Get<List<ShoppingCart>>(_guestCartKey))
+                .Returns(carts);
+
+            // Act
+            _service.RemoveCartValue(cartId);
+
+            // Assert - Should not modify the cart list
+            Assert.Single(carts);
+            Assert.Equal(1, carts[0].Id);
+            _mockMemoryCache.Verify(m => m.Set(_guestCartKey, carts), Times.Once);
+        }*/
+
+        [Fact]
+        public void GetShoppingCartsByUserId_WithNullResponse_ShouldReturnEmptyList()
+        {
+            // Arrange
+            _mockShoppingCartRepository.Setup(r => r.GetAll(
+                It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(),
+                It.IsAny<string>()))
+                .Returns((IEnumerable<ShoppingCart>)null);
+
+            // Act
+            var result = _service.GetShoppingCartsByUserId(_userId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
+
+        [Fact]
+        public void SessionSetIntInHttpContext_ShouldBeCalledForMinus()
+        {
+            // Arrange
+            int cartId = 1;
+            var cart = new ShoppingCart { Id = cartId, ProductId = 1, Count = 1, ApplicationUserId = _userId };
+            var sessionMock = new Mock<ISession>();
+            var httpContextMock = new Mock<HttpContext>();
+
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
+                .Returns(cart);
+
+            _mockShoppingCartRepository.Setup(r => r.GetAll(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null))
+                .Returns(new List<ShoppingCart>());
+
+            httpContextMock.Setup(c => c.Session).Returns(sessionMock.Object);
+            _mockHttpContextAccessor.Setup(h => h.HttpContext).Returns(httpContextMock.Object);
+
+            // Act
+            _service.Minus(cartId);
+
+            // Assert
+            sessionMock.Verify(s => s.Set(
+                It.Is<string>(key => key == SD.SessionCart),
+                It.IsAny<byte[]>()),
+                Times.Once);
+        }
+
+        [Fact]
+        public void SessionSetIntInHttpContext_ShouldBeCalledForRemoveCartValue()
+        {
+            // Arrange
+            int cartId = 1;
+            var cart = new ShoppingCart { Id = cartId, ProductId = 1, Count = 1, ApplicationUserId = _userId };
+            var sessionMock = new Mock<ISession>();
+            var httpContextMock = new Mock<HttpContext>();
+
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
+                .Returns(cart);
+
+            _mockShoppingCartRepository.Setup(r => r.GetAll(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null))
+                .Returns(new List<ShoppingCart>());
+
+            httpContextMock.Setup(c => c.Session).Returns(sessionMock.Object);
+            _mockHttpContextAccessor.Setup(h => h.HttpContext).Returns(httpContextMock.Object);
+
+            // Act
+            _service.RemoveCartValue(cartId);
+
+            // Assert
+            sessionMock.Verify(s => s.Set(
+                It.Is<string>(key => key == SD.SessionCart),
+                It.IsAny<byte[]>()),
+                Times.Once);
+        }
+
+        // Test for handling null HTTP context
+       /* [Fact]
+        public void Minus_WithNullHttpContext_ShouldNotThrowException()
+        {
+            // Arrange
+            int cartId = 1;
+            var cart = new ShoppingCart { Id = cartId, ProductId = 1, Count = 1, ApplicationUserId = _userId };
+
+            _mockShoppingCartRepository.Setup(r => r.Get(It.IsAny<System.Linq.Expressions.Expression<Func<ShoppingCart, bool>>>(), null, false))
+                .Returns(cart);
+
+            _mockHttpContextAccessor.Setup(h => h.HttpContext).Returns((HttpContext)null);
+
+            // Act - This should not throw an exception
+            _service.Minus(cartId);
+
+            // Assert
+            _mockShoppingCartRepository.Verify(r => r.Remove(cart), Times.Once);
+            _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
         }*/
     }
 }
