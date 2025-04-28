@@ -139,7 +139,7 @@ namespace AmarTech.Test.ControllerTests
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             // Act
-            var result = method?.Invoke(_controller, new object[] { null, "Edit" }) as IActionResult;
+            var result = method?.Invoke(_controller, new object[] { null!, "Edit" }) as IActionResult;
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
