@@ -49,6 +49,7 @@ jobs:
             /d:sonar.cs.opencover.reportsPaths="${{ github.workspace }}/coverage.xml" \
             /d:sonar.sources="Src" \
             /d:sonar.exclusions="**/bin/**,**/obj/**,**/*.Designer.cs,**/Migrations/**,**/*.cshtml,**/*.css,**/*.cshtml.cs" \
+            /d:sonar.coverage.exclusions="**/Program.cs" \
             /d:sonar.tests="Src" \
             /d:sonar.test.inclusions="**/*Tests/**/*.cs,**/*.Tests.cs,**/*.Test.cs,**/AmarTech.Test/**/*.cs" \
             /d:sonar.sourceEncoding="UTF-8" \
@@ -76,6 +77,7 @@ jobs:
             --include "[AmarTech.Infrastructure]*" \
             --include "[AmarTech.Domain]*" \
             --exclude "[*]*.Migrations.*" \
+            --exclude "[AmarTech.Web]*Program" \
             -f=opencover \
             -o="${{ github.workspace }}/coverage.xml" \
             --verbosity detailed
