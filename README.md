@@ -4,8 +4,10 @@
     <img src="https://img.shields.io/badge/Live_Site-Visit_Now-brightgreen?style=for-the-badge&logo=internet-explorer" alt="Live Site" />
   </a>
 </p>
+<p align="center">
+  <a href="https://amartech.bsite.net/">Click here to visit the live site</a>
+</p>
 
-[Click here to visit the live site](https://amartech.bsite.net/)
 
 
 ## 📚 Explore Project Resources & Management
