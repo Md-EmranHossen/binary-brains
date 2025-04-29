@@ -1,35 +1,39 @@
-# 🌐 E-Commerce Platform by Binary Brains
-
+# 🌐 Amar-Tech by Binary Brains
 <p align="center">
-  <a href="#">
+  <a href="https://amartech.bsite.net/">
     <img src="https://img.shields.io/badge/Live_Site-Visit_Now-brightgreen?style=for-the-badge&logo=internet-explorer" alt="Live Site" />
   </a>
 </p>
 
-👉 **[Click here to visit the live site]()**
+[Click here to visit the live site](https://amartech.bsite.net/)
 
-## 📚 Explore Project Resources
-Dive into our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki) for detailed documentation, follow progress with our [DevLog](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/tree/main/DevLog), and track tasks on our [Trello Board](https://trello.com/b/67a6303580ff372f899865ae/e-commerce-system-binary-brains).
 
-<table align="center">
-  <tr>
-    <td>
-      <a href="https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki">
-        <img src="https://img.shields.io/badge/BinaryBrains-Wiki-007ACC?logo=github&logoColor=white&style=for-the-badge" alt="GitHub Wiki" />
-      </a>
-    </td>
-    <td>
-      <a href="https://trello.com/b/67a6303580ff372f899865ae/e-commerce-system-binary-brains">
-        <img src="https://img.shields.io/badge/Trello-Project%20Board-0079BF?logo=trello&logoColor=white&style=for-the-badge" alt="Trello Board" />
-      </a>
-    </td>
-    <td>
-      <a href="https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/tree/main/DevLog">
-        <img src="https://img.shields.io/badge/DevLog-Updates-FFD700?logo=github&logoColor=white&style=for-the-badge" alt="DevLog" />
-      </a>
-    </td>
-  </tr>
-</table>
+## 📚 Explore Project Resources & Management
+
+<div align="center">
+
+| 📘 Wiki | 📋 Trello Board | 🛠️ DevLog |
+|--------|-----------------|-----------|
+| ![GitHub Wiki](https://img.shields.io/badge/BinaryBrains-Wiki-007ACC?logo=github&logoColor=white&style=for-the-badge) | ![Trello](https://img.shields.io/badge/Trello-Board-0079BF?logo=trello&logoColor=white&style=for-the-badge) | ![DevLog](https://img.shields.io/badge/DevLog-Updates-FFD700?logo=github&logoColor=white&style=for-the-badge) |
+| [Documentation Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki) | [Project Management Board](https://trello.com/b/your-board-id) | [Daily Development Log](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/tree/main/DevLog) |
+
+</div>
+
+## 📸 Project Screenshots
+
+Here are some screenshots of the Amar-Tech platform in action:
+
+### Admin Dashboard
+![Admin Dashboard](screenshots/admin_dashboard.png)
+
+### Product Listing
+![Product Listing](screenshots/product_listing.png)
+
+### Shopping Cart
+![Shopping Cart](screenshots/shopping_cart.png)
+
+### Payment Processing
+![Payment Processing](screenshots/payment_processing.png)
 
 
 ## Status and Quality Metrics
@@ -55,12 +59,17 @@ Dive into our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-bra
 
 ## 🤝 Team Information: Binary Brains
 
-| Name                   | Role        | GitHub Profile                                     |
-|------------------------|-------------|---------------------------------------------------|
-| Md Emran Hossen        | Team Leader | [Md-EmranHossen](https://github.com/Md-EmranHossen) |
-| Md Rifatul             | Member      | [md-rifatul](https://github.com/md-rifatul)         |
-| FI Pranto              | Member      | [FI-Pranto](https://github.com/FI-Pranto)           |
-| Mashrief Bin Zulfiquer | Mentor      | [mashrief](https://github.com/mashrief)             |
+<div align="center">
+
+| 👤 Name | Mashrief Bin Zulfiquer | Md Emran Hossen | Md Rifatul | FI Pranto |
+|--------|--------------------------|------------------|-------------|------------|
+| 🎯 Role |  Mentor |  Team Leader |  Member |  Member |
+| 💻 GitHub | [mashrief](https://github.com/mashrief) | [Md-EmranHossen](https://github.com/Md-EmranHossen) | [md-rifatul](https://github.com/md-rifatul) | [FI-Pranto](https://github.com/FI-Pranto) |
+| 🔗 LinkedIn | [LinkedIn](https://linkedin.com/in/mashrief) | [LinkedIn](https://linkedin.com/in/md-emranhossen) | [LinkedIn](https://linkedin.com/in/md-rifatul) | [LinkedIn](https://linkedin.com/in/fi-pranto) |
+
+</div>
+
+
 
 ## 📅 Learning & Project Planning
 
