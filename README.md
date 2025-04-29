@@ -23,10 +23,9 @@
 
 ## 📸 Project Screenshots
 
-Here are some screenshots of the Amar-Tech platform in action:
+<h1 align="center" > Admin Dashboard </h1>
 
-### Admin Dashboard
-![Admin Dashboard](screenshots/admin_dashboard.png)
+![174589896446815153178881983581](https://github.com/user-attachments/assets/3c4d2277-be5d-4414-a907-3a837e415098)
 
 ### Product Listing
 ![Product Listing](screenshots/product_listing.png)
@@ -38,7 +37,7 @@ Here are some screenshots of the Amar-Tech platform in action:
 ![Payment Processing](screenshots/payment_processing.png)
 
 
-## Status and Quality Metrics
+## Status and QualityDashboard
 
 <div align="center">
   <table>
