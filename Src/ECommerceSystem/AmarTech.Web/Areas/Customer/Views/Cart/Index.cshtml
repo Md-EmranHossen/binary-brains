@@ -39,7 +39,16 @@
                                     <h5 class="text-uppercase text-secondary">
                                         <strong>@item.Product?.Title</strong>
                                     </h5>
-                                    <p><small>@Html.Raw(item.Product?.Description)</small></p>
+                                    <p><small>
+                                            @{
+                                                var des = item.Product?.Description;
+                                                if (des?.Length > 201)
+                                                {
+                                                    des = item.Product?.Description.Substring(0, 200) + "...";
+                                                }
+                                            }
+                                            @des
+                                    </small></p>
                                 </div>
                                 <div class="col-12 col-lg-5 text-center row">
                                     <div class="col-3 text-md-right pt-2 pt-md-4">
