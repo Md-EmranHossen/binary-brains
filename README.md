@@ -67,13 +67,51 @@ Dive into our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-bra
 ### Stack Learning
 ➡️ **[Learning Phase Tracking Sheet](https://docs.google.com/spreadsheets/d/1O1THgzEOz3rn8fNiuz1fPZaR_eUYecXm_UKkXdEvVFY/edit?usp=sharing)** – Track our daily learning activities.
 
-## 📄 Project Description
-The **E-Commerce Platform** is a robust online shopping solution built with **ASP.NET Core** and **SQL Server**. Key features include:
-- User management
-- Product listing
-- Shopping cart functionality
-- Payment processing
-- Admin panel for efficient management
+---
+
+## 📝 Project Description  
+**AmarTech** is a full-featured e-commerce platform built using **ASP.NET Core MVC** following **Clean Architecture principles**. It is designed to offer both a learning resource for developers and a practical online shopping experience for users. AmarTech supports role-based access, secure transactions, product management, and much more, all presented through a responsive and intuitive UI.
+
+
+## 🚀 Key Features
+
+### 🛒 Product & Category Management  
+- Admins or employees can **add, edit, and delete products and categories**.  
+- Products include details like pricing, discounts, stock, and images.
+
+### 👥 Role-Based Access Control  
+- Supports roles such as **Admin, Customer, Employee, and Company**.  
+- Each role has distinct access rights for managing different parts of the system.
+
+### 🛍️ Shopping Cart & Checkout  
+- Users can **add items to a cart as a guest** (stored in memory) or as an authenticated user (stored in the database).  
+- At login, guest carts are merged with the user’s persistent cart.  
+- Includes **secure checkout** and **Stripe payment integration**.
+
+### 🔒 Authentication & User Management  
+- Users can **register and log in using email/password**.  
+- Optional **Facebook login** integration.  
+- Admins can manage users and their roles from the dashboard.
+
+### 📦 Order Tracking & History  
+- Customers can **track the status** of their orders and view order history.  
+- Admins can update order statuses and view order details.
+
+---
+
+## 🧠 Architectural Overview
+
+### 🧱 Code Structure  
+- **Clean Architecture** with layers: Domain, Application, Infrastructure, Web, and Test.
+
+### 🛠 Design Patterns  
+- Implements industry best practices such as:  
+  - **Dependency Injection**  
+  - **Repository Pattern**  
+  - **Service Layer Abstraction**  
+  - **Unit of Work** for database consistency
+
+---
 
 ## 📦 Resources
 - [Project Documentation](docs/)
