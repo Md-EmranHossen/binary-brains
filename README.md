@@ -74,6 +74,48 @@ We followed an Agile approach with **5 Sprint Planning** stages to organize our 
 |----------------------------------|--------------------------|
 | ![Trello Board 1](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/Trello.png?raw=true) | ![Trello Board 2](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/TrelloBard2?raw=true) |
 
+## 📁 Repository Structure
+
+```
+Src/
+└── ECommerceSystem/
+    ├── AmarTech.Application/
+    │   ├── Contract/
+    │   └── Services/
+    │
+    ├── AmarTech.Domain/
+    │   └── Entities/
+    │
+    ├── AmarTech.Infrastructure/
+    │   ├── Data/
+    │   ├── DbInitializer/
+    │   ├── Migrations/
+    │   └── Repository/
+    │
+    ├── AmarTech.Web/
+    │   ├── Areas/
+    │   │   ├── Admin/
+    │   │   │   ├── Controllers/
+    │   │   │   └── Views/
+    │   │   ├── Customer/
+    │   │   │   ├── Controllers/
+    │   │   │   └── Views/
+    │   │   └── Identity/
+    │   │       └── Pages/
+    │   ├── Views/
+    │   ├── wwwroot/
+    │   └── Properties/
+    │
+    ├── AmarTech.Test/
+    │   ├── ControllerTests/
+    │   ├── RepositoryTests/
+    │   └── ServiceTests/
+    │
+    └── ECommerceSystem.sln
+```
+
+---
+
 ## 📝 Project Description
 
 **AmarTech** is a full-featured e-commerce platform built using **ASP.NET Core MVC** following **Clean Architecture principles**. It is designed to offer both a learning resource for developers and a practical online shopping experience for users. AmarTech supports role-based access, secure transactions, product management, and much more, all presented through a responsive and intuitive UI.
@@ -124,47 +166,8 @@ We followed an Agile approach with **5 Sprint Planning** stages to organize our 
   - **Service Layer Abstraction**
   - **Unit of Work** for database consistency
 
-## 📁 Repository Structure
-
-```
-Src/
-└── ECommerceSystem/
-    ├── AmarTech.Application/
-    │   ├── Contract/
-    │   └── Services/
-    │
-    ├── AmarTech.Domain/
-    │   └── Entities/
-    │
-    ├── AmarTech.Infrastructure/
-    │   ├── Data/
-    │   ├── DbInitializer/
-    │   ├── Migrations/
-    │   └── Repository/
-    │
-    ├── AmarTech.Web/
-    │   ├── Areas/
-    │   │   ├── Admin/
-    │   │   │   ├── Controllers/
-    │   │   │   └── Views/
-    │   │   ├── Customer/
-    │   │   │   ├── Controllers/
-    │   │   │   └── Views/
-    │   │   └── Identity/
-    │   │       └── Pages/
-    │   ├── Views/
-    │   ├── wwwroot/
-    │   └── Properties/
-    │
-    ├── AmarTech.Test/
-    │   ├── ControllerTests/
-    │   ├── RepositoryTests/
-    │   └── ServiceTests/
-    │
-    └── ECommerceSystem.sln
-```
-
----
+## Entity-Relationship Diagram (ERD)
+![Database Image](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/develop/docs/Others%20Images/Database.jpg?raw=true)
 
 ## 📸 Project Screenshots
 
@@ -174,7 +177,6 @@ Src/
 | ![Image 8](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/Project%20Image/8.png?raw=true) | ![Image 9](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/Project%20Image/9.png?raw=true) | ![Image 10](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/Project%20Image/10.png?raw=true) |
 | ![Image 11](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/Project%20Image/11.png?raw=true) | ![Image 12](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/Project%20Image/12.png?raw=true) | ![Image 13](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/Project%20Image/13.png?raw=true) |
 | ![Image 14](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/Project%20Image/14.png?raw=true) | ![Image 15](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/Project%20Image/15.png?raw=true) | ![Image 16](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/Project%20Image/16.png?raw=true) |
-
 
 
 ## 📦 Resources
