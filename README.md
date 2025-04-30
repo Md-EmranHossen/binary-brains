@@ -65,6 +65,14 @@ Dive into our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-bra
 ### Stack Learning
 
 ➡️ **[Learning Phase Tracking Sheet](https://docs.google.com/spreadsheets/d/1O1THgzEOz3rn8fNiuz1fPZaR_eUYecXm_UKkXdEvVFY/edit?usp=sharing)** – Track our daily learning activities.
+### Project Management
+To efficiently manage tasks, collaborate, and maintain project transparency, our team used **Trello** as the project management tool.
+We followed an Agile approach with **5 Sprint Planning** stages to organize our workflow and development milestones.
+### 📋 Trello Boards
+
+| Sprint Planning Status (Start) | Sprint Planning Status (End) |
+|----------------------------------|--------------------------|
+| ![Trello Board 1](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/Trello.png?raw=true) | ![Trello Board 2](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/TrelloBard2?raw=true) |
 
 ## 📝 Project Description
 
@@ -104,8 +112,9 @@ Dive into our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-bra
 ## 🧠 Architectural Overview
 
 ### 🧱 Code Structure
+![Clean Architecture Diagram](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/update_README-File/Src/ECommerceSystem/AmarTech.Web/wwwroot/images/CleanArchitecture.jpg?raw=true)
 
-- **Clean Architecture** with layers: Domain, Application, Infrastructure, Web, and Test.
+**Clean Architecture** with layers: `Domain`, `Application`, `Infrastructure`, `Web`, and `Test`.
 
 ### 🛠 Design Patterns
 
