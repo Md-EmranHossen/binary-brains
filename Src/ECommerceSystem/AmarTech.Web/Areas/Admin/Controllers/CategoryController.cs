@@ -14,7 +14,7 @@ namespace AmarTech.Web.Areas.Admin.Controllers
         private readonly ICategoryService _categoryService;
         private readonly IApplicationUserService _applicationUserService;
 
-        public CategoryController(ICategoryService categoryService,IApplicationUserService applicationUserService)
+        public CategoryController(ICategoryService categoryService, IApplicationUserService applicationUserService)
         {
             _categoryService = categoryService;
             _applicationUserService = applicationUserService;
@@ -89,7 +89,7 @@ namespace AmarTech.Web.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-  
+
         [HttpGet]
         public IActionResult Delete(int? id)
         {

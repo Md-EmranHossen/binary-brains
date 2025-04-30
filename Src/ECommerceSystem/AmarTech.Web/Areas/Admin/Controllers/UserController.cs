@@ -20,7 +20,7 @@ namespace AmarTech.Web.Areas.Admin.Controllers
         private readonly ICompanyService _companyService;
         private readonly UserManager<IdentityUser> _userManager;
 
-        public UserController(IApplicationUserService applicationUserService,ICompanyService companyService, UserManager<IdentityUser> userManager)
+        public UserController(IApplicationUserService applicationUserService, ICompanyService companyService, UserManager<IdentityUser> userManager)
         {
             _applicationUserService = applicationUserService;
             _companyService = companyService;
@@ -33,10 +33,9 @@ namespace AmarTech.Web.Areas.Admin.Controllers
 
             foreach (var user in userList)
             {
-                user.Role=_applicationUserService.GetUserrole(user.Id);
+                user.Role = _applicationUserService.GetUserrole(user.Id);
             }
             return View(userList);
-
         }
 
         public IActionResult LockUnlock(string? userId)
@@ -48,7 +47,7 @@ namespace AmarTech.Web.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            if(userObj.LockoutEnd!=null && userObj.LockoutEnd > DateTime.Now)
+            if (userObj.LockoutEnd != null && userObj.LockoutEnd > DateTime.Now)
             {
                 userObj.LockoutEnd = DateTime.Now;
             }
@@ -57,11 +56,8 @@ namespace AmarTech.Web.Areas.Admin.Controllers
                 userObj.LockoutEnd = DateTime.Now.AddDays(10);
             }
             _applicationUserService.UpdateUser(userObj);
-  
-
 
             return RedirectToAction(nameof(Index));
-
         }
 
         public IActionResult RoleManagement(string? userId)
@@ -87,13 +83,9 @@ namespace AmarTech.Web.Areas.Admin.Controllers
                     Value = i.Id.ToString()
                 }),
             };
-
             RoleVM.User.Role = _applicationUserService.GetUserrole(userId);
-
             return View(RoleVM);
         }
-
-
         [HttpPost]
         public IActionResult RoleManagement(RoleManagemantVM roleManagmentVM)
         {
@@ -101,13 +93,11 @@ namespace AmarTech.Web.Areas.Admin.Controllers
             {
                 return View(roleManagmentVM);
             }
-
             ApplicationUser? applicationUser = _applicationUserService.GetUserById(roleManagmentVM.User?.Id);
             if (applicationUser == null)
             {
                 return NotFound("User not found");
             }
-
             var oldRole = _userManager.GetRolesAsync(applicationUser)
                 .GetAwaiter().GetResult().FirstOrDefault() ?? string.Empty;
 
@@ -118,28 +108,23 @@ namespace AmarTech.Web.Areas.Admin.Controllers
                 // A role was updated
 
                 if (roleManagmentVM.User.Role == SD.Role_Company)
-                    {
-                        applicationUser.CompanyId = roleManagmentVM.User.CompanyId;
-                    }
-                    if (oldRole == SD.Role_Company)
-                    {
-                        applicationUser.CompanyId = null;
-                    }
-                    _applicationUserService.UpdateUser(applicationUser);
+                {
+                    applicationUser.CompanyId = roleManagmentVM.User.CompanyId;
+                }
+                if (oldRole == SD.Role_Company)
+                {
+                    applicationUser.CompanyId = null;
+                }
+                _applicationUserService.UpdateUser(applicationUser);
 
-                    if (!string.IsNullOrEmpty(oldRole))
-                    {
-                        _userManager.RemoveFromRoleAsync(applicationUser, oldRole).GetAwaiter().GetResult();
-                    }
-                    _userManager.AddToRoleAsync(applicationUser, roleManagmentVM.User.Role).GetAwaiter().GetResult();
-                
+                if (!string.IsNullOrEmpty(oldRole))
+                {
+                    _userManager.RemoveFromRoleAsync(applicationUser, oldRole).GetAwaiter().GetResult();
+                }
+                _userManager.AddToRoleAsync(applicationUser, roleManagmentVM.User.Role).GetAwaiter().GetResult();
+
             }
-
             return RedirectToAction("Index");
         }
-
-
-
-
     }
 }

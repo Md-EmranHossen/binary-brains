@@ -13,18 +13,19 @@ namespace AmarTech.Web.Areas.Admin.Controllers
         private readonly IApplicationUserService _applicationUserService;
         private readonly IOrderHeaderService _orderHeaderService;
 
-        public DashboardController(IProductService productService,IApplicationUserService applicationUserService,IOrderHeaderService orderHeaderService) {
+        public DashboardController(IProductService productService, IApplicationUserService applicationUserService, IOrderHeaderService orderHeaderService)
+        {
             _productService = productService;
             _applicationUserService = applicationUserService;
             _orderHeaderService = orderHeaderService;
         }
         public IActionResult Index()
         {
-            var dashboardVM= new DashboardVM()
+            var dashboardVM = new DashboardVM()
             {
-                TotalUsers=_applicationUserService.GetAllUsersCount(),
-                TotalOrders=_orderHeaderService.GetAllOrderHeadersCount(),
-                TotalProducts=_productService.GetAllProductsCount(),
+                TotalUsers = _applicationUserService.GetAllUsersCount(),
+                TotalOrders = _orderHeaderService.GetAllOrderHeadersCount(),
+                TotalProducts = _productService.GetAllProductsCount(),
             };
             return View(dashboardVM);
         }

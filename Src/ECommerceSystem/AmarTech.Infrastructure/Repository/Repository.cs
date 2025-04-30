@@ -11,7 +11,7 @@ namespace AmarTech.Infrastructure.Repository
         internal DbSet<T> dbSet;
         public Repository(ApplicationDbContext db)
         {
-     
+
             this.dbSet = db.Set<T>();
             db.Products.Include(u => u.Category).Include(u => u.CategoryId);
         }
@@ -43,7 +43,7 @@ namespace AmarTech.Infrastructure.Repository
 
 
 
-        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter=null, string? includeProperties = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
         {
             IQueryable<T> query = dbSet;
             if (filter != null)

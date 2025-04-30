@@ -1377,6 +1377,5 @@ namespace AmarTech.Test.ServiceTests
             _mockShoppingCartRepository.Verify(r => r.Remove(cart), Times.Once);
             _mockUnitOfWork.Verify(u => u.Commit(), Times.Once);
         }
-
     }
 }

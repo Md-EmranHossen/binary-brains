@@ -77,7 +77,5 @@ namespace AmarTech.Application.Services
             }
             _unitOfWork.Commit();
         }
-
-        
     }
 }
