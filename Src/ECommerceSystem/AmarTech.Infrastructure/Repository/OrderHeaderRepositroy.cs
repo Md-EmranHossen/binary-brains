@@ -53,9 +53,6 @@ namespace AmarTech.Infrastructure.Repository
                     orderFromDb.PaymentDate = DateTime.Now;
                 }
             }
-
-            
         }
-
     }
 }

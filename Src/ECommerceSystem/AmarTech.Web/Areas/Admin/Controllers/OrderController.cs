@@ -300,17 +300,8 @@ namespace AmarTech.Web.Areas.Admin.Controllers
                     _orderHeaderService.UpdateStripePaymentID(orderHeaderId, session.Id, session.PaymentIntentId);
                     _orderHeaderService.UpdateStatus(orderHeaderId, orderHeader.OrderStatus ?? SD.StatusShipped, SD.PaymentStatusApproved);
                 }
-
-
             }
-
-
             return View(orderHeaderId);
         }
-
-
-
-
-
     }
 }

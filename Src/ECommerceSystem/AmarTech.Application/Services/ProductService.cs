@@ -146,7 +146,5 @@ namespace AmarTech.Application.Services
         {
             return _productRepository.GetAllProductsCount(searchQuery);
         }
-
-
     }
 }

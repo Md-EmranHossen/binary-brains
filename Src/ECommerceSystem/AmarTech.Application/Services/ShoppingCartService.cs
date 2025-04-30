@@ -26,7 +26,7 @@ namespace AmarTech.Application.Services
         private readonly IMemoryCache _memoryCache;
         private readonly string _guestCartKey = "guest_cart";
 
-        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor,IMemoryCache memoryCache)
+        public ShoppingCartService(IShoppingCartRepository shoppingCartRepository, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor, IMemoryCache memoryCache)
         {
             _shoppingCartRepository = shoppingCartRepository;
             _unitOfWork = unitOfWork;
@@ -50,10 +50,7 @@ namespace AmarTech.Application.Services
                     _shoppingCartRepository.Remove(shoppingcart);
                     _unitOfWork.Commit();
                 }
-
             }
-
-
         }
 
         public ShoppingCart? GetShoppingCartById(int? id, bool track = false)
@@ -128,22 +125,15 @@ namespace AmarTech.Application.Services
 
         public ShoppingCartVM GetShoppingCartVM(string? userId)
         {
-
-
             var shoppingCartList = GetShoppingCartsByUserId(userId ?? "") ?? new List<ShoppingCart>(); // Ensure not null
-
-
             var shoppingCartVM = new ShoppingCartVM
             {
                 ShoppingCartList = shoppingCartList,
                 OrderHeader = new OrderHeader
                 {
                     OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
-                                             .Sum(cart => (cart.Product.Price-cart.Product.DiscountAmount) * cart.Count)
+                                             .Sum(cart => (cart.Product.Price - cart.Product.DiscountAmount) * cart.Count)
                 }
-                
-
-
             };
             return shoppingCartVM;
         }
@@ -158,27 +148,25 @@ namespace AmarTech.Application.Services
                 return shoppingCarts;
             }
             return new List<ShoppingCart>();
-            
+
         }
-        public void Plus(ShoppingCart? cartFromDb,int cartId)
+        public void Plus(ShoppingCart? cartFromDb, int cartId)
         {
-            
+
             if (cartFromDb == null)
             {
                 PlusMemoryCach(cartId);
             }
             else
             {
-               PlusDB(cartFromDb);
+                PlusDB(cartFromDb);
             }
 
         }
         void PlusMemoryCach(int cartId)
         {
             var cartList = GetCart();
-
             var cart = cartList?.FirstOrDefault(c => c.Id == cartId);
-
             if (cart != null && cart.Count <= cart.Product.StockQuantity)
             {
                 cart.Count++;
@@ -193,7 +181,7 @@ namespace AmarTech.Application.Services
             {
                 return;
             }
-           
+
             UpdateShoppingCart(cartFromDb);
             _unitOfWork.Commit();
         }
@@ -205,15 +193,15 @@ namespace AmarTech.Application.Services
             {
                 MinusMemoryCach(cartId);
             }
+
             else
             {
-               MinusDB(cartFromDb,cartId);
+                MinusDB(cartFromDb, cartId);
             }
         }
         void MinusMemoryCach(int cartId)
         {
             var cartList = GetCart();
-
             var cart = cartList?.FirstOrDefault(c => c.Id == cartId);
             if (cart == null) return;
             if (cart.Count <= 1)
@@ -224,21 +212,19 @@ namespace AmarTech.Application.Services
             else
             {
                 cart.Count--;
-               
             }
 
             SetInMemory(cartList);
-           
+
 
         }
-        void MinusDB(ShoppingCart cartFromDb,int cartId)
+        void MinusDB(ShoppingCart cartFromDb, int cartId)
         {
             if (cartFromDb.Count <= 1)
             {
                 DeleteShoppingCart(cartId);
                 _httpContextAccessor.HttpContext?.Session.SetInt32(SD.SessionCart,
-GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
-
+                GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
             }
             else
             {
@@ -258,22 +244,17 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
             {
                 RemoveCartFromDB(cartFromDb, cartId);
             }
-
         }
 
         void RemoveCartFromMemory(int cartId)
         {
             var cartList = GetCart();
-
             var cart = cartList?.FirstOrDefault(c => c.Id == cartId);
             if (cart == null) return;
-
             cartList?.Remove(cart);
-            
-
             SetInMemory(cartList);
         }
-        void RemoveCartFromDB(ShoppingCart cartFromDb,int cartId)
+        void RemoveCartFromDB(ShoppingCart cartFromDb, int cartId)
         {
             DeleteShoppingCart(cartId);
             _httpContextAccessor.HttpContext?.Session.SetInt32(SD.SessionCart,
@@ -286,14 +267,12 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
             return _shoppingCartRepository.GetAll(u => u.ApplicationUserId == userId);
         }
 
-        public ShoppingCartVM GetShoppingCartVMForSummaryPost(IEnumerable<ShoppingCart> shoppingCartList,ApplicationUser applicationUser,string userId)
+        public ShoppingCartVM GetShoppingCartVMForSummaryPost(IEnumerable<ShoppingCart> shoppingCartList, ApplicationUser applicationUser, string userId)
         {
             double orderTotal = shoppingCartList
              .Where(cart => cart.Product != null)
-             .Sum(cart => (double)(cart.Product.Price-cart.Product.DiscountAmount) * cart.Count);
-
-
-            var shoppingCartVM= new ShoppingCartVM
+             .Sum(cart => (double)(cart.Product.Price - cart.Product.DiscountAmount) * cart.Count);
+            var shoppingCartVM = new ShoppingCartVM
             {
                 ShoppingCartList = shoppingCartList,
                 OrderHeader = new OrderHeader
@@ -313,7 +292,7 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
             {
                 if (item.Product != null)
                 {
-                    item.Price = (double)(item.Product.Price-item.Product.DiscountAmount);
+                    item.Price = (double)(item.Product.Price - item.Product.DiscountAmount);
                 }
             }
 
@@ -389,22 +368,20 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
         public ShoppingCartVM MemoryCartVM(List<ShoppingCart> shoppingCartList)
         {
 
-           return  new ShoppingCartVM()
+            return new ShoppingCartVM()
             {
                 ShoppingCartList = shoppingCartList,
                 OrderHeader = new OrderHeader
                 {
                     OrderTotal = (double)shoppingCartList.Where(cart => cart.Product != null) // Avoid null references
-                                         .Sum(cart => (cart.Product.Price - cart.Product.DiscountAmount) * cart.Count)
+                                          .Sum(cart => (cart.Product.Price - cart.Product.DiscountAmount) * cart.Count)
                 }
             };
         }
 
-        public ShoppingCartVM CombineToDB(List<ShoppingCart> cartFromDb, List<ShoppingCart> cartFromMemory,string userId)
+        public ShoppingCartVM CombineToDB(List<ShoppingCart> cartFromDb, List<ShoppingCart> cartFromMemory, string userId)
         {
-
-
-            _shoppingCartRepository.CombineToDB(cartFromDb,cartFromMemory,userId);
+            _shoppingCartRepository.CombineToDB(cartFromDb, cartFromMemory, userId);
             ClearCart();
             var shoppingCartList = GetShoppingCartsByUserId(userId ?? "") ?? new List<ShoppingCart>();
             return new ShoppingCartVM()
@@ -416,8 +393,6 @@ GetShoppingCartByUserId(cartFromDb.ApplicationUserId).Count());
                                        .Sum(cart => (cart.Product.Price - cart.Product.DiscountAmount) * cart.Count)
                 }
             };
-
-
         }
     }
 }

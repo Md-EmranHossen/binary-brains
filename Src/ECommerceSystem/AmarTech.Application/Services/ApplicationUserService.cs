@@ -10,7 +10,7 @@ namespace AmarTech.Application.Services
         private readonly IApplicationUserRepository _applicationUserRepositroy;
         private readonly IUnitOfWork _unitOfWork;
 
-        public ApplicationUserService(IApplicationUserRepository ApplicationUserRepositroy,IUnitOfWork unitOfWork)
+        public ApplicationUserService(IApplicationUserRepository ApplicationUserRepositroy, IUnitOfWork unitOfWork)
         {
             _applicationUserRepositroy = ApplicationUserRepositroy;
             _unitOfWork = unitOfWork;
@@ -23,7 +23,7 @@ namespace AmarTech.Application.Services
 
         public IEnumerable<ApplicationUser> GetAllUsers()
         {
-            var obj= _applicationUserRepositroy.GetAll(includeProperties: "Company");
+            var obj = _applicationUserRepositroy.GetAll(includeProperties: "Company");
             return obj;
         }
 
@@ -44,7 +44,7 @@ namespace AmarTech.Application.Services
 
         public string GetUserrole(string userId)
         {
-           return _applicationUserRepositroy.GetUserRole(userId);
+            return _applicationUserRepositroy.GetUserRole(userId);
         }
 
         public void UpdateUser(ApplicationUser user)
@@ -56,12 +56,8 @@ namespace AmarTech.Application.Services
 
         public string GetUserName(string? userId)
         {
-            return GetUserById(userId)?.Name??"";
+            return GetUserById(userId)?.Name ?? "";
 
         }
-
-
-
-
     }
 }

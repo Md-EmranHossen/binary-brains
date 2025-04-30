@@ -325,7 +325,7 @@ namespace AmarTech.Test.ControllerTests
         {
             // Arrange
             string userId = "user-123";
-            var user = new ApplicationUser { Id = userId , Name = "User1" };
+            var user = new ApplicationUser { Id = userId, Name = "User1" };
             var roleVM = new RoleManagemantVM
             {
                 User = new ApplicationUser

@@ -20,8 +20,6 @@ namespace AmarTech.Infrastructure.Repository
             _db = db;
         }
 
-
-
         public void Update(Product obj)
         {
             _db.Products.Update(obj);
@@ -64,10 +62,9 @@ namespace AmarTech.Infrastructure.Repository
                     product.StockQuantity -= cart.Count;
                 }
             }
-
         }
 
-        public int GetAllProductsCount(string ? searchQuery=null)
+        public int GetAllProductsCount(string? searchQuery = null)
         {
             if (searchQuery == null)
             {
