@@ -218,8 +218,15 @@ Src/
   - **Service Layer Abstraction**
   - **Unit of Work** for database consistency
 
+
+## Use Case Diagram
+
+![](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/main/docs/Others%20Images/Use%20Case%20Diagram.drawio.png?raw=true)
+
 ## Entity-Relationship Diagram (ERD)
 ![Database Image](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/blob/develop/docs/Others%20Images/Database.jpg?raw=true)
+
+
 
 ## 📸 Project Screenshots
 
