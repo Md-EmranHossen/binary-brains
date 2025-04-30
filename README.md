@@ -111,6 +111,47 @@ Dive into our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-bra
   - **Service Layer Abstraction**  
   - **Unit of Work** for database consistency
 
+## 📁 Repository Structure
+
+```
+Src/
+└── ECommerceSystem/
+    ├── AmarTech.Application/
+    │   ├── Contract/
+    │   └── Services/
+    │
+    ├── AmarTech.Domain/
+    │   └── Entities/
+    │
+    ├── AmarTech.Infrastructure/
+    │   ├── Data/
+    │   ├── DbInitializer/
+    │   ├── Migrations/
+    │   └── Repository/
+    │
+    ├── AmarTech.Web/
+    │   ├── Areas/
+    │   │   ├── Admin/
+    │   │   │   ├── Controllers/
+    │   │   │   └── Views/
+    │   │   ├── Customer/
+    │   │   │   ├── Controllers/
+    │   │   │   └── Views/
+    │   │   └── Identity/
+    │   │       └── Pages/
+    │   ├── Views/
+    │   ├── wwwroot/
+    │   └── Properties/
+    │
+    ├── AmarTech.Test/
+    │   ├── ControllerTests/
+    │   ├── RepositoryTests/
+    │   └── ServiceTests/
+    │
+    └── ECommerceSystem.sln
+```
+
+
 ---
 
 ## 📦 Resources
