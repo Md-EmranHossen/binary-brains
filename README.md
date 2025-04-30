@@ -60,33 +60,6 @@ Dive into our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-bra
 
 </div>
 
-<h2>📌 How to Get Started</h2>
-<p>1️⃣ Clone the repository</p>
-<pre><code class="language-bash">git clone https://github.com/Learnathon-By-Geeky-Solutions/binary-brains.git
-</code></pre>
-<p>2️⃣ Set up the backend (ASP.NET Core MVC)<br>
-3️⃣ Configure the SQL Server database<br>
-4️⃣ Run the project locally</p>
-<p>🔧 For full setup instructions, see the <a href="https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki/installation-guide">Installation Guide</a>.</p>
-
-## 📸 Project Screenshots
-
-<h1 align="center" > Admin Dashboard </h1>
-
-![174589896446815153178881983581](https://github.com/user-attachments/assets/3c4d2277-be5d-4414-a907-3a837e415098)
-
-### Product Listing
-
-![Product Listing](screenshots/product_listing.png)
-
-### Shopping Cart
-
-![Shopping Cart](screenshots/shopping_cart.png)
-
-### Payment Processing
-
-![Payment Processing](screenshots/payment_processing.png)
-
 ## 📅 Learning & Project Planning
 
 ### Stack Learning
