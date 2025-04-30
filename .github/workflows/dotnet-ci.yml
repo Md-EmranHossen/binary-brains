@@ -49,8 +49,9 @@ jobs:
             /d:sonar.cs.opencover.reportsPaths="${{ github.workspace }}/coverage.xml" \
             /d:sonar.sources="Src" \
             /d:sonar.exclusions="**/bin/**,**/obj/**,**/*.Designer.cs,**/Migrations/**,**/*.cshtml,**/*.css,**/*.cshtml.cs" \
+            /d:sonar.coverage.exclusions="**/Program.cs" \
             /d:sonar.tests="Src" \
-            /d:sonar.test.inclusions="**/*Tests/**/*.cs,**/*.Tests.cs,**/*.Test.cs,**/ECommerceSystem.Test/**/*.cs" \
+            /d:sonar.test.inclusions="**/*Tests/**/*.cs,**/*.Tests.cs,**/*.Test.cs,**/AmarTech.Test/**/*.cs" \
             /d:sonar.sourceEncoding="UTF-8" \
             /d:sonar.projectBaseDir="${{ github.workspace }}"
       
@@ -61,7 +62,7 @@ jobs:
       - name: Find test project path
         id: find-test-dll
         run: |
-          TEST_DLL_PATH=$(find . -path "*/bin/Release/*/ECommerceSystem.Test.dll" | head -1)
+          TEST_DLL_PATH=$(find . -path "*/bin/Release/*/AmarTech.Test.dll" | head -1)
           echo "TEST_DLL_PATH=$TEST_DLL_PATH" >> $GITHUB_ENV
           echo "Found test DLL at: $TEST_DLL_PATH"
       
@@ -71,10 +72,12 @@ jobs:
           coverlet "${{ env.TEST_DLL_PATH }}" \
             --target "dotnet" \
             --targetargs "test Src/ECommerceSystem/ECommerceSystem.sln --no-build --configuration Release" \
-            --include "[ECommerceWebApp]*" \
-            --include "[ECommerceSystem.Service]*" \
-            --include "[ECommerceSystem.DataAccess]*" \
+            --include "[AmarTech.Web]*" \
+            --include "[AmarTech.Application]*" \
+            --include "[AmarTech.Infrastructure]*" \
+            --include "[AmarTech.Domain]*" \
             --exclude "[*]*.Migrations.*" \
+            --exclude "[AmarTech.Web]*Program" \
             -f=opencover \
             -o="${{ github.workspace }}/coverage.xml" \
             --verbosity detailed

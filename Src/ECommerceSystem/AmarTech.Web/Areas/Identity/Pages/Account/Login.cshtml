@@ -1,0 +1,130 @@
+﻿@page
+@model LoginModel
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7 col-sm-9">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary bg-gradient py-3">
+                    <h2 class="text-center text-white font-weight-bold mb-0">Login</h2>
+                </div>
+                <div class="card-body p-4 p-lg-5">
+                    <form id="account" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                            <label asp-for="Input.Email" class="form-label">Email</label>
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                            <label asp-for="Input.Password" class="form-label">Password</label>
+                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" asp-for="Input.RememberMe" id="rememberMeCheck" />
+                            <label class="form-check-label" for="rememberMeCheck">
+                                @Html.DisplayNameFor(m => m.Input.RememberMe)
+                            </label>
+                        </div>
+
+                        <div class="d-grid">
+                            <button id="login-submit" type="submit" class="btn btn-primary btn-lg">Sign In</button>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a id="forgot-password" asp-page="./ForgotPassword" class="text-decoration-none small">Forgot your password?</a>
+                            <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-decoration-none small">Register as a new user</a>
+                        </div>
+                        <div class="text-center mt-2">
+                            <a id="resend-confirmation" asp-page="./ResendEmailConfirmation" class="text-decoration-none small">Resend email confirmation</a>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4 mb-2">
+                        <div class="separator">
+                            <span class="separator-text bg-white px-3">or continue with</span>
+                        </div>
+                    </div>
+
+                    @{
+                        if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                        {
+                            <div class="alert alert-info text-center small">
+                                <p class="mb-0">
+                                    External authentication services are not configured.
+                                </p>
+                            </div>
+                        }
+                        else
+                        {
+                            <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    @foreach (var provider in Model.ExternalLogins!)
+                                    {
+                                        <button type="submit" class="btn btn-outline-secondary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
+                                            @provider.DisplayName
+                                        </button>
+                                    }
+                                </div>
+                            </form>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #6c757d;
+    }
+
+        .separator::before,
+        .separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .separator::before {
+            margin-right: .75rem;
+        }
+
+        .separator::after {
+            margin-left: .75rem;
+        }
+
+    .form-floating > .form-control:focus ~ label,
+    .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        color: #0d6efd;
+        opacity: 0.8;
+    }
+
+    .card-header {
+        border-bottom: none;
+    }
+
+    .btn-primary {
+        box-shadow: 0 4px 9px -4px rgba(13, 110, 253, 0.3);
+    }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 9px -4px rgba(13, 110, 253, 0.3);
+        }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

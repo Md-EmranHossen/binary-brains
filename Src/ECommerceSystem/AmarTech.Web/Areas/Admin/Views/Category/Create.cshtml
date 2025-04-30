@@ -1,0 +1,65 @@
+﻿@using AmarTech.Domain.Entities
+@model Category
+
+<div class="card shadow-lg border-0 rounded-3 mt-5">
+    <div class="card-header bg-primary ml-0 py-2 col-12" style="width: 400px; text-align: center; margin: 7px auto;">
+
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="text-white fw-bold mb-0">Create Category</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4 p-md-5 bg-light">
+        <form method="post" class="needs-validation" novalidate>
+            <div class="border rounded-3 p-4 bg-white shadow-sm">
+                <div class="mb-4">
+                    <div class="form-floating">
+                        <input asp-for="Name" class="form-control form-control-lg border-0 shadow-sm" placeholder="Category Name" />
+                        <label asp-for="Name" class="text-secondary">Category Name</label>
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="form-floating">
+                        <input asp-for="DsiplayOrder" class="form-control form-control-lg border-0 shadow-sm" placeholder="Display Order" />
+                        <label asp-for="DsiplayOrder" class="text-secondary">Display Order</label>
+                        <span asp-validation-for="DsiplayOrder" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-3 d-md-flex justify-content-md-start mt-4">
+                    <button type="submit" class="btn btn-success btn-lg px-4 py-2 shadow-sm">
+                        <i class="bi bi-plus-circle me-2"></i>Create
+                    </button>
+                    <a asp-controller="Category" asp-action="Index" class="btn btn-outline-dark btn-lg px-4 py-2">
+                        <i class="bi bi-arrow-left me-2"></i>Back to List
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+        <script>
+            // Add Bootstrap form validation
+            (function () {
+                'use strict'
+                var forms = document.querySelectorAll('.needs-validation')
+                Array.prototype.slice.call(forms).forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+            })()
+        </script>
+    }
+}

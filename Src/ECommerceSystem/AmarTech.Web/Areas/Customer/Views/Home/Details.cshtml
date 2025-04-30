@@ -1,0 +1,65 @@
+﻿@model ShoppingCart
+
+<form method="post">
+    <input type="hidden" asp-for="ProductId" />
+    <div class="card shadow border-0 mt-4">
+        <div class="card-header bg-primary ml-0 py-2 col-12" style="width: 1100px; text-align: center; margin: 7px auto;">
+
+            <h3 class="text-white text-uppercase">@Model.Product.Title</h3>
+            <p class="text-white-50 fw-semibold mb-0">Category: <b>@Model.Product.Category.Name</b></p>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-lg-4 text-center mb-3">
+                    <img src="@(Model.Product.ImageUrl ?? "https://placehold.co/600x400")" width="100%" class="rounded" alt="@Model.Product.Title" />
+                </div>
+                <div class="col-12 col-lg-8">
+                    <h5 class="text-muted">Description</h5>
+                    <p class="text-secondary">@Model.Product.Description</p>
+
+                    <h6 class="text-dark text-opacity-50">
+                        @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+                        {
+                            <p>Stock: <b>@Model.Product.StockQuantity</b></p>
+                        }
+                    </h6>
+
+                    <h6 class="text-dark text-opacity-50">
+                        Price:
+                        <span class="text-danger fw-bold">
+                            @((Model.Product.Price - Model.Product.DiscountAmount).ToString("C"))
+                        </span>
+                        @if (Model.Product.DiscountAmount > 0)
+                        {
+                            <span class="text-decoration-line-through text-muted">
+                                @Model.Product.Price.ToString("C")
+                            </span>
+                        }
+                    </h6>
+
+                    <div class="input-group my-3 w-50">
+                        <span class="input-group-text bg-primary text-white border-0 fw-semibold">Count</span>
+                        <input asp-for="Count" type="number" value="1" class="form-control text-end" min="1" max="@Model.Product.StockQuantity" />
+                    </div>
+
+                    @if (Model.Product.StockQuantity > 0)
+                    {
+                        <button type="submit" class="btn btn-primary bg-gradient w-50 py-2 text-uppercase fw-semibold">
+                            Add to Cart
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-secondary bg-gradient w-50 py-2 text-uppercase fw-semibold" disabled>
+                            Out of Stock
+                        </button>
+                    }
+
+                    <div class="mt-3">
+                        <a asp-action="Index" class="btn btn-outline-primary">Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
