@@ -2,6 +2,18 @@
 
 AmarTech is a robust E-Commerce Web Application built with ASP.NET Core MVC, showcasing key features of a modern online store. Created for educational purposes, it adheres to clean architecture principles, demonstrating how to develop a scalable and maintainable system from the ground up.
 
+# 🌐 Live Demo
+
+<div align="center">
+  
+🔗 Click here to view the live site: [https://amartech.bsite.net/](https://amartech.bsite.net/)
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit-blue?style=for-the-badge)](https://amartech.bsite.net/)
+
+</div>
+
+
+
 ## 📚 Explore Project Resources, management
 
 Dive into our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/wiki) for detailed documentation, follow progress with our [DevLog](https://github.com/Learnathon-By-Geeky-Solutions/binary-brains/tree/main/DevLog), and track tasks on our [Trello Board](https://trello.com/b/67a6303580ff372f899865ae/e-commerce-system-binary-brains).
@@ -30,13 +42,14 @@ Dive into our [Wiki](https://github.com/Learnathon-By-Geeky-Solutions/binary-bra
 
 <div align="center">
   <table>
-    <tr>
-      <td><img src="https://sonarcloud.io/api/project_badges/measure?project=Learnathon-By-Geeky-Solutions_binary-brains&metric=alert_status&style=for-the-badge&color=4C8BF5" alt="Quality Gate" /></td>
-      <td><img src="https://sonarcloud.io/api/project_badges/measure?project=Learnathon-By-Geeky-Solutions_binary-brains&metric=vulnerabilities&style=for-the-badge&color=FF6F61" alt="Vulnerabilities" /></td>
-      <td><img src="https://sonarcloud.io/api/project_badges/measure?project=Learnathon-By-Geeky-Solutions_binary-brains&metric=bugs&style=for-the-badge&color=FF6F61" alt="Bugs" /></td>
-      <td><img src="https://sonarcloud.io/api/project_badges/measure?project=Learnathon-By-Geeky-Solutions_binary-brains&metric=security_rating&style=for-the-badge&color=28A745" alt="Security" /></td>
-      <td><img src="https://sonarcloud.io/api/project_badges/measure?project=Learnathon-By-Geeky-Solutions_binary-brains&metric=code_smells&style=for-the-badge&color=FFA500" alt="Code Smells" /></td>
-    </tr>
+<tr>
+  <td><img src="https://sonarcloud.io/api/project_badges/measure?project=Learnathon-By-Geeky-Solutions_binary-brains&metric=alert_status&style=for-the-badge&color=4C8BF5" alt="Quality Gate" /></td>
+  <td><img src="https://sonarcloud.io/api/project_badges/measure?project=Learnathon-By-Geeky-Solutions_dev-4545&metric=coverage&style=for-the-badge" alt="Coverage" /></td>
+  
+  <td><img src="https://sonarcloud.io/api/project_badges/measure?project=Learnathon-By-Geeky-Solutions_binary-brains&metric=bugs&style=for-the-badge&color=FF6F61" alt="Bugs" /></td>
+  <td><img src="https://sonarcloud.io/api/project_badges/measure?project=Learnathon-By-Geeky-Solutions_binary-brains&metric=security_rating&style=for-the-badge&color=28A745" alt="Security" /></td>
+  <td><img src="https://sonarcloud.io/api/project_badges/measure?project=Learnathon-By-Geeky-Solutions_binary-brains&metric=code_smells&style=for-the-badge&color=FFA500" alt="Code Smells" /></td>
+</tr>
    <tr>
       <td><img src="https://img.shields.io/github/contributors/Learnathon-By-Geeky-Solutions/binary-brains.svg?style=for-the-badge&color=4C8BF5" alt="Contributors" /></td>
       <td><img src="https://img.shields.io/github/forks/Learnathon-By-Geeky-Solutions/binary-brains.svg?style=for-the-badge&color=4C8BF5" alt="Forks" /></td>
@@ -115,6 +128,45 @@ Src/
 ```
 
 ---
+## 📝 Tools and Technologies
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Microsoft_.NET_logo.png" alt="ASP.NET Core" style="height: 60px;">
+      <p><b>ASP.NET Core</b></p>
+    </td>
+    <td align="center">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/4/4f/Csharp_Logo.png" alt="C#" style="height: 60px;">
+      <p><b>C#</b></p>
+    </td>
+    <td align="center">
+      <img src="https://schwabencode.com/contents/logos/mssql-server.png" alt="SQL Server" style="height: 60px;">
+      <p><b>Microsoft SQL Server</b></p>
+    </td>
+    <td align="center">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" style="height: 60px;">
+      <p><b>Stripe</b></p>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <p><b>ASP.NET Identity</b></p>
+    </td>
+    <td align="center">
+      <img src="https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png" alt="GitHub" style="height: 60px;">
+      <p><b>GitHub</b></p>
+    </td>
+ <td align="center">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook Login" style="height: 60px;">
+      <p><b>Facebook Login</b></p>
+    </td>
+ <td align="center">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Trello-logo-blue.svg" alt="Trello" style="height: 60px;">
+      <p><b>Trello</b></p>
+    </td>
+  </tr>
+</table>
 
 ## 📝 Project Description
 
