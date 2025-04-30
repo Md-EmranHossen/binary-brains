@@ -24,7 +24,7 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             _shoppingCartService = shoppingCartService ?? throw new ArgumentNullException(nameof(shoppingCartService));
         }
 
-        public IActionResult Index(int? page,string? query)
+        public IActionResult Index(int? page, string? query)
         {
             if (!ModelState.IsValid)
             {
@@ -32,8 +32,8 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
-            var productList = _productService.SkipAndTake(page,query);
+
+            var productList = _productService.SkipAndTake(page, query);
             int totalProductCount;
             if (string.IsNullOrEmpty(query))
             {
@@ -46,7 +46,7 @@ namespace AmarTech.Web.Areas.Customer.Controllers
 
             var totalPages = _productService.CalculateTotalPage(totalProductCount);
 
-            ViewBag.CurrentPage = page??1;
+            ViewBag.CurrentPage = page ?? 1;
             ViewBag.TotalPages = totalPages;
             ViewBag.SearchQuery = query;
 
@@ -114,7 +114,7 @@ namespace AmarTech.Web.Areas.Customer.Controllers
                 HttpContext.Session.SetInt32(SD.SessionCart,
        _shoppingCartService.GetShoppingCartByUserId(userId).Count());
             }
-            
+
 
             return RedirectToAction(nameof(Index));
         }

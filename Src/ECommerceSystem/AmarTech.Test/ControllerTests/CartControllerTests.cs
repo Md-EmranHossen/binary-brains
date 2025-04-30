@@ -146,7 +146,7 @@ namespace AmarTech.Test.ControllerTests
             var memoryCartList = new List<ShoppingCart> { new ShoppingCart() };
             var combinedCartVM = new ShoppingCartVM
             {
-                OrderHeader = new OrderHeader { ApplicationUser = new ApplicationUser()  { Name="Rifat"} },
+                OrderHeader = new OrderHeader { ApplicationUser = new ApplicationUser() { Name = "Rifat" } },
                 ShoppingCartList = new List<ShoppingCart> { new ShoppingCart { Product = new Product { Price = 100, DiscountAmount = 10 } } }
             };
 
@@ -154,7 +154,7 @@ namespace AmarTech.Test.ControllerTests
             _mockShoppingCartService.Setup(s => s.GetShoppingCartsByUserId(userId)).Returns(dbCartList);
             _mockShoppingCartService.Setup(s => s.CombineToDB(dbCartList, memoryCartList, userId)).Returns(combinedCartVM);
             _mockShoppingCartService.Setup(s => s.GetShoppingCartByUserId(userId)).Returns(dbCartList);
-            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns(new ApplicationUser() { Name="Rifat"});
+            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns(new ApplicationUser() { Name = "Rifat" });
 
             // Act
             var result = _controller.Summary() as ViewResult;
@@ -177,7 +177,7 @@ namespace AmarTech.Test.ControllerTests
             var emptyMemoryCartList = new List<ShoppingCart>();
             var dbCartVM = new ShoppingCartVM
             {
-                OrderHeader = new OrderHeader { ApplicationUser = new ApplicationUser() { Name="Rifat"} },
+                OrderHeader = new OrderHeader { ApplicationUser = new ApplicationUser() { Name = "Rifat" } },
                 ShoppingCartList = new List<ShoppingCart> { new ShoppingCart { Product = new Product { Price = 100, DiscountAmount = 10 } } }
             };
 
@@ -185,7 +185,7 @@ namespace AmarTech.Test.ControllerTests
             _mockShoppingCartService.Setup(s => s.GetShoppingCartsByUserId(userId)).Returns(dbCartList);
             _mockShoppingCartService.Setup(s => s.GetShoppingCartVM(userId)).Returns(dbCartVM);
             _mockShoppingCartService.Setup(s => s.GetShoppingCartByUserId(userId)).Returns(dbCartList);
-            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns(new ApplicationUser() { Name="Rifat"});
+            _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns(new ApplicationUser() { Name = "Rifat" });
 
             // Act
             var result = _controller.Summary() as ViewResult;
@@ -337,7 +337,7 @@ namespace AmarTech.Test.ControllerTests
                 OrderHeader = new OrderHeader { Id = 1 }
             };
             var shoppingCartList = new List<ShoppingCart>();
-            var applicationUser = new ApplicationUser {Name="Admin", CompanyId = 1 };
+            var applicationUser = new ApplicationUser { Name = "Admin", CompanyId = 1 };
 
             _mockShoppingCartService.Setup(s => s.GetShoppingCartsByUserId(userId)).Returns(shoppingCartList);
             _mockApplicationUserService.Setup(s => s.GetUserById(userId)).Returns(applicationUser);
@@ -410,7 +410,7 @@ namespace AmarTech.Test.ControllerTests
             var cart = new ShoppingCart { Id = cartId, ProductId = 1 };
             var product = new Product { Id = 1 };
 
-            _mockShoppingCartService.Setup(s => s.GetShoppingCartById(cartId,false)).Returns(cart);
+            _mockShoppingCartService.Setup(s => s.GetShoppingCartById(cartId, false)).Returns(cart);
             _mockProductService.Setup(s => s.GetProductById(cart.ProductId)).Returns(product);
 
             // Act
@@ -419,7 +419,7 @@ namespace AmarTech.Test.ControllerTests
             // Assert
             Assert.NotNull(result);
             Assert.Equal("Index", result.ActionName);
-            _mockShoppingCartService.Verify(s => s.GetShoppingCartById(cartId,false), Times.Once);
+            _mockShoppingCartService.Verify(s => s.GetShoppingCartById(cartId, false), Times.Once);
             _mockProductService.Verify(s => s.GetProductById(cart.ProductId), Times.Once);
             _mockShoppingCartService.Verify(s => s.Plus(cart, cartId), Times.Once);
         }

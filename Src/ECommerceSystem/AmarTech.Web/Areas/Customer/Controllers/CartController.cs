@@ -20,7 +20,7 @@ namespace AmarTech.Web.Areas.Customer.Controllers
         private readonly IOrderDetailService _orderDetailService;
         private readonly IProductService _productService;
         private const string HeaderLocation = "Location";
-        public CartController(IShoppingCartService shoppingCartService, IOrderHeaderService orderHeaderService, IApplicationUserService applicationUserService, IOrderDetailService orderDetailService,IProductService productService)
+        public CartController(IShoppingCartService shoppingCartService, IOrderHeaderService orderHeaderService, IApplicationUserService applicationUserService, IOrderDetailService orderDetailService, IProductService productService)
         {
             _shoppingCartService = shoppingCartService;
             _orderHeaderService = orderHeaderService;
@@ -38,7 +38,7 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             {
                 var shoppingCartList = GetMemoryShoppingCartList();
 
-                shoppingCartVM =_shoppingCartService.MemoryCartVM(shoppingCartList);
+                shoppingCartVM = _shoppingCartService.MemoryCartVM(shoppingCartList);
 
             }
             else
@@ -63,17 +63,18 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             }
             ShoppingCartVM shoppingCartVM;
             var cartList = _shoppingCartService.GetCart();
-            var shoppingCartList =_shoppingCartService.GetShoppingCartsByUserId(userId).ToList();
+            var shoppingCartList = _shoppingCartService.GetShoppingCartsByUserId(userId).ToList();
 
             if (cartList.Count > 0)
             {
-                    shoppingCartVM = _shoppingCartService.CombineToDB(shoppingCartList, cartList, userId);  
+                shoppingCartVM = _shoppingCartService.CombineToDB(shoppingCartList, cartList, userId);
             }
-            else { 
+            else
+            {
                 shoppingCartVM = _shoppingCartService.GetShoppingCartVM(userId);
             }
-            
-            
+
+
             if (shoppingCartVM == null)
             {
                 return NotFound();
@@ -84,7 +85,7 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             var user = _applicationUserService.GetUserById(userId);
             if (user == null)
             {
-                return NotFound(); 
+                return NotFound();
             }
 
             shoppingCartVM.OrderHeader.ApplicationUser = user;
@@ -138,7 +139,7 @@ namespace AmarTech.Web.Areas.Customer.Controllers
                 return NotFound("User not found.");
             }
 
-            shoppingCartVM = _shoppingCartService.GetShoppingCartVMForSummaryPost(shoppingCartList, applicationUser,userId);
+            shoppingCartVM = _shoppingCartService.GetShoppingCartVMForSummaryPost(shoppingCartList, applicationUser, userId);
 
             _orderHeaderService.AddOrderHeader(shoppingCartVM.OrderHeader);
 
@@ -172,9 +173,9 @@ namespace AmarTech.Web.Areas.Customer.Controllers
 
             var orderHeader = _orderHeaderService.OrderConfirmation(id);
 
-            
 
-            var cartList=_shoppingCartService.RemoveShoppingCarts(orderHeader);
+
+            var cartList = _shoppingCartService.RemoveShoppingCarts(orderHeader);
             _productService.ReduceStockCount(cartList);
 
 
@@ -190,7 +191,7 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             var cartFromDb = _shoppingCartService.GetShoppingCartById(cartId);
             if (cartFromDb != null)
             {
-                cartFromDb.Product = _productService.GetProductById(cartFromDb.ProductId)??new Product();
+                cartFromDb.Product = _productService.GetProductById(cartFromDb.ProductId) ?? new Product();
             }
             _shoppingCartService.Plus(cartFromDb, cartId);
 
@@ -214,7 +215,7 @@ namespace AmarTech.Web.Areas.Customer.Controllers
             {
                 return BadRequest(ModelState);
             }
-            
+
             _shoppingCartService.RemoveCartValue(cartId);
 
 
@@ -241,6 +242,3 @@ namespace AmarTech.Web.Areas.Customer.Controllers
 
     }
 }
-
-
-

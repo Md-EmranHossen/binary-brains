@@ -16,9 +16,7 @@ namespace AmarTech.Infrastructure.Repository
         {
             _db = db;
         }
-
      
-
         public void Update(Company obj)
         {
             _db.Companies.Update(obj);
