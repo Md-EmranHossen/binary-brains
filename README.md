@@ -1,4 +1,4 @@
-# 🛒 AmarTech - An Ecommerce Platform
+# 🛒 AmarTech - An Ecommerce Platform 
 
 AmarTech is a robust E-Commerce Web Application built with ASP.NET Core MVC, showcasing key features of a modern online store. Created for educational purposes, it adheres to clean architecture principles, demonstrating how to develop a scalable and maintainable system from the ground up.
 
